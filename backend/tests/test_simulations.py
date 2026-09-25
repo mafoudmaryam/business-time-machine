@@ -83,3 +83,22 @@ def test_simulate_missing_scenario_404(client, business):
 def test_get_missing_simulation_run_404(client):
     resp = client.get("/simulation_runs/999")
     assert resp.status_code == 404
+
+
+def test_list_simulation_runs_of_business(client, business):
+    scenario = _make_scenario(client, business["id"], "Price +10%")
+    client.post(f"/scenarios/{scenario['id']}/simulate", json={"horizon": 12, "iterations": 200, "seed": 1})
+    client.post(f"/scenarios/{scenario['id']}/simulate", json={"horizon": 12, "iterations": 200, "seed": 2})
+
+    resp = client.get(f"/businesses/{business['id']}/simulation_runs")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert len(body) == 2
+    # newest first
+    assert body[0]["seed"] == 2
+    assert set(body[0]["scenario_names"]) == {"baseline", "Price +10%"}
+
+
+def test_list_simulation_runs_for_missing_business_404(client):
+    resp = client.get("/businesses/999/simulation_runs")
+    assert resp.status_code == 404

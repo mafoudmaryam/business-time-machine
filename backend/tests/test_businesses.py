@@ -31,6 +31,21 @@ def test_get_missing_business_404(client):
     assert resp.status_code == 404
 
 
+def test_list_businesses(client):
+    client.post("/businesses", json={"name": "Corner Cafe"})
+    client.post("/businesses", json={"name": "Riverside Roasters"})
+    resp = client.get("/businesses")
+    assert resp.status_code == 200
+    names = [b["name"] for b in resp.json()]
+    assert names == ["Corner Cafe", "Riverside Roasters"]
+
+
+def test_list_businesses_empty(client):
+    resp = client.get("/businesses")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
 def test_invalid_baseline_rejected(client):
     resp = client.post("/businesses", json={
         "name": "Bad Cafe", "baseline": {"cogs_ratio": 1.5},

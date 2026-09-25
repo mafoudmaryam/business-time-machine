@@ -6,6 +6,7 @@ see the backend README / the commands the assistant printed after setup.
 from __future__ import annotations
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from .routers import businesses, scenarios, simulations
 
@@ -14,6 +15,13 @@ app = FastAPI(
     description="Café decision simulator backend. The engine (btm_engine) does all the math; "
                 "this API stores businesses, scenarios and results around it.",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(businesses.router)

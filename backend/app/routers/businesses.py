@@ -10,6 +10,11 @@ from ..database import get_db
 router = APIRouter(prefix="/businesses", tags=["businesses"])
 
 
+@router.get("", response_model=list[schemas.BusinessOut])
+def list_businesses(db: Session = Depends(get_db)):
+    return db.query(models.Business).order_by(models.Business.id).all()
+
+
 @router.post("", response_model=schemas.BusinessOut, status_code=201)
 def create_business(payload: schemas.BusinessCreate, db: Session = Depends(get_db)):
     business = models.Business(name=payload.name)

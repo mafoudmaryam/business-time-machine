@@ -57,3 +57,38 @@ def test_get_scenario(client, business):
 def test_scenario_for_missing_business_404(client):
     resp = client.post("/businesses/999/scenarios", json={"name": "S1", "decisions": []})
     assert resp.status_code == 404
+
+
+def test_list_scenarios_of_business(client, business):
+    client.post(f"/businesses/{business['id']}/scenarios", json={"name": "S1", "decisions": []})
+    client.post(f"/businesses/{business['id']}/scenarios", json={"name": "S2", "decisions": []})
+    resp = client.get(f"/businesses/{business['id']}/scenarios")
+    assert resp.status_code == 200
+    names = [s["name"] for s in resp.json()]
+    assert names == ["S1", "S2"]
+
+
+def test_list_scenarios_for_missing_business_404(client):
+    resp = client.get("/businesses/999/scenarios")
+    assert resp.status_code == 404
+
+
+def test_scenario_versioning_reports_parent_name(client, business):
+    parent = client.post(f"/businesses/{business['id']}/scenarios", json={
+        "name": "Price +10%",
+        "decisions": [{"type": "price", "start_month": 1, "value": 10, "unit": "percent", "confirmed": True}],
+    }).json()
+
+    child = client.post(f"/businesses/{business['id']}/scenarios", json={
+        "name": "Price +10% v2",
+        "parent_scenario_id": parent["id"],
+        "decisions": [{"type": "price", "start_month": 1, "value": 15, "unit": "percent", "confirmed": True}],
+    })
+    assert child.status_code == 201
+    assert child.json()["parent_scenario_name"] == "Price +10%"
+
+    listed = client.get(f"/businesses/{business['id']}/scenarios").json()
+    versioned = next(s for s in listed if s["name"] == "Price +10% v2")
+    assert versioned["parent_scenario_name"] == "Price +10%"
+    original = next(s for s in listed if s["name"] == "Price +10%")
+    assert original["parent_scenario_name"] is None

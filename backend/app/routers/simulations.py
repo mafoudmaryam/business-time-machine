@@ -39,6 +39,33 @@ def _load_scenarios(db: Session, business_id: int, scenario_ids: list[int]) -> l
     return scenarios
 
 
+@router.get("/businesses/{business_id}/simulation_runs", response_model=list[schemas.SimulationRunSummaryOut])
+def list_simulation_runs(business_id: int, db: Session = Depends(get_db)):
+    business = db.get(models.Business, business_id)
+    if business is None:
+        raise HTTPException(status_code=404, detail="business not found")
+
+    runs = (
+        db.query(models.SimulationRun)
+        .filter(models.SimulationRun.business_id == business_id)
+        .order_by(models.SimulationRun.id.desc())
+        .all()
+    )
+    return [
+        schemas.SimulationRunSummaryOut(
+            id=run.id,
+            business_id=run.business_id,
+            engine_version=run.engine_version,
+            seed=run.seed,
+            iterations=run.iterations,
+            horizon=run.horizon,
+            created_at=run.created_at,
+            scenario_names=[r.scenario_name for r in run.results],
+        )
+        for run in runs
+    ]
+
+
 @router.post("/businesses/{business_id}/simulate", response_model=schemas.SimulationRunOut, status_code=201)
 def simulate_business(business_id: int, payload: schemas.SimulateRequest, db: Session = Depends(get_db)):
     business = db.get(models.Business, business_id)

@@ -11,6 +11,19 @@ from ..database import get_db
 router = APIRouter(tags=["scenarios"])
 
 
+@router.get("/businesses/{business_id}/scenarios", response_model=list[schemas.ScenarioOut])
+def list_scenarios(business_id: int, db: Session = Depends(get_db)):
+    business = db.get(models.Business, business_id)
+    if business is None:
+        raise HTTPException(status_code=404, detail="business not found")
+    return (
+        db.query(models.Scenario)
+        .filter(models.Scenario.business_id == business_id)
+        .order_by(models.Scenario.id)
+        .all()
+    )
+
+
 @router.post("/businesses/{business_id}/scenarios", response_model=schemas.ScenarioOut, status_code=201)
 def create_scenario(business_id: int, payload: schemas.ScenarioCreate, db: Session = Depends(get_db)):
     business = db.get(models.Business, business_id)

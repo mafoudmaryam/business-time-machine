@@ -71,6 +71,11 @@ class Scenario(Base):
 
     business = relationship("Business", back_populates="scenarios")
     decisions = relationship("Decision", back_populates="scenario", cascade="all, delete-orphan")
+    parent = relationship("Scenario", remote_side=[id])
+
+    @property
+    def parent_scenario_name(self) -> "str | None":
+        return self.parent.name if self.parent is not None else None
 
 
 class Decision(Base):

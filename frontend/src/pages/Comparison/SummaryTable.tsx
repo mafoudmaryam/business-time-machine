@@ -1,0 +1,39 @@
+import type { ScenarioResultOut } from "../../api";
+import { formatMoney, formatPercent } from "../../lib/format";
+
+/** Doubles as the accessible table view of the charts: every number the charts
+ * show is also here as text. */
+export function SummaryTable({ results }: { results: ScenarioResultOut[] }) {
+  return (
+    <table className="summary-table">
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Total profit p10</th>
+          <th>Total profit p50</th>
+          <th>Total profit p90</th>
+          <th>End cash (p50)</th>
+          <th>P(cash &lt; 0)</th>
+          <th>P(beats baseline)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {results.map((r) => (
+          <tr key={r.scenario_name}>
+            <td>{r.scenario_name}</td>
+            <td>{formatMoney(r.summary.total_profit_p10)}</td>
+            <td>{formatMoney(r.summary.total_profit_p50)}</td>
+            <td>{formatMoney(r.summary.total_profit_p90)}</td>
+            <td>{formatMoney(r.summary.end_cash_p50)}</td>
+            <td>{formatPercent(r.summary.prob_cash_negative * 100)}</td>
+            <td>
+              {r.summary.prob_beats_baseline_profit === undefined
+                ? "—"
+                : formatPercent(r.summary.prob_beats_baseline_profit * 100)}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}

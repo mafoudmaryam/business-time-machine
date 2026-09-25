@@ -110,6 +110,7 @@ class ScenarioOut(BaseModel):
     business_id: int
     name: str
     parent_scenario_id: Optional[int]
+    parent_scenario_name: Optional[str] = None
     created_at: dt.datetime
     decisions: list[DecisionOut]
 
@@ -154,3 +155,16 @@ class SimulationRunOut(BaseModel):
     horizon: int
     created_at: dt.datetime
     results: list[ScenarioResultOut]
+
+
+class SimulationRunSummaryOut(BaseModel):
+    """Lightweight row for a run-history list -- no bands/summary payload."""
+
+    id: int
+    business_id: int
+    engine_version: str
+    seed: int
+    iterations: int
+    horizon: int
+    created_at: dt.datetime
+    scenario_names: list[str]
