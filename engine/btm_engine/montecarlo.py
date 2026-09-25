@@ -8,7 +8,7 @@ import numpy as np
 
 from .decisions import Decision, build_timeline
 from .model import METRICS, simulate
-from .params import CafeBaseline, CafeTemplate, Draws
+from .params import BusinessBaseline, IndustryTemplate, Draws
 
 ENGINE_VERSION = "0.1.0"
 BAND_METRICS = ("revenue", "profit", "cash", "customers", "visits", "service_quality")
@@ -28,13 +28,13 @@ def _tri_ppf(u: np.ndarray, lo: float, mode: float, hi: float) -> np.ndarray:
     return np.where(u < fc, left, right)
 
 
-def churn_bounds(base: CafeBaseline, tpl: CafeTemplate) -> tuple[float, float, float]:
+def churn_bounds(base: BusinessBaseline, tpl: IndustryTemplate) -> tuple[float, float, float]:
     lo, hi = tpl.churn_range
     mode = base.churn_rate
     return min(lo, mode), mode, max(hi, mode)
 
 
-def sample_draws(base: CafeBaseline, tpl: CafeTemplate, n: int, horizon: int, seed: int) -> Draws:
+def sample_draws(base: BusinessBaseline, tpl: IndustryTemplate, n: int, horizon: int, seed: int) -> Draws:
     rng = np.random.default_rng(seed)
     return Draws(
         elasticity=_tri_ppf(_lhs_uniform(rng, n), *tpl.elasticity),
@@ -43,11 +43,12 @@ def sample_draws(base: CafeBaseline, tpl: CafeTemplate, n: int, horizon: int, se
         marketing_curvature=tpl.marketing_curvature[0]
         + _lhs_uniform(rng, n) * (tpl.marketing_curvature[1] - tpl.marketing_curvature[0]),
         word_of_mouth=tpl.word_of_mouth[0] + _lhs_uniform(rng, n) * (tpl.word_of_mouth[1] - tpl.word_of_mouth[0]),
+        waste_rate=_tri_ppf(_lhs_uniform(rng, n), *tpl.waste_rate),
         noise=np.clip(rng.normal(1.0, tpl.demand_noise_sd, size=(n, horizon)), 0.0, None),
     )
 
 
-def deterministic_draws(base: CafeBaseline, tpl: CafeTemplate) -> Draws:
+def deterministic_draws(base: BusinessBaseline, tpl: IndustryTemplate) -> Draws:
     """A single run with every uncertain parameter at its central value and no noise.
     This is the version to rebuild in a spreadsheet for verification."""
     m = tpl.mode_values()
@@ -57,6 +58,7 @@ def deterministic_draws(base: CafeBaseline, tpl: CafeTemplate) -> Draws:
         churn0=np.array([base.churn_rate]),
         marketing_curvature=np.array([m["marketing_curvature"]]),
         word_of_mouth=np.array([m["word_of_mouth"]]),
+        waste_rate=np.array([m["waste_rate"]]),
         noise=None,
     )
 
@@ -121,7 +123,7 @@ def _summary(out: dict[str, np.ndarray], baseline_out: dict[str, np.ndarray] | N
     return s
 
 
-def run_scenarios(base: CafeBaseline, tpl: CafeTemplate, scenarios: dict[str, list[Decision]],
+def run_scenarios(base: BusinessBaseline, tpl: IndustryTemplate, scenarios: dict[str, list[Decision]],
                   horizon: int = 24, iterations: int = 1000, seed: int = 42,
                   keep_raw: bool = False) -> RunResult:
     """Run a baseline plus each scenario on the same random draws.
@@ -147,7 +149,7 @@ def run_scenarios(base: CafeBaseline, tpl: CafeTemplate, scenarios: dict[str, li
     return RunResult(ENGINE_VERSION, seed, iterations, horizon, results)
 
 
-def run_deterministic(base: CafeBaseline, tpl: CafeTemplate, decisions: list[Decision],
+def run_deterministic(base: BusinessBaseline, tpl: IndustryTemplate, decisions: list[Decision],
                       horizon: int = 24) -> dict[str, np.ndarray]:
     """One run at central parameter values. Returns {metric: array of length T}."""
     out = simulate(base, tpl, build_timeline(base, decisions, horizon), deterministic_draws(base, tpl))

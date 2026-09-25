@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class BaselineIn(BaseModel):
-    """What the owner enters: the cafe as it is today. Mirrors btm_engine.CafeBaseline."""
+    """What the owner enters: the business as it is today. Mirrors btm_engine.BusinessBaseline."""
 
     customers: float = 900.0
     cash: float = 25_000.0
@@ -36,7 +36,9 @@ class BaselineOut(BaselineIn):
 
 class BusinessCreate(BaseModel):
     name: str
-    baseline: BaselineIn = BaselineIn()
+    industry: str = "cafe"
+    # None means "use this industry's default baseline" -- see routers/businesses.py.
+    baseline: Optional[BaselineIn] = None
 
 
 class BusinessOut(BaseModel):
@@ -44,8 +46,23 @@ class BusinessOut(BaseModel):
 
     id: int
     name: str
+    industry: str
     created_at: dt.datetime
     baseline: Optional[BaselineOut]
+
+
+# ---------- industries ----------
+
+
+class IndustryOut(BaseModel):
+    """GET /industries -- so the frontend never hard-codes café wording/defaults."""
+
+    id: str
+    display_name: str
+    customer_noun: str
+    capacity_label: str
+    default_baseline: BaselineIn
+    field_labels: dict[str, str]
 
 
 # ---------- scenarios / decisions ----------

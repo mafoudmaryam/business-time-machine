@@ -1,6 +1,6 @@
 # Business Time Machine
 
-Master's thesis project: an AI-assisted decision simulator for small cafés. An owner describes a decision in plain language ("raise prices 10% in March"). Claude turns it into structured parameters, the user confirms them, and a deterministic plus Monte Carlo engine projects revenue, profit, cash and customers for 12–36 months, compared against a baseline.
+Master's thesis project: an AI-assisted decision simulator for small food-service businesses (café, restaurant, bakery). An owner describes a decision in plain language ("raise prices 10% in March"). Claude turns it into structured parameters, the user confirms them, and a deterministic plus Monte Carlo engine projects revenue, profit, cash and customers for 12–36 months, compared against a baseline.
 
 Thesis question: does AI-assisted simulation help non-expert owners compare the consequences of decisions before committing?
 
@@ -9,17 +9,18 @@ Thesis question: does AI-assisted simulation help non-expert owners compare the 
 2. **Human in the loop:** the user confirms the parameters the LLM extracted before any simulation runs.
 3. **The engine stays standalone:** no web or database imports inside `engine/btm_engine`.
 4. **Reproducibility:** store `engine_version`, `seed` and `iterations` with every run.
-5. **Scope:** one industry (café), six decision types (price, hiring, marketing, hours, menu, investment). Push back on scope creep.
+5. **Scope:** small food-service businesses -- café, restaurant, bakery (`btm_engine/templates/`) -- six decision types (price, hiring, marketing, hours, menu, investment). Push back on scope creep.
 6. Keep all tests passing (`cd engine && python -m pytest`). Add tests with every feature.
 
 ## Current state
-- `engine/` is done: model, Monte Carlo (Latin hypercube sampling, common random numbers), sensitivity analysis, 19 tests, and a demo. See `engine/README.md`.
-- `backend/` is done: FastAPI + SQLAlchemy + Alembic over SQLite, CORS open to any localhost/127.0.0.1 port, businesses/scenarios/decisions/simulation_runs endpoints, `engine_bridge.py` as the sole engine import point, `seed_demo.py` for sample data, 30 tests.
-- `frontend/` is done: React + TypeScript + Vite + Recharts, four pages (business setup wizard, scenario builder with decision confirmation and versioning, comparison dashboard, run history), a single typed API client (`src/api.ts`), 22 Vitest tests.
+- `engine/` is done: model, Monte Carlo (Latin hypercube sampling, common random numbers), sensitivity analysis, 29 tests, and a demo. See `engine/README.md`. Three industry templates ship in `btm_engine/templates/` (`cafe`, `restaurant`, `bakery`) behind a `get_template(id)`/`list_industries()` registry -- café is the original, literature-sourced template; restaurant/bakery defaults are typical-small-business estimates with inline TODO/assumption comments, not yet calibrated.
+- `backend/` is done: FastAPI + SQLAlchemy + Alembic over SQLite, CORS open to any localhost/127.0.0.1 port, businesses/industries/scenarios/decisions/simulation_runs endpoints, `businesses.industry` column (default `cafe`), `engine_bridge.py` as the sole engine import point, `seed_demo.py` for sample data, 36 tests.
+- `frontend/` is done: React + TypeScript + Vite + Recharts, four pages (business setup wizard with an industry picker, scenario builder with decision confirmation and versioning, comparison dashboard, run history), a single typed API client (`src/api.ts`), 22 Vitest tests.
 - `start.ps1` / `stop.ps1` at the repo root start and stop both dev servers together.
+- A café-house visual redesign is planned but on hold pending industry-aware wording -- see `docs/redesign-plan.md`.
 - Not yet built: the AI layer (NL -> `Decision` objects via Claude tool use, grounded explanations over SSE) and `ai_interactions` logging.
 - The model spec (equations, sources, validation plan) lives in a Claude Doc the user can share with you.
-- Known issue: the marketing (α, γ) and word-of-mouth (β) parameters are uncalibrated and look too optimistic.
+- Known issue: the marketing (α, γ) and word-of-mouth (β) parameters are uncalibrated and look too optimistic, and are currently reused unchanged across all three industries.
 
 ## Planned architecture
 - `backend/`: Python FastAPI, PostgreSQL (results stored as JSONB), SQLAlchemy + Alembic, JWT auth. The engine runs inline, since 1,000 runs take about 0.1 s.

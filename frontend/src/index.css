@@ -172,6 +172,27 @@ button:disabled {
   margin-bottom: 16px;
 }
 
+.industry-cards {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.industry-card {
+  background: var(--bg-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.industry-card.selected {
+  border-color: var(--accent);
+  border-width: 2px;
+  color: var(--accent);
+}
+
 .error-banner {
   background: var(--danger-bg);
   color: var(--danger);

@@ -3,14 +3,16 @@
 Pure Python + NumPy, no web dependencies. The LLM layer never computes numbers:
 it only produces `Decision` objects, and everything numeric comes from here.
 """
-from .params import CafeBaseline, CafeTemplate, Draws
+from .params import BusinessBaseline, IndustryTemplate, Draws
 from .decisions import Decision, DECISION_TYPES, DECISIONS_JSON_SCHEMA, build_timeline
 from .model import METRICS, simulate
 from .montecarlo import ENGINE_VERSION, RunResult, ScenarioResult, run_deterministic, run_scenarios
 from .sensitivity import one_at_a_time
+from .templates import TEMPLATES, get_template, list_industries
 
 __all__ = [
-    "CafeBaseline", "CafeTemplate", "Draws", "Decision", "DECISION_TYPES", "DECISIONS_JSON_SCHEMA",
+    "BusinessBaseline", "IndustryTemplate", "Draws", "Decision", "DECISION_TYPES", "DECISIONS_JSON_SCHEMA",
     "build_timeline", "METRICS", "simulate", "ENGINE_VERSION", "RunResult", "ScenarioResult",
     "run_deterministic", "run_scenarios", "one_at_a_time",
+    "TEMPLATES", "get_template", "list_industries",
 ]

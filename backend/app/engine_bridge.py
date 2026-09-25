@@ -11,7 +11,8 @@ from typing import Optional
 from jsonschema import ValidationError, validate as jsonschema_validate
 from sqlalchemy.orm import Session
 
-from btm_engine import CafeBaseline, CafeTemplate, DECISIONS_JSON_SCHEMA, Decision as EngineDecision, run_scenarios
+from btm_engine import (BusinessBaseline, DECISIONS_JSON_SCHEMA, Decision as EngineDecision,
+                        get_template, list_industries, run_scenarios)
 
 from . import models
 
@@ -31,8 +32,8 @@ def validate_decisions_payload(decision_dicts: list[dict]) -> None:
         raise ValueError(exc.message) from exc
 
 
-def to_baseline(snapshot: models.BusinessSnapshot) -> CafeBaseline:
-    return CafeBaseline(
+def to_baseline(snapshot: models.BusinessSnapshot) -> BusinessBaseline:
+    return BusinessBaseline(
         customers=snapshot.customers,
         cash=snapshot.cash,
         staff_fte=snapshot.staff_fte,
@@ -76,7 +77,7 @@ def run_simulation(
 
     baseline_snapshot = business.baseline
     base = to_baseline(baseline_snapshot)
-    tpl = CafeTemplate()
+    tpl = get_template(business.industry)
 
     if seed is None:
         seed = random.randint(1, SEED_MAX)

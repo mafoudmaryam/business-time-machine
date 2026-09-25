@@ -1,4 +1,5 @@
-"""Inputs to the café model: the owner's business profile and the industry template.
+"""Inputs to the business model: the owner's business profile and the industry
+template.
 
 Symbols follow the model spec (section 2).
 """
@@ -8,8 +9,8 @@ from dataclasses import dataclass, field, asdict
 
 
 @dataclass(frozen=True)
-class CafeBaseline:
-    """What the owner enters: the café as it is today (monthly figures)."""
+class BusinessBaseline:
+    """What the owner enters: the business as it is today (monthly figures)."""
 
     customers: float = 900.0          # C0  regular customers
     cash: float = 25_000.0            # K0  cash balance
@@ -39,10 +40,24 @@ class CafeBaseline:
         return asdict(self)
 
 
-@dataclass(frozen=True)
-class CafeTemplate:
-    """Industry-template parameters. The point values are used for the
-    deterministic run; the ranges drive the Monte Carlo (spec section 5)."""
+@dataclass
+class IndustryTemplate:
+    """Everything specific to one industry: display/wording metadata, the
+    owner's default starting numbers, and the uncertainty ranges that drive
+    Monte Carlo (spec section 5). The point values of the ranges are used for
+    the deterministic run.
+
+    Only the café numbers are sourced from literature (see the field comments
+    below). Every restaurant/bakery-specific number is a plain assumption --
+    marked inline -- pending real calibration.
+    """
+
+    id: str = "cafe"
+    display_name: str = "Café"
+    customer_noun: str = "regulars"                       # "regulars" / "guests" / "customers"
+    capacity_label: str = "visits per staff member per month"
+    allowed_decision_types: tuple[str, ...] = field(default_factory=tuple)
+    default_baseline: BusinessBaseline = field(default_factory=BusinessBaseline)
 
     # Price elasticity of visits ε: triangular(min, mode, max). Andreyeva et al. 2010.
     elasticity: tuple[float, float, float] = (-1.76, -0.81, -0.23)
@@ -58,10 +73,14 @@ class CafeTemplate:
     word_of_mouth: tuple[float, float] = (0.005, 0.02)
     # Monthly demand noise e_t ~ Normal(1, sd).
     demand_noise_sd: float = 0.05
+    # Share of food/ingredient cost thrown away as waste: triangular(min, mode, max).
+    # Cost of goods becomes cogs_ratio * (1 + waste_rate). Zero for café/restaurant
+    # (not modelled for them yet); bakery default 8%, TODO: to calibrate, not sourced.
+    waste_rate: tuple[float, float, float] = (0.0, 0.0, 0.0)
 
     awareness0: float = 0.30          # A0 starting brand awareness
     awareness_decay: float = 0.10     # ρ  monthly decay of awareness
-    marketing_ref: float = 100.0      # m_ref so a café with zero marketing keeps some awareness
+    marketing_ref: float = 100.0      # m_ref so a business with zero marketing keeps some awareness
     service_penalty: float = 1.0      # λ  churn multiplier at zero service quality
     visits_per_fte: float = 1_800.0   # κ  visits one FTE can serve per month at d0 days
     utilities_share: float = 0.20     # share of fixed costs that scales with opening days
@@ -75,6 +94,7 @@ class CafeTemplate:
             "short_run_share": self.short_run_share[1],
             "marketing_curvature": sum(self.marketing_curvature) / 2,
             "word_of_mouth": sum(self.word_of_mouth) / 2,
+            "waste_rate": self.waste_rate[1],
         }
 
     def season(self, t: int) -> float:
@@ -91,6 +111,7 @@ class Draws:
     churn0: "object"
     marketing_curvature: "object"
     word_of_mouth: "object"
+    waste_rate: "object"
     noise: "object" = field(default=None)   # shape (N, T), or None for no noise
 
     @property

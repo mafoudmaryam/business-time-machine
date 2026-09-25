@@ -2,11 +2,11 @@
 import numpy as np
 import pytest
 
-from btm_engine import (CafeBaseline, CafeTemplate, Decision, run_deterministic, run_scenarios,
-                        one_at_a_time)
+from btm_engine import (BusinessBaseline, IndustryTemplate, Decision, get_template,
+                        run_deterministic, run_scenarios, one_at_a_time)
 
-BASE = CafeBaseline()
-TPL = CafeTemplate()
+TPL = get_template("cafe")
+BASE = TPL.default_baseline
 
 
 def det(decisions=(), horizon=24, base=BASE, tpl=TPL):
@@ -69,8 +69,8 @@ def test_zero_staff_means_zero_revenue():
 
 
 def test_churn_is_capped_at_one():
-    base = CafeBaseline(churn_rate=1.0)
-    tpl = CafeTemplate(churn_range=(1.0, 1.0), word_of_mouth=(0.0, 0.0))
+    base = BusinessBaseline(churn_rate=1.0)
+    tpl = IndustryTemplate(churn_range=(1.0, 1.0), word_of_mouth=(0.0, 0.0))
     out = det(base=base, tpl=tpl, horizon=6)
     # n0 keeps the steady state, so check the dynamics directly: churn is capped at 1
     assert out["churn_rate"].max() <= 1.0

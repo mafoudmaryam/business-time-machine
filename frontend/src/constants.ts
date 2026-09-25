@@ -49,7 +49,7 @@ export const BASELINE_STEPS: { title: string; fields: FieldSpec[] }[] = [
       { key: "walk_in_visits", label: "Walk-in visits", help: "Visits per month from people who aren't regulars.", unit: "visits/month", min: 0, step: 50 },
       { key: "churn_rate", label: "Monthly churn", help: "Share of regulars who stop coming back each month.", unit: "%", min: 0, max: 100, step: 1, isPercent: true },
       { key: "avg_ticket", label: "Average ticket", help: "Average amount spent per visit.", unit: "{CUR}/visit", min: 0, step: 0.1 },
-      { key: "seats", label: "Seats", help: "Physical seating capacity of the café.", unit: "seats", min: 1, step: 1 },
+      { key: "seats", label: "Seats", help: "Physical seating or counter capacity, if relevant to this business.", unit: "seats", min: 1, step: 1 },
     ],
   },
   {

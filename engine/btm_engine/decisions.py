@@ -10,7 +10,7 @@ from typing import Any
 
 import numpy as np
 
-from .params import CafeBaseline
+from .params import BusinessBaseline
 
 DECISION_TYPES = ("price", "hiring", "marketing", "hours", "menu", "investment")
 
@@ -80,7 +80,7 @@ def _loan_payment(amount: float, months: int, annual_rate: float) -> float:
     return amount * r / (1 - (1 + r) ** -months)
 
 
-def build_timeline(base: CafeBaseline, decisions: list[Decision], horizon: int) -> dict[str, np.ndarray]:
+def build_timeline(base: BusinessBaseline, decisions: list[Decision], horizon: int) -> dict[str, np.ndarray]:
     """Turn a list of decisions into per-month input arrays of length `horizon`.
 
     Decisions apply from their start month onward and stack in list order.

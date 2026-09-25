@@ -18,6 +18,7 @@ class Business(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    industry = Column(String, nullable=False, default="cafe", server_default="cafe")
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
 
     snapshots = relationship(
@@ -34,7 +35,7 @@ class Business(Base):
 
 
 class BusinessSnapshot(Base):
-    """The owner's numbers at a point in time -- mirrors btm_engine.CafeBaseline."""
+    """The owner's numbers at a point in time -- mirrors btm_engine.BusinessBaseline."""
 
     __tablename__ = "business_snapshots"
 

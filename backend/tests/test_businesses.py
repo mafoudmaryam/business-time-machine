@@ -3,8 +3,36 @@ def test_create_business_uses_default_baseline(client):
     assert resp.status_code == 201
     body = resp.json()
     assert body["name"] == "Corner Cafe"
+    assert body["industry"] == "cafe"
     assert body["baseline"]["customers"] == 900.0
     assert body["baseline"]["avg_ticket"] == 6.50
+
+
+def test_create_business_defaults_baseline_from_industry(client):
+    resp = client.post("/businesses", json={"name": "Sunrise Bakery", "industry": "bakery"})
+    assert resp.status_code == 201
+    body = resp.json()
+    assert body["industry"] == "bakery"
+    assert body["baseline"]["customers"] == 600.0
+    assert body["baseline"]["avg_ticket"] == 5.5
+    assert body["baseline"]["fixed_costs"] == 12_000.0
+
+
+def test_create_business_rejects_unknown_industry(client):
+    resp = client.post("/businesses", json={"name": "Mystery Shop", "industry": "food-truck"})
+    assert resp.status_code == 422
+
+
+def test_partial_baseline_falls_back_to_industry_defaults_not_cafes(client):
+    resp = client.post("/businesses", json={
+        "name": "Downtown Bistro", "industry": "restaurant", "baseline": {"avg_ticket": 30},
+    })
+    assert resp.status_code == 201
+    body = resp.json()
+    assert body["baseline"]["avg_ticket"] == 30
+    # unspecified fields fall back to the restaurant template, not café's
+    assert body["baseline"]["staff_fte"] == 8.0
+    assert body["baseline"]["customers"] == 700.0
 
 
 def test_create_business_with_custom_baseline(client):

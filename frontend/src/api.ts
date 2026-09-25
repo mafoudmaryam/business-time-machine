@@ -89,7 +89,7 @@ export const DEFAULT_BASELINE_FORM: BaselineFormValues = {
   open_days: 28,
 };
 
-interface BaselineIn {
+export interface BaselineIn {
   customers: number;
   cash: number;
   staff_fte: number;
@@ -113,6 +113,7 @@ export interface BaselineOut extends BaselineIn {
 export interface BusinessOut {
   id: number;
   name: string;
+  industry: string;
   created_at: string;
   baseline: BaselineOut | null;
 }
@@ -121,7 +122,9 @@ function baselineFormToApi(form: BaselineFormValues): BaselineIn {
   return { ...form, cogs_ratio: percentToRatio(form.cogs_ratio), churn_rate: percentToRatio(form.churn_rate) };
 }
 
-export function baselineApiToForm(baseline: BaselineOut): BaselineFormValues {
+/** Accepts either a saved BaselineOut or an industry's plain default_baseline --
+ * both are the same ratio-based shape. */
+export function baselineApiToForm(baseline: BaselineIn): BaselineFormValues {
   return { ...baseline, cogs_ratio: ratioToPercent(baseline.cogs_ratio), churn_rate: ratioToPercent(baseline.churn_rate) };
 }
 
@@ -133,11 +136,26 @@ export function getBusiness(businessId: number): Promise<BusinessOut> {
   return request(`/businesses/${businessId}`);
 }
 
-export function createBusiness(name: string, baseline: BaselineFormValues): Promise<BusinessOut> {
+export function createBusiness(name: string, industry: string, baseline: BaselineFormValues): Promise<BusinessOut> {
   return request("/businesses", {
     method: "POST",
-    body: JSON.stringify({ name, baseline: baselineFormToApi(baseline) }),
+    body: JSON.stringify({ name, industry, baseline: baselineFormToApi(baseline) }),
   });
+}
+
+// ---------- industries ----------
+
+export interface IndustryOut {
+  id: string;
+  display_name: string;
+  customer_noun: string;
+  capacity_label: string;
+  default_baseline: BaselineIn; // ratio-based, same shape as BaselineOut minus id/created_at
+  field_labels: Record<string, string>;
+}
+
+export function listIndustries(): Promise<IndustryOut[]> {
+  return request("/industries");
 }
 
 // ---------- scenarios / decisions ----------

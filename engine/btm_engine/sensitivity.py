@@ -11,16 +11,16 @@ import numpy as np
 
 from .decisions import Decision, build_timeline
 from .model import simulate
-from .params import CafeBaseline, CafeTemplate
+from .params import BusinessBaseline, IndustryTemplate
 from .montecarlo import deterministic_draws
 
 DRAW_PARAMS = ("elasticity", "short_run_share", "churn0", "marketing_curvature", "word_of_mouth")
 BASELINE_PARAMS = ("visits_per_regular", "walk_in_visits", "cogs_ratio", "wage_per_fte", "fixed_costs")
 
 
-def one_at_a_time(base: CafeBaseline, tpl: CafeTemplate, decisions: list[Decision],
+def one_at_a_time(base: BusinessBaseline, tpl: IndustryTemplate, decisions: list[Decision],
                   horizon: int = 24, swing: float = 0.20, metric: str = "profit") -> list[dict]:
-    def total(b: CafeBaseline, draws) -> float:
+    def total(b: BusinessBaseline, draws) -> float:
         out = simulate(b, tpl, build_timeline(b, decisions, horizon), draws)
         return float(out[metric][0].sum()) if metric != "cash" else float(out["cash"][0, -1])
 

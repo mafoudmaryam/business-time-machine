@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .params import CafeBaseline, CafeTemplate, Draws
+from .params import BusinessBaseline, IndustryTemplate, Draws
 
 METRICS = (
     "customers", "visits", "demand_visits", "revenue", "cogs", "labour", "fixed_costs",
@@ -15,9 +15,9 @@ METRICS = (
 )
 
 
-def calibrate(base: CafeBaseline, tpl: CafeTemplate, draws: Draws) -> dict[str, np.ndarray]:
+def calibrate(base: BusinessBaseline, tpl: IndustryTemplate, draws: Draws) -> dict[str, np.ndarray]:
     """Pick n0 and α per run so that, with no decisions, no seasonality and no noise,
-    the café stays exactly where the owner says it is today (a steady state).
+    the business stays exactly where the owner says it is today (a steady state).
 
     Any movement in a scenario therefore comes from the decisions, not from the
     model drifting on its own.
@@ -31,7 +31,7 @@ def calibrate(base: CafeBaseline, tpl: CafeTemplate, draws: Draws) -> dict[str, 
     return {"n0": n0, "alpha": alpha}
 
 
-def simulate(base: CafeBaseline, tpl: CafeTemplate, timeline: dict[str, np.ndarray],
+def simulate(base: BusinessBaseline, tpl: IndustryTemplate, timeline: dict[str, np.ndarray],
              draws: Draws) -> dict[str, np.ndarray]:
     """Run the model. Returns {metric: array of shape (N, T)}."""
     base.validate()
@@ -45,6 +45,7 @@ def simulate(base: CafeBaseline, tpl: CafeTemplate, timeline: dict[str, np.ndarr
     delta0 = np.asarray(draws.churn0, dtype=float)
     gamma = np.asarray(draws.marketing_curvature, dtype=float)
     beta = np.asarray(draws.word_of_mouth, dtype=float)
+    waste = np.asarray(draws.waste_rate, dtype=float)
     noise = np.ones((N, T)) if draws.noise is None else np.asarray(draws.noise, dtype=float)
 
     p0 = base.avg_ticket
@@ -81,7 +82,7 @@ def simulate(base: CafeBaseline, tpl: CafeTemplate, timeline: dict[str, np.ndarr
         churn = np.clip(delta0 * ratio ** eta * (1 + tpl.service_penalty * (1 - Q)), 0.0, 1.0)
         # 7. Profit and loss
         R = p * timeline["ticket_mult"][t] * V
-        cogs = c * R
+        cogs = c * (1 + waste) * R
         labour = base.wage_per_fte * S * day_ratio
         fixed = base.fixed_costs * (1 - tpl.utilities_share + tpl.utilities_share * day_ratio)
         profit = R - cogs - labour - fixed - M

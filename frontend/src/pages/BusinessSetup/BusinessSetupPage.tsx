@@ -1,18 +1,43 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createBusiness, DEFAULT_BASELINE_FORM, type BaselineFormValues } from "../../api";
+import {
+  baselineApiToForm,
+  createBusiness,
+  DEFAULT_BASELINE_FORM,
+  listIndustries,
+  type BaselineFormValues,
+  type IndustryOut,
+} from "../../api";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { NumberField } from "../../components/NumberField";
+import { Spinner } from "../../components/Spinner";
+import { useAsync } from "../../hooks/useAsync";
 import { BASELINE_STEPS } from "../../constants";
 
 type FieldErrors = Record<string, string>;
 
-function validateStep(stepIndex: number, baseline: BaselineFormValues, name: string): FieldErrors {
+const NAME_PLACEHOLDER: Record<string, string> = {
+  cafe: "Corner Café",
+  restaurant: "Downtown Bistro",
+  bakery: "Sunrise Bakery",
+};
+
+function validateStep(
+  step: number,
+  baseline: BaselineFormValues,
+  name: string,
+  industryId: string | null,
+): FieldErrors {
   const errors: FieldErrors = {};
-  if (stepIndex === 0 && name.trim().length === 0) {
+  if (step === 0) {
+    if (!industryId) errors.industry = "Choose a business type.";
+    return errors;
+  }
+  const baselineStep = BASELINE_STEPS[step - 1];
+  if (step === 1 && name.trim().length === 0) {
     errors.name = "Give the business a name.";
   }
-  for (const field of BASELINE_STEPS[stepIndex].fields) {
+  for (const field of baselineStep.fields) {
     const value = baseline[field.key as keyof BaselineFormValues];
     if (!Number.isFinite(value)) {
       errors[field.key] = "Enter a number.";
@@ -27,6 +52,9 @@ function validateStep(stepIndex: number, baseline: BaselineFormValues, name: str
 
 export function BusinessSetupPage() {
   const navigate = useNavigate();
+  const industries = useAsync(listIndustries, []);
+
+  const [industryId, setIndustryId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [baseline, setBaseline] = useState<BaselineFormValues>({ ...DEFAULT_BASELINE_FORM });
   const [step, setStep] = useState(0);
@@ -34,14 +62,23 @@ export function BusinessSetupPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const isLastStep = step === BASELINE_STEPS.length - 1;
+  const totalSteps = BASELINE_STEPS.length + 1;
+  const isLastStep = step === totalSteps - 1;
+  const selectedIndustry = industries.data?.find((i) => i.id === industryId) ?? null;
+  const fieldLabels = selectedIndustry?.field_labels ?? {};
+
+  function selectIndustry(industry: IndustryOut) {
+    setIndustryId(industry.id);
+    setBaseline(baselineApiToForm(industry.default_baseline));
+    setErrors({});
+  }
 
   function updateField(key: string, value: number) {
     setBaseline((b) => ({ ...b, [key]: value }));
   }
 
   function goNext() {
-    const stepErrors = validateStep(step, baseline, name);
+    const stepErrors = validateStep(step, baseline, name, industryId);
     setErrors(stepErrors);
     if (Object.keys(stepErrors).length > 0) return;
     if (isLastStep) {
@@ -57,10 +94,11 @@ export function BusinessSetupPage() {
   }
 
   async function submit() {
+    if (!industryId) return;
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const business = await createBusiness(name.trim(), baseline);
+      const business = await createBusiness(name.trim(), industryId, baseline);
       navigate(`/scenarios?business=${business.id}`);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : String(err));
@@ -69,16 +107,41 @@ export function BusinessSetupPage() {
     }
   }
 
-  const current = BASELINE_STEPS[step];
+  const current = step === 0 ? null : BASELINE_STEPS[step - 1];
+  const heading = selectedIndustry
+    ? `Tell us about your ${selectedIndustry.display_name.toLowerCase()}`
+    : "What kind of business do you run?";
 
   return (
     <div className="page">
-      <h1>New business</h1>
+      <h1>{heading}</h1>
       <p className="step-indicator">
-        Step {step + 1} of {BASELINE_STEPS.length}: {current.title}
+        Step {step + 1} of {totalSteps}: {step === 0 ? "Business type" : current!.title}
       </p>
 
       {step === 0 && (
+        <div className="field">
+          {industries.loading && <Spinner label="Loading business types…" />}
+          <ErrorBanner message={industries.error} />
+          {industries.data && (
+            <div className="industry-cards">
+              {industries.data.map((ind) => (
+                <button
+                  key={ind.id}
+                  type="button"
+                  className={ind.id === industryId ? "industry-card selected" : "industry-card"}
+                  onClick={() => selectIndustry(ind)}
+                >
+                  {ind.display_name}
+                </button>
+              ))}
+            </div>
+          )}
+          {errors.industry && <p className="field-error">{errors.industry}</p>}
+        </div>
+      )}
+
+      {step === 1 && (
         <div className="field">
           <label htmlFor="business-name">Business name</label>
           <input
@@ -86,17 +149,17 @@ export function BusinessSetupPage() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Corner Café"
+            placeholder={industryId ? NAME_PLACEHOLDER[industryId] : "Corner Café"}
           />
           <p className="field-help">Shown in scenario and run-history lists.</p>
           {errors.name && <p className="field-error">{errors.name}</p>}
         </div>
       )}
 
-      {current.fields.map((field) => (
+      {current?.fields.map((field) => (
         <NumberField
           key={field.key}
-          label={field.label}
+          label={fieldLabels[field.key] ?? field.label}
           help={field.help}
           unit={field.unit}
           min={field.min}

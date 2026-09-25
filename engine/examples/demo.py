@@ -22,14 +22,14 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from btm_engine import (CafeBaseline, CafeTemplate, Decision, METRICS, one_at_a_time,
+from btm_engine import (Decision, METRICS, get_template, one_at_a_time,
                         run_deterministic, run_scenarios)
 
 OUT = Path(__file__).parent / "output"
 OUT.mkdir(exist_ok=True)
 
-base = CafeBaseline()
-tpl = CafeTemplate()
+tpl = get_template("cafe")
+base = tpl.default_baseline
 
 scenarios = {
     "Price +10% (m3)": [Decision("price", 3, 10, "percent")],
