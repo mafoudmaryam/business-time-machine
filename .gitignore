@@ -5,3 +5,4 @@ examples/output/
 *.egg-info/
 *.db
 .env
+node_modules/
