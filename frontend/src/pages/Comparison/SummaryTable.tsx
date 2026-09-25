@@ -1,4 +1,5 @@
 import type { ScenarioResultOut } from "../../api";
+import { InfoTip } from "../../components/InfoTip";
 import { formatMoney, formatPercent } from "../../lib/format";
 
 /** Doubles as the accessible table view of the charts: every number the charts
@@ -13,8 +14,13 @@ export function SummaryTable({ results }: { results: ScenarioResultOut[] }) {
           <th>Total profit p50</th>
           <th>Total profit p90</th>
           <th>End cash (p50)</th>
-          <th>P(cash &lt; 0)</th>
-          <th>P(beats baseline)</th>
+          <th>
+            P(cash &lt; 0) <InfoTip text="The chance that cash drops below zero at some point during the simulation." />
+          </th>
+          <th>
+            P(beats baseline){" "}
+            <InfoTip text="The chance this scenario ends up more profitable than doing nothing (the baseline)." />
+          </th>
         </tr>
       </thead>
       <tbody>

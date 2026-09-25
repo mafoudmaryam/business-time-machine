@@ -4,6 +4,7 @@ import { getSimulationRun, listBusinesses, listSimulationRuns, type SimulationRu
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
+import { ChartCaption } from "../Comparison/ChartCaption";
 import { MetricChart } from "../Comparison/MetricChart";
 import { RiskAlerts } from "../Comparison/RiskAlert";
 import { RunMeta } from "../Comparison/RunMeta";
@@ -114,6 +115,7 @@ export function RunHistoryPage() {
             <section className="run-results">
               <h2>Run #{openedRun.id}</h2>
               <RiskAlerts results={openedRun.results} />
+              <ChartCaption />
               <div className="chart-grid">
                 {CHARTS.map((c) => (
                   <MetricChart

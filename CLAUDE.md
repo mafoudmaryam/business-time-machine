@@ -14,6 +14,10 @@ Thesis question: does AI-assisted simulation help non-expert owners compare the 
 
 ## Current state
 - `engine/` is done: model, Monte Carlo (Latin hypercube sampling, common random numbers), sensitivity analysis, 19 tests, and a demo. See `engine/README.md`.
+- `backend/` is done: FastAPI + SQLAlchemy + Alembic over SQLite, CORS open to any localhost/127.0.0.1 port, businesses/scenarios/decisions/simulation_runs endpoints, `engine_bridge.py` as the sole engine import point, `seed_demo.py` for sample data, 30 tests.
+- `frontend/` is done: React + TypeScript + Vite + Recharts, four pages (business setup wizard, scenario builder with decision confirmation and versioning, comparison dashboard, run history), a single typed API client (`src/api.ts`), 22 Vitest tests.
+- `start.ps1` / `stop.ps1` at the repo root start and stop both dev servers together.
+- Not yet built: the AI layer (NL -> `Decision` objects via Claude tool use, grounded explanations over SSE) and `ai_interactions` logging.
 - The model spec (equations, sources, validation plan) lives in a Claude Doc the user can share with you.
 - Known issue: the marketing (α, γ) and word-of-mouth (β) parameters are uncalibrated and look too optimistic.
 

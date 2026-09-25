@@ -141,6 +141,18 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.info-tip {
+  cursor: help;
+  color: var(--text-muted);
+  border-bottom: 1px dotted var(--text-muted);
+}
+
+.chart-caption {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 8px;
+}
+
 .link-button {
   background: none;
   border: none;

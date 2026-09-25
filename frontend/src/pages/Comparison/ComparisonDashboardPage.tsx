@@ -6,6 +6,7 @@ import { Spinner } from "../../components/Spinner";
 import { MAX_SCENARIOS_PER_RUN } from "../../constants";
 import { useAsync } from "../../hooks/useAsync";
 import { friendlyErrorMessage } from "../../lib/friendlyError";
+import { ChartCaption } from "./ChartCaption";
 import { MetricChart } from "./MetricChart";
 import { RiskAlerts } from "./RiskAlert";
 import { RunMeta } from "./RunMeta";
@@ -149,6 +150,7 @@ export function ComparisonDashboardPage() {
           {run && (
             <section className="run-results">
               <RiskAlerts results={run.results} />
+              <ChartCaption />
               <div className="chart-grid">
                 {CHARTS.map((c) => (
                   <MetricChart key={c.metric} title={c.title} metric={c.metric} results={run.results} isMoney={c.isMoney} />
