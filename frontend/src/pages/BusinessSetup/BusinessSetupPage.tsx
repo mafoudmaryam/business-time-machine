@@ -12,6 +12,7 @@ import { ErrorBanner } from "../../components/ErrorBanner";
 import { NumberField } from "../../components/NumberField";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
+import { heroImage } from "../../lib/images";
 import { BASELINE_STEPS } from "../../constants";
 
 type FieldErrors = Record<string, string>;
@@ -114,13 +115,19 @@ export function BusinessSetupPage() {
 
   return (
     <div className="page">
-      <h1>{heading}</h1>
+      {selectedIndustry && step > 0 ? (
+        <div className="hero-banner" style={{ backgroundImage: `url(${heroImage(selectedIndustry.id, "setup")})` }}>
+          <h1>{heading}</h1>
+        </div>
+      ) : (
+        <h1>{heading}</h1>
+      )}
       <p className="step-indicator">
         Step {step + 1} of {totalSteps}: {step === 0 ? "Business type" : current!.title}
       </p>
 
       {step === 0 && (
-        <div className="field">
+        <div className="industry-picker">
           {industries.loading && <Spinner label="Loading business types…" />}
           <ErrorBanner message={industries.error} />
           {industries.data && (
@@ -130,9 +137,10 @@ export function BusinessSetupPage() {
                   key={ind.id}
                   type="button"
                   className={ind.id === industryId ? "industry-card selected" : "industry-card"}
+                  style={{ backgroundImage: `url(${heroImage(ind.id, "setup")})` }}
                   onClick={() => selectIndustry(ind)}
                 >
-                  {ind.display_name}
+                  <span className="industry-card-label">{ind.display_name}</span>
                 </button>
               ))}
             </div>

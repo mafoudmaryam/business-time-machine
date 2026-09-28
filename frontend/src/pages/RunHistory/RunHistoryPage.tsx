@@ -1,28 +1,37 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { getSimulationRun, listBusinesses, listSimulationRuns, type SimulationRunOut } from "../../api";
+import { getSimulationRun, listBusinesses, listIndustries, listSimulationRuns, type SimulationRunOut } from "../../api";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
+import { capitalize } from "../../lib/format";
 import { ChartCaption } from "../Comparison/ChartCaption";
 import { MetricChart } from "../Comparison/MetricChart";
 import { RiskAlerts } from "../Comparison/RiskAlert";
 import { RunMeta } from "../Comparison/RunMeta";
 import { SummaryTable } from "../Comparison/SummaryTable";
 
-const CHARTS: { metric: string; title: string; isMoney: boolean }[] = [
-  { metric: "revenue", title: "Revenue", isMoney: true },
-  { metric: "profit", title: "Profit", isMoney: true },
-  { metric: "cash", title: "Cash", isMoney: true },
-  { metric: "customers", title: "Customers", isMoney: false },
-];
+function buildCharts(customerNoun: string): { metric: string; title: string; isMoney: boolean }[] {
+  return [
+    { metric: "revenue", title: "Revenue", isMoney: true },
+    { metric: "profit", title: "Profit", isMoney: true },
+    { metric: "cash", title: "Cash", isMoney: true },
+    { metric: "customers", title: capitalize(customerNoun), isMoney: false },
+  ];
+}
 
 export function RunHistoryPage() {
   const [params, setParams] = useSearchParams();
   const businessId = params.get("business") ? Number(params.get("business")) : null;
 
   const businesses = useAsync(listBusinesses, []);
+  const industries = useAsync(listIndustries, []);
   const runs = useAsync(() => (businessId ? listSimulationRuns(businessId) : Promise.resolve([])), [businessId]);
+
+  const selectedBusiness = businesses.data?.find((b) => b.id === businessId) ?? null;
+  const industry = industries.data?.find((i) => i.id === selectedBusiness?.industry) ?? null;
+  const customerNoun = industry?.customer_noun ?? "customers";
+  const charts = buildCharts(customerNoun);
 
   const [openedRun, setOpenedRun] = useState<SimulationRunOut | null>(null);
   const [openError, setOpenError] = useState<string | null>(null);
@@ -117,7 +126,7 @@ export function RunHistoryPage() {
               <RiskAlerts results={openedRun.results} />
               <ChartCaption />
               <div className="chart-grid">
-                {CHARTS.map((c) => (
+                {charts.map((c) => (
                   <MetricChart
                     key={c.metric}
                     title={c.title}
@@ -127,7 +136,7 @@ export function RunHistoryPage() {
                   />
                 ))}
               </div>
-              <SummaryTable results={openedRun.results} />
+              <SummaryTable results={openedRun.results} customerNoun={customerNoun} />
               <RunMeta run={openedRun} />
             </section>
           )}

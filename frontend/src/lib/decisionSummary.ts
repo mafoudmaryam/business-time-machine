@@ -1,8 +1,15 @@
 import type { DecisionFormValues } from "../api";
 import { formatMonth, formatMoney } from "./format";
 
-/** Turns one decision lever into the plain-language sentence the owner confirms. */
-export function decisionSummary(d: DecisionFormValues): string {
+function pluralize(noun: string, value: number): string {
+  return Math.abs(value) === 1 ? noun : `${noun}s`;
+}
+
+/** Turns one decision lever into the plain-language sentence the owner confirms.
+ * staffNoun is the industry's own word for its staff (barista/server/baker). When
+ * it's not known (or a caller hasn't been updated yet), hiring falls back to the
+ * original generic "FTE staff" wording -- so existing callers/tests are unaffected. */
+export function decisionSummary(d: DecisionFormValues, staffNoun?: string): string {
   const from = `from ${formatMonth(d.start_month)}`;
 
   switch (d.type) {
@@ -10,8 +17,13 @@ export function decisionSummary(d: DecisionFormValues): string {
       if (d.unit === "absolute") return `Set price to ${formatMoney(d.value)} ${from}`;
       return d.value >= 0 ? `Raise prices ${d.value}% ${from}` : `Cut prices ${Math.abs(d.value)}% ${from}`;
 
-    case "hiring":
+    case "hiring": {
+      if (staffNoun) {
+        const noun = pluralize(staffNoun, d.value);
+        return d.value >= 0 ? `Hire ${d.value} ${noun} ${from}` : `Let go of ${Math.abs(d.value)} ${noun} ${from}`;
+      }
       return d.value >= 0 ? `Add ${d.value} FTE staff ${from}` : `Cut ${Math.abs(d.value)} FTE staff ${from}`;
+    }
 
     case "marketing":
       if (d.unit === "percent") {

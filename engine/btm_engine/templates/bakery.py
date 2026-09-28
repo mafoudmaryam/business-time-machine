@@ -16,6 +16,7 @@ TEMPLATE = IndustryTemplate(
     id="bakery",
     display_name="Bakery",
     customer_noun="customers",
+    staff_noun="baker",
     capacity_label="units of baking output per staff member per month",
     allowed_decision_types=DECISION_TYPES,
     default_baseline=BusinessBaseline(

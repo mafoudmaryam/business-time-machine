@@ -60,6 +60,7 @@ class IndustryOut(BaseModel):
     id: str
     display_name: str
     customer_noun: str
+    staff_noun: str
     capacity_label: str
     default_baseline: BaselineIn
     field_labels: dict[str, str]

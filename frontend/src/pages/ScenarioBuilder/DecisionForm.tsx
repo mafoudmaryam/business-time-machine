@@ -2,6 +2,11 @@ import { useState } from "react";
 import type { DecisionFormValues } from "../../api";
 import { NumberField } from "../../components/NumberField";
 import { DECISION_TYPE_HELP, DECISION_TYPE_LABELS, DECISION_TYPES, type DecisionType } from "../../constants";
+import { decisionTypeImage } from "../../lib/images";
+
+function tileLabel(type: DecisionType, staffNoun: string): string {
+  return type === "hiring" ? `Hire a ${staffNoun}` : DECISION_TYPE_LABELS[type];
+}
 
 function defaultsFor(type: DecisionType): DecisionFormValues {
   const base = { type, start_month: 1, source: "user" as const, confirmed: false };
@@ -21,7 +26,13 @@ function defaultsFor(type: DecisionType): DecisionFormValues {
   }
 }
 
-export function DecisionForm({ onAdd }: { onAdd: (decision: DecisionFormValues) => void }) {
+interface Props {
+  industryId: string;
+  staffNoun: string;
+  onAdd: (decision: DecisionFormValues) => void;
+}
+
+export function DecisionForm({ industryId, staffNoun, onAdd }: Props) {
   const [draft, setDraft] = useState<DecisionFormValues>(defaultsFor("price"));
 
   function changeType(type: DecisionType) {
@@ -40,18 +51,20 @@ export function DecisionForm({ onAdd }: { onAdd: (decision: DecisionFormValues) 
   return (
     <div className="decision-form">
       <div className="field">
-        <label htmlFor="decision-type">Decision type</label>
-        <select
-          id="decision-type"
-          value={draft.type}
-          onChange={(e) => changeType(e.target.value as DecisionType)}
-        >
+        <span>Decision type</span>
+        <div className="decision-tiles">
           {DECISION_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {DECISION_TYPE_LABELS[t]}
-            </option>
+            <button
+              key={t}
+              type="button"
+              className={t === draft.type ? "decision-tile selected" : "decision-tile"}
+              style={{ backgroundImage: `url(${decisionTypeImage(industryId, t)})` }}
+              onClick={() => changeType(t)}
+            >
+              <span className="decision-tile-label">{tileLabel(t, staffNoun)}</span>
+            </button>
           ))}
-        </select>
+        </div>
         <p className="field-help">{DECISION_TYPE_HELP[draft.type]}</p>
       </div>
 
@@ -88,7 +101,7 @@ export function DecisionForm({ onAdd }: { onAdd: (decision: DecisionFormValues) 
       {draft.type === "hiring" && (
         <NumberField
           label="Staff change"
-          help="Positive to hire, negative to lay off, in FTE headcount."
+          help={`Positive to hire, negative to let go, in FTE ${staffNoun}s.`}
           unit="FTE"
           step={0.5}
           value={draft.value}
@@ -119,7 +132,7 @@ export function DecisionForm({ onAdd }: { onAdd: (decision: DecisionFormValues) 
       {draft.type === "hours" && (
         <NumberField
           label="Open days"
-          help="How many days per month the café will be open from the start month."
+          help="How many days per month the business will be open from the start month."
           unit="days/month"
           min={1}
           max={31}
@@ -192,7 +205,7 @@ export function DecisionForm({ onAdd }: { onAdd: (decision: DecisionFormValues) 
           />
           <NumberField
             label="Capacity gain (optional)"
-            help="How much more the café can serve, e.g. a faster espresso machine."
+            help="How much more the business can serve, e.g. faster or bigger equipment."
             unit="%"
             step={1}
             value={draft.capacity_pct ?? 0}

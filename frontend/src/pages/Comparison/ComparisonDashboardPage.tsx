@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { listBusinesses, listScenarios, simulateBusiness, type SimulationRunOut } from "../../api";
+import { listBusinesses, listIndustries, listScenarios, simulateBusiness, type SimulationRunOut } from "../../api";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
 import { MAX_SCENARIOS_PER_RUN } from "../../constants";
 import { useAsync } from "../../hooks/useAsync";
+import { capitalize } from "../../lib/format";
 import { friendlyErrorMessage } from "../../lib/friendlyError";
+import { heroImage } from "../../lib/images";
 import { ChartCaption } from "./ChartCaption";
 import { MetricChart } from "./MetricChart";
 import { RiskAlerts } from "./RiskAlert";
@@ -13,19 +15,28 @@ import { RunMeta } from "./RunMeta";
 import { SummaryTable } from "./SummaryTable";
 
 const HORIZONS = [12, 24, 36];
-const CHARTS: { metric: string; title: string; isMoney: boolean }[] = [
-  { metric: "revenue", title: "Revenue", isMoney: true },
-  { metric: "profit", title: "Profit", isMoney: true },
-  { metric: "cash", title: "Cash", isMoney: true },
-  { metric: "customers", title: "Customers", isMoney: false },
-];
+
+function buildCharts(customerNoun: string): { metric: string; title: string; isMoney: boolean }[] {
+  return [
+    { metric: "revenue", title: "Revenue", isMoney: true },
+    { metric: "profit", title: "Profit", isMoney: true },
+    { metric: "cash", title: "Cash", isMoney: true },
+    { metric: "customers", title: capitalize(customerNoun), isMoney: false },
+  ];
+}
 
 export function ComparisonDashboardPage() {
   const [params, setParams] = useSearchParams();
   const businessId = params.get("business") ? Number(params.get("business")) : null;
 
   const businesses = useAsync(listBusinesses, []);
+  const industries = useAsync(listIndustries, []);
   const scenarios = useAsync(() => (businessId ? listScenarios(businessId) : Promise.resolve([])), [businessId]);
+
+  const selectedBusiness = businesses.data?.find((b) => b.id === businessId) ?? null;
+  const industry = industries.data?.find((i) => i.id === selectedBusiness?.industry) ?? null;
+  const customerNoun = industry?.customer_noun ?? "customers";
+  const charts = buildCharts(customerNoun);
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [horizon, setHorizon] = useState(24);
@@ -65,7 +76,12 @@ export function ComparisonDashboardPage() {
 
   return (
     <div className="page">
-      <h1>Comparison dashboard</h1>
+      {industry && (
+        <div className="hero-banner" style={{ backgroundImage: `url(${heroImage(industry.id, "compare")})` }}>
+          <h1>Comparison dashboard</h1>
+        </div>
+      )}
+      {!industry && <h1>Comparison dashboard</h1>}
 
       <div className="field">
         <label htmlFor="business-select">Business</label>
@@ -152,11 +168,11 @@ export function ComparisonDashboardPage() {
               <RiskAlerts results={run.results} />
               <ChartCaption />
               <div className="chart-grid">
-                {CHARTS.map((c) => (
+                {charts.map((c) => (
                   <MetricChart key={c.metric} title={c.title} metric={c.metric} results={run.results} isMoney={c.isMoney} />
                 ))}
               </div>
-              <SummaryTable results={run.results} />
+              <SummaryTable results={run.results} customerNoun={customerNoun} />
               <RunMeta run={run} />
             </section>
           )}

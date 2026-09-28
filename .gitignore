@@ -7,3 +7,4 @@ examples/output/
 .env
 node_modules/
 .dev-pids.json
+frontend/.photo-candidates/

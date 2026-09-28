@@ -40,6 +40,21 @@ describe("decisionSummary", () => {
       .toBe("Cut 1 FTE staff from month 4");
   });
 
+  it("uses the industry's staff noun when given, singular", () => {
+    expect(decisionSummary(decision({ type: "hiring", value: 1, unit: "fte", start_month: 6 }), "baker"))
+      .toBe("Hire 1 baker from month 6");
+  });
+
+  it("uses the industry's staff noun when given, pluralized", () => {
+    expect(decisionSummary(decision({ type: "hiring", value: 2, unit: "fte", start_month: 6 }), "server"))
+      .toBe("Hire 2 servers from month 6");
+  });
+
+  it("uses the industry's staff noun for layoffs too", () => {
+    expect(decisionSummary(decision({ type: "hiring", value: -1.5, unit: "fte", start_month: 3 }), "barista"))
+      .toBe("Let go of 1.5 baristas from month 3");
+  });
+
   it("summarizes an absolute marketing budget", () => {
     expect(decisionSummary(decision({ type: "marketing", value: 600, unit: "per_month", start_month: 1 })))
       .toBe("Set marketing spend to ¥600/month from month 1");

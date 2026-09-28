@@ -9,6 +9,7 @@ TEMPLATE = IndustryTemplate(
     id="cafe",
     display_name="Café",
     customer_noun="regulars",
+    staff_noun="barista",
     capacity_label="visits per staff member per month",
     allowed_decision_types=DECISION_TYPES,
     default_baseline=BusinessBaseline(

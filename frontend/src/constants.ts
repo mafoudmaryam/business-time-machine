@@ -23,7 +23,7 @@ export const DECISION_TYPE_HELP: Record<DecisionType, string> = {
   price: "Change the average ticket price, either by a percentage or to a new absolute price.",
   hiring: "Add or remove staff, in full-time-equivalent (FTE) headcount.",
   marketing: "Change monthly marketing spend, either by a percentage or to a new absolute amount.",
-  hours: "Change how many days per month the café is open.",
+  hours: "Change how many days per month the business is open.",
   menu: "Reprice or add menu items (an upsell), optionally with a new ingredient-cost ratio and a one-off setup cost.",
   investment: "A one-off purchase, optionally financed with a loan, that may also add serving capacity.",
 };
@@ -60,7 +60,7 @@ export const BASELINE_STEPS: { title: string; fields: FieldSpec[] }[] = [
       { key: "cogs_ratio", label: "Cost of goods (COGS)", help: "Ingredient and packaging cost as a share of revenue.", unit: "%", min: 0, max: 99, step: 1, isPercent: true },
       { key: "fixed_costs", label: "Fixed costs", help: "Rent, utilities and other costs that don't vary with sales.", unit: "{CUR}/month", min: 0, step: 100 },
       { key: "marketing", label: "Marketing spend", help: "Current monthly marketing budget.", unit: "{CUR}/month", min: 0, step: 50 },
-      { key: "open_days", label: "Open days", help: "How many days per month the café opens.", unit: "days/month", min: 1, max: 31, step: 1 },
+      { key: "open_days", label: "Open days", help: "How many days per month the business opens.", unit: "days/month", min: 1, max: 31, step: 1 },
     ],
   },
   {

@@ -18,3 +18,11 @@ export function formatPercent(value: number, digits = 0): string {
 export function formatMonth(month: number): string {
   return `month ${month}`;
 }
+
+export function capitalize(word: string): string {
+  return word.length === 0 ? word : word[0].toUpperCase() + word.slice(1);
+}
+
+export function formatCount(value: number): string {
+  return Math.round(value).toLocaleString();
+}

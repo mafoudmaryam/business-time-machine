@@ -55,6 +55,7 @@ class IndustryTemplate:
     id: str = "cafe"
     display_name: str = "Café"
     customer_noun: str = "regulars"                       # "regulars" / "guests" / "customers"
+    staff_noun: str = "barista"                            # "barista" / "server" / "baker"
     capacity_label: str = "visits per staff member per month"
     allowed_decision_types: tuple[str, ...] = field(default_factory=tuple)
     default_baseline: BusinessBaseline = field(default_factory=BusinessBaseline)

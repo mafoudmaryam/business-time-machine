@@ -4,6 +4,7 @@ import {
   createScenario,
   decisionOutToForm,
   listBusinesses,
+  listIndustries,
   listScenarios,
   type DecisionFormValues,
   type ScenarioOut,
@@ -23,7 +24,11 @@ export function ScenarioBuilderPage() {
   const businessId = params.get("business") ? Number(params.get("business")) : null;
 
   const businesses = useAsync(listBusinesses, []);
+  const industries = useAsync(listIndustries, []);
   const scenarios = useAsync(() => (businessId ? listScenarios(businessId) : Promise.resolve([])), [businessId]);
+
+  const selectedBusiness = businesses.data?.find((b) => b.id === businessId) ?? null;
+  const industry = industries.data?.find((i) => i.id === selectedBusiness?.industry) ?? null;
 
   const [name, setName] = useState("");
   const [parentScenarioId, setParentScenarioId] = useState<number | undefined>(undefined);
@@ -159,8 +164,18 @@ export function ScenarioBuilderPage() {
             </div>
 
             <h3>Decisions</h3>
-            <DecisionList decisions={decisions} onToggleConfirmed={toggleConfirmed} onRemove={removeDecision} />
-            <DecisionForm onAdd={addDecision} />
+            {!industry && <Spinner label="Loading business details…" />}
+            {industry && (
+              <>
+                <DecisionList
+                  decisions={decisions}
+                  staffNoun={industry.staff_noun}
+                  onToggleConfirmed={toggleConfirmed}
+                  onRemove={removeDecision}
+                />
+                <DecisionForm industryId={industry.id} staffNoun={industry.staff_noun} onAdd={addDecision} />
+              </>
+            )}
 
             <ErrorBanner message={submitError} />
             {savedMessage && <p className="success-message">{savedMessage}</p>}

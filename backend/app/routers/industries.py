@@ -27,6 +27,7 @@ def get_industries():
             id=tpl.id,
             display_name=tpl.display_name,
             customer_noun=tpl.customer_noun,
+            staff_noun=tpl.staff_noun,
             capacity_label=tpl.capacity_label,
             default_baseline=schemas.BaselineIn(**tpl.default_baseline.to_dict()),
             field_labels=_field_labels(tpl.customer_noun),

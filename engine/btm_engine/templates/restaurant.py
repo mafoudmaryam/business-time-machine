@@ -15,6 +15,7 @@ TEMPLATE = IndustryTemplate(
     id="restaurant",
     display_name="Restaurant",
     customer_noun="guests",
+    staff_noun="server",
     capacity_label="covers per staff member per month",
     allowed_decision_types=DECISION_TYPES,
     default_baseline=BusinessBaseline(

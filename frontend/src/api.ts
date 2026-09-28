@@ -149,6 +149,7 @@ export interface IndustryOut {
   id: string;
   display_name: string;
   customer_noun: string;
+  staff_noun: string;
   capacity_label: string;
   default_baseline: BaselineIn; // ratio-based, same shape as BaselineOut minus id/created_at
   field_labels: Record<string, string>;
