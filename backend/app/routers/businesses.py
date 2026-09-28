@@ -22,7 +22,7 @@ def create_business(payload: schemas.BusinessCreate, db: Session = Depends(get_d
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
-    business = models.Business(name=payload.name, industry=payload.industry)
+    business = models.Business(name=payload.name, industry=payload.industry, currency=payload.currency)
     db.add(business)
     db.flush()
 

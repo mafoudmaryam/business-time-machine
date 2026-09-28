@@ -4,19 +4,25 @@ import { getSimulationRun, listBusinesses, listIndustries, listSimulationRuns, t
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
-import { capitalize } from "../../lib/format";
+import { DEFAULT_CURRENCY, capitalize } from "../../lib/format";
+import { displayScenarioName } from "../../lib/scenarioLabel";
 import { ChartCaption } from "../Comparison/ChartCaption";
 import { MetricChart } from "../Comparison/MetricChart";
 import { RiskAlerts } from "../Comparison/RiskAlert";
 import { RunMeta } from "../Comparison/RunMeta";
 import { SummaryTable } from "../Comparison/SummaryTable";
 
-function buildCharts(customerNoun: string): { metric: string; title: string; isMoney: boolean }[] {
+function buildCharts(customerNoun: string): { metric: string; title: string; tooltip: string; isMoney: boolean }[] {
   return [
-    { metric: "revenue", title: "Revenue", isMoney: true },
-    { metric: "profit", title: "Profit", isMoney: true },
-    { metric: "cash", title: "Cash", isMoney: true },
-    { metric: "customers", title: capitalize(customerNoun), isMoney: false },
+    { metric: "revenue", title: "Revenue", tooltip: "Total sales before any costs are taken out.", isMoney: true },
+    { metric: "profit", title: "Profit", tooltip: "What's left after every cost is paid.", isMoney: true },
+    { metric: "cash", title: "Cash", tooltip: "Money actually in the bank, month by month.", isMoney: true },
+    {
+      metric: "customers",
+      title: capitalize(customerNoun),
+      tooltip: `How many ${customerNoun} keep coming back, month by month.`,
+      isMoney: false,
+    },
   ];
 }
 
@@ -31,6 +37,7 @@ export function RunHistoryPage() {
   const selectedBusiness = businesses.data?.find((b) => b.id === businessId) ?? null;
   const industry = industries.data?.find((i) => i.id === selectedBusiness?.industry) ?? null;
   const customerNoun = industry?.customer_noun ?? "customers";
+  const currency = selectedBusiness?.currency ?? DEFAULT_CURRENCY;
   const charts = buildCharts(customerNoun);
 
   const [openedRun, setOpenedRun] = useState<SimulationRunOut | null>(null);
@@ -93,7 +100,7 @@ export function RunHistoryPage() {
                 <tr>
                   <th>Run</th>
                   <th>Created</th>
-                  <th>Horizon</th>
+                  <th>Months simulated</th>
                   <th>Scenarios</th>
                   <th>Seed</th>
                   <th></th>
@@ -105,7 +112,7 @@ export function RunHistoryPage() {
                     <td>#{r.id}</td>
                     <td>{new Date(r.created_at).toLocaleString()}</td>
                     <td>{r.horizon} months</td>
-                    <td>{r.scenario_names.join(", ")}</td>
+                    <td>{r.scenario_names.map(displayScenarioName).join(", ")}</td>
                     <td>{r.seed}</td>
                     <td>
                       <button type="button" className="link-button" onClick={() => openRun(r.id)}>
@@ -130,13 +137,15 @@ export function RunHistoryPage() {
                   <MetricChart
                     key={c.metric}
                     title={c.title}
+                    tooltip={c.tooltip}
                     metric={c.metric}
                     results={openedRun.results}
                     isMoney={c.isMoney}
+                    currency={currency}
                   />
                 ))}
               </div>
-              <SummaryTable results={openedRun.results} customerNoun={customerNoun} />
+              <SummaryTable results={openedRun.results} customerNoun={customerNoun} currency={currency} />
               <RunMeta run={openedRun} />
             </section>
           )}

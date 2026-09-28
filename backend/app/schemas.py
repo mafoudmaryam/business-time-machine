@@ -4,7 +4,7 @@ from __future__ import annotations
 import datetime as dt
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # ---------- businesses ----------
 
@@ -37,8 +37,14 @@ class BaselineOut(BaselineIn):
 class BusinessCreate(BaseModel):
     name: str
     industry: str = "cafe"
+    currency: str = Field("USD", pattern=r"^[A-Za-z]{3}$", description="ISO 4217 currency code, e.g. USD, EUR, JPY.")
     # None means "use this industry's default baseline" -- see routers/businesses.py.
     baseline: Optional[BaselineIn] = None
+
+    @field_validator("currency")
+    @classmethod
+    def _uppercase_currency(cls, v: str) -> str:
+        return v.upper()
 
 
 class BusinessOut(BaseModel):
@@ -47,6 +53,7 @@ class BusinessOut(BaseModel):
     id: int
     name: str
     industry: str
+    currency: str
     created_at: dt.datetime
     baseline: Optional[BaselineOut]
 

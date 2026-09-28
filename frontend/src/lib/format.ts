@@ -1,13 +1,32 @@
-import { CURRENCY } from "../constants";
+export const DEFAULT_CURRENCY = "USD";
 
-/** Replaces the "{CUR}" placeholder used in FieldSpec.unit / decision unit templates. */
-export function formatUnit(unitTemplate: string): string {
-  return unitTemplate.replace("{CUR}", CURRENCY);
+/** The symbol/prefix Intl uses for a currency in the user's own locale,
+ * e.g. "$" for USD, "¥" for JPY, "CN¥" for CNY -- used for compact unit
+ * labels like "($/visit)" without hard-coding any one currency. */
+export function currencySymbol(currency: string): string {
+  try {
+    const parts = new Intl.NumberFormat(undefined, { style: "currency", currency }).formatToParts(0);
+    return parts.filter((p) => p.type === "currency").map((p) => p.value).join("");
+  } catch {
+    return currency;
+  }
 }
 
-export function formatMoney(value: number): string {
-  const rounded = Math.round(value).toLocaleString();
-  return `${CURRENCY}${rounded}`;
+/** Replaces the "{CUR}" placeholder used in FieldSpec.unit / decision unit templates. */
+export function formatUnit(unitTemplate: string, currency: string): string {
+  return unitTemplate.replace("{CUR}", currencySymbol(currency));
+}
+
+export function formatMoney(value: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch {
+    return `${currencySymbol(currency)}${Math.round(value).toLocaleString()}`;
+  }
 }
 
 /** value is already a 0-100 number, e.g. formatPercent(10) -> "10%". */

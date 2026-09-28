@@ -12,8 +12,9 @@ import { ErrorBanner } from "../../components/ErrorBanner";
 import { NumberField } from "../../components/NumberField";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
+import { BASELINE_STEPS, CURRENCIES } from "../../constants";
+import { DEFAULT_CURRENCY, formatUnit } from "../../lib/format";
 import { heroImage } from "../../lib/images";
-import { BASELINE_STEPS } from "../../constants";
 
 type FieldErrors = Record<string, string>;
 
@@ -57,6 +58,7 @@ export function BusinessSetupPage() {
 
   const [industryId, setIndustryId] = useState<string | null>(null);
   const [name, setName] = useState("");
+  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
   const [baseline, setBaseline] = useState<BaselineFormValues>({ ...DEFAULT_BASELINE_FORM });
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -99,7 +101,7 @@ export function BusinessSetupPage() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const business = await createBusiness(name.trim(), industryId, baseline);
+      const business = await createBusiness(name.trim(), industryId, currency, baseline);
       navigate(`/scenarios?business=${business.id}`);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : String(err));
@@ -149,19 +151,39 @@ export function BusinessSetupPage() {
         </div>
       )}
 
+      {step >= 1 && (
+        <p className="example-numbers-note">
+          Example numbers are for a typical small US business — replace them with your own.
+        </p>
+      )}
+
       {step === 1 && (
-        <div className="field">
-          <label htmlFor="business-name">Business name</label>
-          <input
-            id="business-name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={industryId ? NAME_PLACEHOLDER[industryId] : "Corner Café"}
-          />
-          <p className="field-help">Shown in scenario and run-history lists.</p>
-          {errors.name && <p className="field-error">{errors.name}</p>}
-        </div>
+        <>
+          <div className="field">
+            <label htmlFor="business-name">Business name</label>
+            <input
+              id="business-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={industryId ? NAME_PLACEHOLDER[industryId] : "Corner Café"}
+            />
+            <p className="field-help">Shown in scenario and run-history lists.</p>
+            {errors.name && <p className="field-error">{errors.name}</p>}
+          </div>
+
+          <div className="field">
+            <label htmlFor="business-currency">Currency</label>
+            <select id="business-currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+              {CURRENCIES.map((code) => (
+                <option key={code} value={code}>
+                  {code}
+                </option>
+              ))}
+            </select>
+            <p className="field-help">Every money amount and chart uses this currency.</p>
+          </div>
+        </>
       )}
 
       {current?.fields.map((field) => (
@@ -169,7 +191,8 @@ export function BusinessSetupPage() {
           key={field.key}
           label={fieldLabels[field.key] ?? field.label}
           help={field.help}
-          unit={field.unit}
+          tooltip={field.help}
+          unit={formatUnit(field.unit, currency)}
           min={field.min}
           max={field.max}
           step={field.step}

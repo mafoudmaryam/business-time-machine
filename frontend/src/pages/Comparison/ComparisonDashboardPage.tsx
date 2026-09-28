@@ -5,7 +5,7 @@ import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
 import { MAX_SCENARIOS_PER_RUN } from "../../constants";
 import { useAsync } from "../../hooks/useAsync";
-import { capitalize } from "../../lib/format";
+import { DEFAULT_CURRENCY, capitalize } from "../../lib/format";
 import { friendlyErrorMessage } from "../../lib/friendlyError";
 import { heroImage } from "../../lib/images";
 import { ChartCaption } from "./ChartCaption";
@@ -16,12 +16,17 @@ import { SummaryTable } from "./SummaryTable";
 
 const HORIZONS = [12, 24, 36];
 
-function buildCharts(customerNoun: string): { metric: string; title: string; isMoney: boolean }[] {
+function buildCharts(customerNoun: string): { metric: string; title: string; tooltip: string; isMoney: boolean }[] {
   return [
-    { metric: "revenue", title: "Revenue", isMoney: true },
-    { metric: "profit", title: "Profit", isMoney: true },
-    { metric: "cash", title: "Cash", isMoney: true },
-    { metric: "customers", title: capitalize(customerNoun), isMoney: false },
+    { metric: "revenue", title: "Revenue", tooltip: "Total sales before any costs are taken out.", isMoney: true },
+    { metric: "profit", title: "Profit", tooltip: "What's left after every cost is paid.", isMoney: true },
+    { metric: "cash", title: "Cash", tooltip: "Money actually in the bank, month by month.", isMoney: true },
+    {
+      metric: "customers",
+      title: capitalize(customerNoun),
+      tooltip: `How many ${customerNoun} keep coming back, month by month.`,
+      isMoney: false,
+    },
   ];
 }
 
@@ -108,7 +113,7 @@ export function ComparisonDashboardPage() {
       {businessId && (
         <>
           <div className="field">
-            <span>Scenarios to compare (up to {MAX_SCENARIOS_PER_RUN}, baseline is always included)</span>
+            <span>Scenarios to compare (up to {MAX_SCENARIOS_PER_RUN}; "if you change nothing" is always included)</span>
             {scenarios.loading && <Spinner label="Loading scenarios…" />}
             <ErrorBanner message={scenarios.error} />
             {scenarios.data && scenarios.data.length === 0 && (
@@ -147,7 +152,7 @@ export function ComparisonDashboardPage() {
           </div>
 
           <div className="field">
-            <label htmlFor="horizon-select">Horizon</label>
+            <label htmlFor="horizon-select">Months to simulate</label>
             <select id="horizon-select" value={horizon} onChange={(e) => setHorizon(Number(e.target.value))}>
               {HORIZONS.map((h) => (
                 <option key={h} value={h}>
@@ -169,10 +174,22 @@ export function ComparisonDashboardPage() {
               <ChartCaption />
               <div className="chart-grid">
                 {charts.map((c) => (
-                  <MetricChart key={c.metric} title={c.title} metric={c.metric} results={run.results} isMoney={c.isMoney} />
+                  <MetricChart
+                    key={c.metric}
+                    title={c.title}
+                    tooltip={c.tooltip}
+                    metric={c.metric}
+                    results={run.results}
+                    isMoney={c.isMoney}
+                    currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
+                  />
                 ))}
               </div>
-              <SummaryTable results={run.results} customerNoun={customerNoun} />
+              <SummaryTable
+                results={run.results}
+                customerNoun={customerNoun}
+                currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
+              />
               <RunMeta run={run} />
             </section>
           )}

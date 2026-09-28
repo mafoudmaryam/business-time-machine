@@ -11,26 +11,31 @@ import {
   YAxis,
 } from "recharts";
 import type { ScenarioResultOut } from "../../api";
+import { InfoTip } from "../../components/InfoTip";
 import { SCENARIO_COLORS } from "../../constants";
-import { formatMoney } from "../../lib/format";
+import { DEFAULT_CURRENCY, formatMoney } from "../../lib/format";
+import { displayScenarioName } from "../../lib/scenarioLabel";
 
 interface Props {
   title: string;
+  tooltip?: string;
   metric: string; // key into ScenarioResultOut.bands, e.g. "revenue"
-  results: ScenarioResultOut[]; // baseline first, so SCENARIO_COLORS[0] is always the baseline
+  results: ScenarioResultOut[]; // baseline first, so SCENARIO_COLORS[0] is always "if you change nothing"
   isMoney: boolean;
+  currency?: string;
 }
 
 type ChartRow = { month: number } & Record<string, number | [number, number]>;
 
-function formatValue(value: number, isMoney: boolean): string {
-  return isMoney ? formatMoney(value) : Math.round(value).toLocaleString();
+function formatValue(value: number, isMoney: boolean, currency: string): string {
+  return isMoney ? formatMoney(value, currency) : Math.round(value).toLocaleString();
 }
 
 /** One band-plus-median chart, reused for revenue/profit/cash/customers. Each
- * scenario draws a shaded p10-p90 Area (legend hidden) and a solid p50 Line
- * (legend shown, so scenarios are always named, never color-only). */
-export function MetricChart({ title, metric, results, isMoney }: Props) {
+ * scenario draws a shaded bad-case-to-good-case Area (legend hidden) and a
+ * solid most-likely Line (legend shown, so scenarios are always named, never
+ * color-only). */
+export function MetricChart({ title, tooltip, metric, results, isMoney, currency = DEFAULT_CURRENCY }: Props) {
   const horizon = results[0]?.bands[metric]?.p50.length ?? 0;
   const data: ChartRow[] = Array.from({ length: horizon }, (_, i) => {
     const row: ChartRow = { month: i + 1 };
@@ -45,23 +50,26 @@ export function MetricChart({ title, metric, results, isMoney }: Props) {
 
   return (
     <div className="metric-chart">
-      <h3>{title}</h3>
+      <h3>
+        {title} {tooltip && <InfoTip text={tooltip} />}
+      </h3>
       <ResponsiveContainer width="100%" height={260}>
         <ComposedChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" label={{ value: "Month", position: "insideBottom", offset: -4 }} />
-          <YAxis tickFormatter={(v: number) => formatValue(v, isMoney)} width={80} />
+          <YAxis tickFormatter={(v: number) => formatValue(v, isMoney, currency)} width={80} />
           <Tooltip
             labelFormatter={(month) => `Month ${month}`}
             formatter={(value, name) => {
+              const label = displayScenarioName(String(name));
               if (Array.isArray(value)) {
                 const [lo, hi] = value as [number, number];
-                return [`${formatValue(lo, isMoney)} – ${formatValue(hi, isMoney)}`, `${name} (p10–p90)`];
+                return [`${formatValue(lo, isMoney, currency)} – ${formatValue(hi, isMoney, currency)}`, `${label} (bad case-good case)`];
               }
-              return [formatValue(Number(value), isMoney), `${name} (p50)`];
+              return [formatValue(Number(value), isMoney, currency), `${label} (most likely)`];
             }}
           />
-          <Legend />
+          <Legend formatter={(value) => displayScenarioName(String(value))} />
           {results.map((r, i) => {
             const color = SCENARIO_COLORS[i % SCENARIO_COLORS.length];
             return (

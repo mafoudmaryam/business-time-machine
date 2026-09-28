@@ -114,6 +114,7 @@ export interface BusinessOut {
   id: number;
   name: string;
   industry: string;
+  currency: string;
   created_at: string;
   baseline: BaselineOut | null;
 }
@@ -136,10 +137,15 @@ export function getBusiness(businessId: number): Promise<BusinessOut> {
   return request(`/businesses/${businessId}`);
 }
 
-export function createBusiness(name: string, industry: string, baseline: BaselineFormValues): Promise<BusinessOut> {
+export function createBusiness(
+  name: string,
+  industry: string,
+  currency: string,
+  baseline: BaselineFormValues,
+): Promise<BusinessOut> {
   return request("/businesses", {
     method: "POST",
-    body: JSON.stringify({ name, industry, baseline: baselineFormToApi(baseline) }),
+    body: JSON.stringify({ name, industry, currency, baseline: baselineFormToApi(baseline) }),
   });
 }
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { DecisionFormValues } from "../../api";
 import { NumberField } from "../../components/NumberField";
 import { DECISION_TYPE_HELP, DECISION_TYPE_LABELS, DECISION_TYPES, type DecisionType } from "../../constants";
+import { formatUnit } from "../../lib/format";
 import { decisionTypeImage } from "../../lib/images";
 
 function tileLabel(type: DecisionType, staffNoun: string): string {
@@ -26,17 +27,44 @@ function defaultsFor(type: DecisionType): DecisionFormValues {
   }
 }
 
+const OPTIONAL_NUMERIC_FIELDS = ["loan_months", "annual_rate", "capacity_pct", "cogs_ratio", "investment"] as const;
+
+/** Only checks that every number the user touched is actually a valid number
+ * -- this is the decision form's "on Save" moment, mirrored from the setup
+ * wizard's per-step validation. It doesn't re-check business-rule ranges
+ * (e.g. start_month vs. horizon), which the engine already validates at
+ * simulate time. */
+function validateDraft(draft: DecisionFormValues): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!Number.isFinite(draft.start_month) || draft.start_month < 1) {
+    errors.start_month = "Enter a month number of 1 or more.";
+  }
+  if (!Number.isFinite(draft.value)) {
+    errors.value = "Enter a number.";
+  }
+  for (const key of OPTIONAL_NUMERIC_FIELDS) {
+    const v = draft[key];
+    if (v !== undefined && !Number.isFinite(v)) {
+      errors[key] = "Enter a number.";
+    }
+  }
+  return errors;
+}
+
 interface Props {
   industryId: string;
   staffNoun: string;
+  currency: string;
   onAdd: (decision: DecisionFormValues) => void;
 }
 
-export function DecisionForm({ industryId, staffNoun, onAdd }: Props) {
+export function DecisionForm({ industryId, staffNoun, currency, onAdd }: Props) {
   const [draft, setDraft] = useState<DecisionFormValues>(defaultsFor("price"));
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   function changeType(type: DecisionType) {
     setDraft(defaultsFor(type));
+    setErrors({});
   }
 
   function set<K extends keyof DecisionFormValues>(key: K, value: DecisionFormValues[K]) {
@@ -44,8 +72,12 @@ export function DecisionForm({ industryId, staffNoun, onAdd }: Props) {
   }
 
   function add() {
+    const draftErrors = validateDraft(draft);
+    setErrors(draftErrors);
+    if (Object.keys(draftErrors).length > 0) return;
     onAdd(draft);
     setDraft(defaultsFor(draft.type));
+    setErrors({});
   }
 
   return (
@@ -71,11 +103,13 @@ export function DecisionForm({ industryId, staffNoun, onAdd }: Props) {
       <NumberField
         label="Start month"
         help="The simulation month this change takes effect (month 1 = the first month simulated)."
+        tooltip="Counting from month 1 = the first month of the simulation, not a calendar month."
         unit="month"
         min={1}
         step={1}
         value={draft.start_month}
         onChange={(v) => set("start_month", Math.round(v))}
+        error={errors.start_month}
       />
 
       {draft.type === "price" && (
@@ -89,11 +123,13 @@ export function DecisionForm({ industryId, staffNoun, onAdd }: Props) {
           </div>
           <NumberField
             label={draft.unit === "percent" ? "Price change" : "New price"}
-            help={draft.unit === "percent" ? "Positive to raise, negative to cut." : "The new average ticket price."}
-            unit={draft.unit === "percent" ? "%" : "{CUR}/visit"}
+            help={draft.unit === "percent" ? "Positive to raise, negative to cut." : "The new average sale per visit."}
+            tooltip={draft.unit === "percent" ? "Positive to raise, negative to cut." : "The new average sale per visit."}
+            unit={draft.unit === "percent" ? "%" : formatUnit("{CUR}/visit", currency)}
             step={draft.unit === "percent" ? 1 : 0.1}
             value={draft.value}
             onChange={(v) => set("value", v)}
+            error={errors.value}
           />
         </>
       )}
@@ -101,11 +137,13 @@ export function DecisionForm({ industryId, staffNoun, onAdd }: Props) {
       {draft.type === "hiring" && (
         <NumberField
           label="Staff change"
-          help={`Positive to hire, negative to let go, in FTE ${staffNoun}s.`}
-          unit="FTE"
+          help={`Positive to hire, negative to let go. Two half-time ${staffNoun}s count as one full-time hire.`}
+          tooltip={`Positive to hire, negative to let go. Two half-time ${staffNoun}s count as one full-time hire.`}
+          unit="full-time equivalent"
           step={0.5}
           value={draft.value}
           onChange={(v) => set("value", v)}
+          error={errors.value}
         />
       )}
 
@@ -121,10 +159,12 @@ export function DecisionForm({ industryId, staffNoun, onAdd }: Props) {
           <NumberField
             label={draft.unit === "percent" ? "Spend change" : "New monthly spend"}
             help={draft.unit === "percent" ? "Positive to increase, negative to decrease." : "The new monthly marketing budget."}
-            unit={draft.unit === "percent" ? "%" : "{CUR}/month"}
+            tooltip={draft.unit === "percent" ? "Positive to increase, negative to decrease." : "The new monthly marketing budget."}
+            unit={draft.unit === "percent" ? "%" : formatUnit("{CUR}/month", currency)}
             step={draft.unit === "percent" ? 1 : 50}
             value={draft.value}
             onChange={(v) => set("value", v)}
+            error={errors.value}
           />
         </>
       )}
@@ -133,12 +173,14 @@ export function DecisionForm({ industryId, staffNoun, onAdd }: Props) {
         <NumberField
           label="Open days"
           help="How many days per month the business will be open from the start month."
+          tooltip="How many days per month the business will be open from the start month."
           unit="days/month"
           min={1}
           max={31}
           step={1}
           value={draft.value}
           onChange={(v) => set("value", v)}
+          error={errors.value}
         />
       )}
 
@@ -146,30 +188,36 @@ export function DecisionForm({ industryId, staffNoun, onAdd }: Props) {
         <>
           <NumberField
             label="Menu price change"
-            help="Upsell / reprice: raises the average ticket without an explicit new price."
+            help="Upsell / reprice: raises the average sale per visit without an explicit new price."
+            tooltip="Upsell / reprice: raises the average sale per visit without an explicit new price."
             unit="%"
             step={1}
             value={draft.value}
             onChange={(v) => set("value", v)}
+            error={errors.value}
           />
           <NumberField
-            label="New ingredient cost ratio (optional)"
-            help="Leave unchanged unless the new items also change your cost of goods."
-            unit="%"
+            label="New ingredient costs (optional)"
+            help="Leave unchanged unless the new items also change your ingredient costs."
+            tooltip="Leave unchanged unless the new items also change your ingredient costs."
+            unit="% of sales"
             min={0}
             max={99}
             step={1}
             value={draft.cogs_ratio ?? 0}
             onChange={(v) => set("cogs_ratio", v)}
+            error={errors.cogs_ratio}
           />
           <NumberField
             label="One-off setup cost (optional)"
             help="Equipment or menu-design cost charged once, in the start month."
-            unit="{CUR}"
+            tooltip="Equipment or menu-design cost charged once, in the start month."
+            unit={formatUnit("{CUR}", currency)}
             min={0}
             step={100}
             value={draft.investment ?? 0}
             onChange={(v) => set("investment", v)}
+            error={errors.investment}
           />
         </>
       )}
@@ -179,37 +227,45 @@ export function DecisionForm({ industryId, staffNoun, onAdd }: Props) {
           <NumberField
             label="Amount"
             help="The purchase price."
-            unit="{CUR}"
+            tooltip="The purchase price."
+            unit={formatUnit("{CUR}", currency)}
             min={0}
             step={100}
             value={draft.value}
             onChange={(v) => set("value", v)}
+            error={errors.value}
           />
           <NumberField
             label="Loan months (optional)"
             help="0 pays the full amount up front; otherwise it's spread over this many months."
+            tooltip="0 pays the full amount up front; otherwise it's spread over this many months."
             unit="months"
             min={0}
             step={1}
             value={draft.loan_months ?? 0}
             onChange={(v) => set("loan_months", Math.round(v))}
+            error={errors.loan_months}
           />
           <NumberField
             label="Loan annual interest rate (optional)"
             help="Only used when loan months is above 0."
+            tooltip="Only used when loan months is above 0."
             unit="%"
             min={0}
             step={0.5}
             value={draft.annual_rate ?? 0}
             onChange={(v) => set("annual_rate", v)}
+            error={errors.annual_rate}
           />
           <NumberField
             label="Capacity gain (optional)"
             help="How much more the business can serve, e.g. faster or bigger equipment."
+            tooltip="How much more the business can serve, e.g. faster or bigger equipment."
             unit="%"
             step={1}
             value={draft.capacity_pct ?? 0}
             onChange={(v) => set("capacity_pct", v)}
+            error={errors.capacity_pct}
           />
         </>
       )}

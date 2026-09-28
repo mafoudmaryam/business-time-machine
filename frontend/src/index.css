@@ -198,6 +198,13 @@ button:disabled {
   margin-bottom: 16px;
 }
 
+.example-numbers-note {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: italic;
+  margin-bottom: 16px;
+}
+
 .industry-picker {
   margin-bottom: 16px;
 }

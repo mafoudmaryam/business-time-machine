@@ -12,6 +12,7 @@ import {
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
+import { DEFAULT_CURRENCY } from "../../lib/format";
 import { DecisionForm } from "./DecisionForm";
 import { DecisionList } from "./DecisionList";
 
@@ -170,10 +171,16 @@ export function ScenarioBuilderPage() {
                 <DecisionList
                   decisions={decisions}
                   staffNoun={industry.staff_noun}
+                  currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
                   onToggleConfirmed={toggleConfirmed}
                   onRemove={removeDecision}
                 />
-                <DecisionForm industryId={industry.id} staffNoun={industry.staff_noun} onAdd={addDecision} />
+                <DecisionForm
+                  industryId={industry.id}
+                  staffNoun={industry.staff_noun}
+                  currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
+                  onAdd={addDecision}
+                />
               </>
             )}
 

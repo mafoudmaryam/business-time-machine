@@ -19,6 +19,7 @@ class Business(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     industry = Column(String, nullable=False, default="cafe", server_default="cafe")
+    currency = Column(String, nullable=False, default="USD", server_default="USD")
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
 
     snapshots = relationship(

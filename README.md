@@ -1,13 +1,21 @@
 # Business Time Machine
 
-An AI-assisted decision simulator for small cafés. An owner describes a decision in
-plain language ("raise prices 10% in March"), confirms the parameters extracted from
-it, and a deterministic-plus-Monte-Carlo engine projects revenue, profit, cash and
-customers for 12-36 months against a baseline. Built as a master's thesis project
-investigating whether AI-assisted simulation helps non-expert owners compare the
-consequences of a decision before committing to it.
+An AI-assisted decision simulator for small food-service businesses (café, restaurant,
+bakery). An owner describes a decision in plain language ("raise prices 10% in
+March"), confirms the parameters extracted from it, and a deterministic-plus-Monte-Carlo
+engine projects revenue, profit, cash and customers for 12-36 months against what
+happens if they change nothing. Built as a master's thesis project investigating
+whether AI-assisted simulation helps non-expert owners compare the consequences of a
+decision before committing to it.
 
 **Screenshot:** _(add a screenshot of the comparison dashboard here)_
+
+**Defaults are US-based.** The example numbers the setup wizard pre-fills (customer
+counts, wages, rent, etc.) are rough benchmarks for a typical small business *in the
+United States* -- they are not sourced for any other country's costs or customer
+behaviour. The wizard says so and expects the owner to replace them with their own
+numbers; only the money amounts adapt automatically, via the currency picker (any
+ISO 4217 code, USD by default) and `Intl.NumberFormat`.
 
 ## Install and run (Windows)
 
@@ -81,14 +89,18 @@ npm run build   # type-checks and bundles
 ## Folder overview
 
 - `engine/` -- the simulation engine (`btm_engine`): pure Python + NumPy, no web or
-  database imports. Turns a `CafeBaseline` and a list of `Decision` objects into
-  deterministic and Monte Carlo projections. The only source of every number shown
-  anywhere in the app.
+  database imports. Turns a `BusinessBaseline` and a list of `Decision` objects into
+  deterministic and Monte Carlo projections, using one of three `IndustryTemplate`s
+  (café/restaurant/bakery, see `btm_engine/templates/`). The only source of every
+  number shown anywhere in the app.
 - `backend/` -- FastAPI + SQLAlchemy + Alembic, SQLite by default (`btm.db`). Stores
-  businesses, scenarios, decisions and simulation runs; `app/engine_bridge.py` is the
-  only file that imports the engine. `seed_demo.py` seeds sample data.
-- `frontend/` -- React + TypeScript + Vite, Recharts for the p10/p50/p90 band charts.
-  `src/api.ts` is the single typed client for the backend; `src/pages/` holds the four
-  pages (business setup, scenario builder, comparison dashboard, run history).
+  businesses (including their industry and currency), scenarios, decisions and
+  simulation runs; `app/engine_bridge.py` is the only file that imports the engine.
+  `seed_demo.py` seeds sample data.
+- `frontend/` -- React + TypeScript + Vite, Recharts for the bad-case/most-likely/
+  good-case band charts. `src/api.ts` is the single typed client for the backend;
+  `src/pages/` holds the four pages (business setup, scenario builder, comparison
+  dashboard, run history). Money is formatted with `Intl.NumberFormat` in each
+  business's own currency -- nothing is hard-coded to one currency.
 - `start.ps1` / `stop.ps1` -- start or stop both dev servers together.
 - `CLAUDE.md` -- project context and ground rules for AI-assisted development.

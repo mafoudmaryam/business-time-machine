@@ -4,8 +4,20 @@ def test_create_business_uses_default_baseline(client):
     body = resp.json()
     assert body["name"] == "Corner Cafe"
     assert body["industry"] == "cafe"
+    assert body["currency"] == "USD"
     assert body["baseline"]["customers"] == 900.0
     assert body["baseline"]["avg_ticket"] == 6.50
+
+
+def test_create_business_with_custom_currency(client):
+    resp = client.post("/businesses", json={"name": "Berlin Cafe", "currency": "eur"})
+    assert resp.status_code == 201
+    assert resp.json()["currency"] == "EUR"  # normalized to uppercase
+
+
+def test_create_business_rejects_malformed_currency(client):
+    resp = client.post("/businesses", json={"name": "Bad Currency", "currency": "US"})
+    assert resp.status_code == 422
 
 
 def test_create_business_defaults_baseline_from_industry(client):
