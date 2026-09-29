@@ -26,10 +26,6 @@ const MODE_LABELS: Record<string, string> = {
 const POLL_EVERY_MS = 3000;
 const POLL_LIMIT_MS = 15 * 60 * 1000;
 
-function formatElapsed(seconds: number): string {
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
-}
-
 const EXAMPLE_QUESTIONS = ["Will my cash run out?", "Why does this happen?", "What should I watch for?"];
 
 function signedMoney(value: number, currency: string): string {
@@ -95,10 +91,9 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
   const [answers, setAnswers] = useState<{ question: string; answer: string }[]>([]);
   const [askError, setAskError] = useState<string | null>(null);
 
-  // While the AI writes its more detailed version, the rule-based coach is already on screen.
-  // aiStartMs is when the AI started (browser clock); "now" ticks once a second for the timer.
-  const [aiStartMs, setAiStartMs] = useState<number | null>(null);
-  const [now, setNow] = useState(() => Date.now());
+  // While the AI adds more detail, the rule-based coach is already on screen. When the AI version
+  // arrives it fades in and gets a small "Updated with more detail" tag.
+  const [updated, setUpdated] = useState(false);
   const aiPending = coach?.ai_status === "pending";
 
   useEffect(() => {
@@ -111,7 +106,6 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
       (c) => {
         if (cancelled) return;
         setCoach(c);
-        if (c.ai_status === "pending") setAiStartMs(Date.now() - (c.ai_elapsed_seconds ?? 0) * 1000);
       },
       (err) => {
         if (cancelled) return;
@@ -129,23 +123,20 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
     if (!aiPending) return;
     const started = Date.now();
     const timer = setInterval(() => {
-      setNow(Date.now());
       getCoach(runId).then(
-        (c) => c.ai_status !== "pending" && setCoach(c),
+        (c) => {
+          if (c.ai_status === "pending") return;
+          setCoach(c);
+          if (c.ai_status === "done") setUpdated(true);
+        },
         () => undefined,
       );
       if (Date.now() - started > POLL_LIMIT_MS) clearInterval(timer);
     }, POLL_EVERY_MS);
-    const ticker = setInterval(() => setNow(Date.now()), 1000);
-    return () => {
-      clearInterval(timer);
-      clearInterval(ticker);
-    };
+    return () => clearInterval(timer);
   }, [aiPending, runId]);
 
   if (hidden || (status && !status.enabled)) return null;
-
-  const elapsedSeconds = aiStartMs === null ? 0 : Math.max(0, Math.floor((now - aiStartMs) / 1000));
 
   function retry() {
     setError(null);
@@ -203,10 +194,12 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
         <>
           {aiPending && (
             <p className="coach-writing" role="status">
-              Your coach is writing a more detailed explanation… (about 1–2 minutes){" "}
-              <span className="coach-elapsed">{formatElapsed(elapsedSeconds)}</span>
+              <span className="coach-dot" aria-hidden="true" />
+              Your coach is adding more detail…
             </p>
           )}
+          {updated && !aiPending && <span className="coach-updated-tag">Updated with more detail</span>}
+          <div key={coach.generated_at} className={updated ? "coach-fade" : undefined}>
           <p className="coach-headline">{coach.headline}</p>
           <p>{coach.what_happens}</p>
           <p>{coach.why}</p>
@@ -241,6 +234,8 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
               </ul>
             </>
           )}
+
+          </div>
 
           <div className="coach-ask">
             <h3>Ask the coach</h3>

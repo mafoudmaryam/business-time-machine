@@ -20,7 +20,6 @@ const coach: api.CoachOut = {
   watch_out: ["Keep an eye on your regulars."],
   generated_at: "2026-09-29T00:00:00Z",
   ai_status: "none",
-  ai_elapsed_seconds: null,
   ideas: [
     {
       title: "Add one more barista",
@@ -170,7 +169,7 @@ describe("CoachCard while the AI is still writing", () => {
     headline: "The detailed AI headline.",
     ai_status: "done",
   };
-  const ruleBased: api.CoachOut = { ...coach, mode: "template", ai_status: "pending", ai_elapsed_seconds: 4 };
+  const ruleBased: api.CoachOut = { ...coach, mode: "template", ai_status: "pending" };
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -183,20 +182,24 @@ describe("CoachCard while the AI is still writing", () => {
     vi.useRealTimers();
   });
 
-  it("shows the rule-based coach at once with the note and a timer, then swaps in the AI version", async () => {
+  it("shows the rule-based coach at once with a calm line (no timer), then swaps in the AI version with a tag", async () => {
     vi.mocked(api.getCoach).mockResolvedValueOnce(ruleBased).mockResolvedValue(aiVersion);
-    renderCard();
+    const { container } = renderCard();
 
     expect(await screen.findByText(coach.headline)).toBeTruthy(); // rule-based text is already readable
-    expect(screen.getByText(/Your coach is writing a more detailed explanation… \(about 1–2 minutes\)/)).toBeTruthy();
-    expect(screen.getByText("0:04")).toBeTruthy();
+    expect(screen.getByText("Your coach is adding more detail…")).toBeTruthy();
+    expect(container.querySelector(".coach-dot")).not.toBeNull();
+    expect(screen.queryByText(/\d:\d\d/)).toBeNull(); // no counting seconds
+    expect(screen.queryByText("Updated with more detail")).toBeNull();
 
     await vi.advanceTimersByTimeAsync(3000);
     expect(screen.getByText(coach.headline)).toBeTruthy(); // still pending after the first poll
     await vi.advanceTimersByTimeAsync(3000);
 
     expect(await screen.findByText("The detailed AI headline.")).toBeTruthy();
-    expect(screen.queryByText(/writing a more detailed explanation/)).toBeNull();
+    expect(screen.queryByText("Your coach is adding more detail…")).toBeNull();
+    expect(screen.getByText("Updated with more detail")).toBeTruthy();
+    expect(container.querySelector(".coach-fade")).not.toBeNull(); // the swap fades in
     expect(api.getCoach).toHaveBeenCalledWith(9);
   });
 
@@ -206,7 +209,7 @@ describe("CoachCard while the AI is still writing", () => {
     await screen.findByText(coach.headline);
     await vi.advanceTimersByTimeAsync(3000);
 
-    await waitFor(() => expect(screen.queryByText(/writing a more detailed explanation/)).toBeNull());
+    await waitFor(() => expect(screen.queryByText(/adding more detail/)).toBeNull());
     expect(screen.getByText(coach.headline)).toBeTruthy();
     expect(screen.queryByRole("alert")).toBeNull();
   });
@@ -221,11 +224,11 @@ describe("CoachCard while the AI is still writing", () => {
     expect(await screen.findByText("The detailed AI headline.")).toBeTruthy();
   });
 
-  it("counts the elapsed time up every second", async () => {
-    vi.mocked(api.getCoach).mockResolvedValue(ruleBased);
-    renderCard();
-    await screen.findByText("0:04");
-    await vi.advanceTimersByTimeAsync(5000);
-    expect(screen.getByText("0:09")).toBeTruthy();
+  it("a run whose AI version was already done has no tag and no fade", async () => {
+    vi.mocked(api.requestCoach).mockResolvedValue(aiVersion);
+    const { container } = renderCard();
+    expect(await screen.findByText("The detailed AI headline.")).toBeTruthy();
+    expect(screen.queryByText("Updated with more detail")).toBeNull();
+    expect(container.querySelector(".coach-fade")).toBeNull();
   });
 });

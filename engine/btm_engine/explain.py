@@ -18,6 +18,7 @@ from .params import BusinessBaseline, IndustryTemplate
 
 DRIVER_LABELS = {
     "price": "price per sale",
+    "menu": "extra spend per visit from menu changes",
     "visits": "number of visits",
     "ingredients": "ingredient costs",
     "staff": "staff costs",
@@ -32,6 +33,8 @@ def _central(base: BusinessBaseline, tpl: IndustryTemplate, decisions: list[Deci
     tl = build_timeline(base, decisions, horizon)
     out = simulate(base, tpl, tl, deterministic_draws(base, tpl))
     run = {k: v[0] for k, v in out.items()}
+    run["price"] = tl["price"]
+    run["mult"] = tl["ticket_mult"]
     run["ticket"] = tl["price"] * tl["ticket_mult"]
     run["outflow"] = tl["investment"] + tl["loan_payment"]
     run["net_profit"] = run["profit"] - run["outflow"]
@@ -43,15 +46,22 @@ def profit_breakdown(base: BusinessBaseline, tpl: IndustryTemplate, decisions: l
     """Split the total profit difference (scenario minus "change nothing") into drivers.
 
     "Profit" here is profit after investment and loan payments, i.e. what the owner's
-    cash actually gains. The price and visits drivers use the midpoint rule, so the
-    six drivers add up exactly to `total` with nothing left over.
+    cash actually gains. The price, menu and visits drivers use the midpoint rule, so the
+    seven drivers add up exactly to `total` with nothing left over.
     """
     s = _central(base, tpl, decisions, horizon)
     b = _central(base, tpl, [], horizon)
     d_ticket = s["ticket"] - b["ticket"]
     d_visits = s["visits"] - b["visits"]
+    # What each visit brings in is price x menu factor. The change in it is shared between the two in
+    # proportion to their logarithmic changes, so the two parts add up exactly to the whole.
+    per_visit_effect = d_ticket * (s["visits"] + b["visits"]) / 2
+    log_all = np.log(s["ticket"] / b["ticket"])
+    log_price = np.log(s["price"] / b["price"])
+    share = np.divide(log_price, log_all, out=np.zeros_like(log_all), where=np.abs(log_all) > 1e-12)
     drivers = {
-        "price": float((d_ticket * (s["visits"] + b["visits"]) / 2).sum()),
+        "price": float((per_visit_effect * share).sum()),
+        "menu": float((per_visit_effect * (1 - share)).sum()),
         "visits": float((d_visits * (s["ticket"] + b["ticket"]) / 2).sum()),
         "ingredients": float(-(s["cogs"] - b["cogs"]).sum()),
         "staff": float(-(s["labour"] - b["labour"]).sum()),
@@ -135,9 +145,32 @@ def round_display(x: float) -> float:
     return float(int(r)) if digits <= 0 else float(r)
 
 
+_SYMBOLS = {
+    "USD": "$", "EUR": "€", "GBP": "£", "JPY": "¥", "CNY": "CN¥", "CAD": "CA$", "AUD": "A$",
+    "NZD": "NZ$", "HKD": "HK$", "SGD": "S$", "MXN": "MX$", "BRL": "R$", "INR": "₹", "KRW": "₩",
+    "ILS": "₪", "TWD": "NT$", "PHP": "₱", "VND": "₫",
+}
+
+
+def format_money(value: float, currency: str) -> str:
+    """Whole-number money the way an owner reads it: $27,900, €1,200, or CHF 4,500 when the
+    currency has no common symbol. Negative amounts get a leading minus sign."""
+    whole = round(value)
+    code = (currency or "").upper()
+    symbol = _SYMBOLS.get(code)
+    body = f"{abs(whole):,}"
+    text = f"{symbol}{body}" if symbol else f"{code} {body}".strip()
+    return f"-{text}" if whole < 0 else text
+
+
+def _whole(x: float) -> int:
+    """A whole number for display; big values keep three significant figures (1,234 -> 1,230)."""
+    return int(round_display(x)) if abs(x) >= 1000 else int(round(x))
+
+
 def describe_decision(d: Decision, currency: str = "") -> str:
     """One plain-English line, used in the facts so the coach names decisions the same way each time."""
-    money = lambda v: f"{v:,.0f} {currency}".strip()  # noqa: E731
+    money = lambda v: format_money(v, currency) if currency else f"{v:,.0f}"  # noqa: E731
     when = f"from month {d.start_month}"
     if d.type == "price":
         if d.unit == "absolute":
@@ -187,7 +220,7 @@ def build_facts(base: BusinessBaseline, tpl: IndustryTemplate, scenarios: dict[s
             "moments": {
                 "full_month": mo["full_month"],
                 "regulars_drop_month": mo["regulars_drop_month"],
-                "regulars_drop_amount": r(mo["regulars_drop_amount"]),
+                "regulars_drop_amount": _whole(mo["regulars_drop_amount"]),
                 "lowest_cash_month": mo["lowest_cash"]["month"],
                 "lowest_cash_amount": r(mo["lowest_cash"]["amount"]),
                 "crossover_month": mo["crossover"]["month"] if mo["crossover"] else None,
@@ -196,9 +229,12 @@ def build_facts(base: BusinessBaseline, tpl: IndustryTemplate, scenarios: dict[s
             },
             "regulars_end": r(mo["customers_end"]),
             "regulars_end_if_nothing_changes": r(mo["customers_end_baseline"]),
-            "regulars_change_percent": r(100 * (mo["customers_end"] / mo["customers_end_baseline"] - 1))
-            if mo["customers_end_baseline"] else 0.0,
-            "profit_change_percent": r(100 * br["total"] / abs(br["baseline_profit"])) if br["baseline_profit"] else 0.0,
+            # A count ("about 27 fewer regulars") and a whole percent, never "3.01%".
+            "regulars_change_count": _whole(mo["customers_end"] - mo["customers_end_baseline"]),
+            "regulars_change_percent": _whole(100 * (mo["customers_end"] / mo["customers_end_baseline"] - 1))
+            if mo["customers_end_baseline"] else 0,
+            "profit_change_percent": _whole(100 * br["total"] / abs(br["baseline_profit"]))
+            if br["baseline_profit"] else 0,
             "futures": {  # Monte Carlo, "X of 10 futures"
                 "beats_change_nothing_of_10": _tenths(sm["prob_beats_baseline_profit"])
                 if "prob_beats_baseline_profit" in sm else None,

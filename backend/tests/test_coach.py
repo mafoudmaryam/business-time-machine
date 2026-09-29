@@ -116,7 +116,7 @@ def test_template_coach_has_story_and_engine_tested_ideas(client, run):
     body = resp.json()
     assert body["mode"] == "template" and body["fallback"] is False
     assert body["headline"] and body["what_happens"] and body["why"] and body["watch_out"]
-    assert "USD" in body["what_happens"] or "same as changing nothing" in body["what_happens"]
+    assert "$" in body["what_happens"] and "USD" not in json.dumps(body)
     assert 2 <= len(body["ideas"]) <= 3
     for idea in body["ideas"]:
         assert set(idea["result"]) == IDEA_KEYS
@@ -423,7 +423,6 @@ def test_simulate_and_coach_start_stay_fast_while_the_ai_is_slow(client, busines
     body = started.json()
     # The rule-based coach comes back immediately; the AI is still busy.
     assert body["ai_status"] == "pending" and body["mode"] == "template" and body["headline"]
-    assert body["ai_elapsed_seconds"] is not None
     assert start_time < 2.0
 
     # While the slow AI is working, simulating and reading the coach are not held up.
@@ -446,7 +445,6 @@ def test_rule_based_coach_first_then_ai_replaces_it(client, run, use_provider):
     assert (started["mode"], started["ai_status"]) == ("template", "pending")
     later = client.get(f"/simulation_runs/{run['id']}/coach").json()
     assert (later["mode"], later["ai_status"], later["fallback"]) == ("ollama", "done", False)
-    assert later["ai_elapsed_seconds"] is None
     assert later["headline"] != started["headline"]
 
 
@@ -463,7 +461,7 @@ def test_failed_ai_keeps_the_rule_based_coach_without_an_error(client, run, use_
 
 def test_template_mode_is_final_at_once(client, run):
     body = client.post(f"/simulation_runs/{run['id']}/coach").json()
-    assert body["ai_status"] == "none" and body["ai_elapsed_seconds"] is None
+    assert body["ai_status"] == "none"
 
 
 def test_polling_before_the_coach_started_is_a_plain_404(client, run):
@@ -490,3 +488,67 @@ def test_pending_coach_left_over_from_a_restart_becomes_failed(client, run, monk
     service._active.discard(run["id"])                     # as after a server restart
     body = client.get(f"/simulation_runs/{run['id']}/coach").json()
     assert body["ai_status"] == "failed" and body["headline"]
+
+
+# ---------- wording: money format, whole numbers, no repetition, no near-duplicate ideas ----------
+
+def test_template_text_uses_the_currency_symbol_and_whole_numbers(client, run):
+    import re
+    body = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    text = " ".join([body["headline"], body["what_happens"], body["why"], *body["watch_out"]])
+    assert re.search(r"\$\d{1,3}(,\d{3})*", text) and "USD" not in text
+    assert not re.search(r"\d\.\d+%", text)                    # never 3.01%
+    assert "fewer regulars" in text and re.search(r"about \d+ fewer regulars", text)
+
+
+def test_template_headline_is_a_verdict_and_does_not_repeat_the_first_sentence(client, run):
+    from app.coach.ideas import sounds_alike
+    body = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    assert not any(ch.isdigit() for ch in body["headline"])
+    first_sentence = body["what_happens"].split(". ")[0]
+    assert not sounds_alike(body["headline"], first_sentence)
+
+
+def test_euro_business_gets_euro_symbols(client):
+    biz = client.post("/businesses", json={"name": "Euro Cafe", "currency": "EUR"}).json()
+    sc = client.post(f"/businesses/{biz['id']}/scenarios", json={"name": "Raise", "decisions": [
+        {"type": "price", "start_month": 3, "value": 10, "unit": "percent", "confirmed": True}]}).json()
+    run = client.post(f"/businesses/{biz['id']}/simulate",
+                      json={"scenario_ids": [sc["id"]], "horizon": 24, "iterations": 200, "seed": 1}).json()
+    body = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    assert "€" in body["what_happens"] and "EUR" not in body["what_happens"]
+
+
+def test_the_ai_sees_money_already_formatted_but_numbers_are_still_checked_against_plain_facts(client, run, use_provider):
+    fake = use_provider(good_reply(what_happens="You could earn about $26,900 more."))
+    body = final(client, run)
+    assert "$26,900" in fake.calls[0][1] and "USD" not in fake.calls[0][1]      # what the AI was shown
+    assert body["mode"] == "ollama" and "$26,900" in body["what_happens"]       # and it passed the check
+
+
+def test_ai_headline_repeated_by_its_first_sentence_is_trimmed(client, run, use_provider):
+    use_provider(good_reply(headline="Raising prices looks promising for your cafe.",
+                            what_happens="Raising prices looks promising for your cafe. Regulars may drift away."))
+    body = final(client, run)
+    assert body["what_happens"] == "Regulars may drift away."
+
+
+def test_near_duplicate_ai_ideas_are_dropped(client, run, use_provider):
+    def price(title, value):
+        return {"title": title, "why": "Try it.", "builds_on": "baseline",
+                "decisions": [{"type": "price", "start_month": 2, "value": value, "unit": "percent"}]}
+    ideas = [price("Small rise", 3), price("Slightly bigger rise", 5), price("Price cut", -5),
+             {"title": "Open longer", "why": "More days.", "builds_on": "baseline",
+              "decisions": [{"type": "hours", "start_month": 4, "value": 30, "unit": "days"}]}]
+    use_provider(good_reply(ideas=ideas))
+    titles = [i["title"] for i in final(client, run)["ideas"]]
+    assert "Small rise" in titles and "Slightly bigger rise" not in titles       # 3% vs 5%: too alike
+    assert "Price cut" in titles                                                # opposite direction: different
+
+
+def test_template_ideas_are_never_near_duplicates(client, run):
+    from app.coach.ideas import near_duplicate
+    ideas = client.post(f"/simulation_runs/{run['id']}/coach").json()["ideas"]
+    for i, a in enumerate(ideas):
+        for b in ideas[i + 1:]:
+            assert not near_duplicate(a, b)

@@ -6,6 +6,7 @@ import json
 import unicodedata
 
 from .. import engine_bridge
+from .money import facts_for_prompt
 
 COACH_SCHEMA = {
     "type": "object",
@@ -48,7 +49,9 @@ busy owner who is not a finance expert.
 HARD RULES
 - Use ONLY numbers that appear in the FACTS. Never calculate, add up, average or convert anything yourself.
   If you want to mention a number that is not in the FACTS, describe it in words instead.
-- Write money as the number followed by the currency code, e.g. "4,200 {currency}".
+- Copy money exactly as it is written in the FACTS, for example $27,900 (never add a currency code or change the format).
+- Describe changes in {customers_word} with the count ("about 27 fewer {customers_word}") or the whole percent
+  from the FACTS. Never write decimals like 3.01%.
 - Talk about uncertainty as "in X of 10 futures" using the *_of_10 numbers. Never promise anything:
   use words like "could", "likely", "may". This is not financial advice, but do not repeat that here.
 - Plain, friendly words. Never use these words: FTE, COGS, churn, baseline, percentile, p10, p50, p90,
@@ -59,7 +62,8 @@ HARD RULES
 COACH_INSTRUCTIONS = """
 
 Write the coach note as JSON with these fields:
-- headline: one sentence, the main takeaway.
+- headline: one short verdict sentence WITHOUT numbers (for example: "Raising prices looks like a good move.").
+- what_happens must not repeat the headline: start it with the numbers.
 - what_happens: 2 short sentences on WHAT happens over the {months} months (profit vs. if you change nothing,
   {customers_word}, and the key months from the facts).
 - why: 1-2 short sentences on WHY, using the drivers (biggest help and biggest drag).
@@ -96,13 +100,13 @@ def _fill(text: str, facts: dict) -> str:
 
 def coach_prompt(facts: dict) -> tuple[str, str]:
     system = _fill(_STYLE, facts) + _fill(COACH_INSTRUCTIONS, facts)
-    user = "FACTS:\n" + _ascii(json.dumps(facts, ensure_ascii=False))
+    user = "FACTS:\n" + _ascii(json.dumps(facts_for_prompt(facts), ensure_ascii=False))
     return system, user
 
 
 def ask_prompt(facts: dict, question: str) -> tuple[str, str]:
     system = _fill(_STYLE, facts) + _fill(ASK_INSTRUCTIONS, facts)
-    user = "FACTS:\n" + _ascii(json.dumps(facts, ensure_ascii=False)) + "\n\nQUESTION: " + _ascii(question)
+    user = "FACTS:\n" + _ascii(json.dumps(facts_for_prompt(facts), ensure_ascii=False)) + "\n\nQUESTION: " + _ascii(question)
     return system, user
 
 

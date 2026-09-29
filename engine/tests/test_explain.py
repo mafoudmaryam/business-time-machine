@@ -1,6 +1,8 @@
 """The coach's numbers: the profit breakdown must add up exactly, and moments must be right."""
 import json
 
+import numpy as np
+
 import pytest
 
 from btm_engine import (Decision, build_facts, describe_decision, key_moments, profit_breakdown,
@@ -103,8 +105,9 @@ def test_facts_are_json_and_use_tenths():
     f = facts["scenarios"][0]
     assert f["name"] == "Raise prices"
     assert f["decisions"] == ["Raise prices by 10% from month 3"]
+    assert isinstance(f["regulars_change_count"], int) and isinstance(f["regulars_change_percent"], int)
     assert 0 <= f["futures"]["beats_change_nothing_of_10"] <= 10
-    assert {d["key"] for d in f["drivers"]} == {"price", "visits", "ingredients", "staff", "fixed", "investment"}
+    assert {d["key"] for d in f["drivers"]} == {"price", "menu", "visits", "ingredients", "staff", "fixed", "investment"}
     assert facts["business"]["currency"] == "EUR"
 
 
@@ -139,3 +142,70 @@ def test_month_one_summary_shows_a_loss_for_costly_staff():
     base = replace(tpl.default_baseline, wage_per_fte=5_000, marketing=1_000, customers=500, visits_per_regular=10)
     s = month_one_summary(base, tpl)
     assert s["profit"] == pytest.approx(-6_875)
+
+
+# ---------- the price driver, checked against a hand calculation ----------
+
+def test_price_driver_matches_the_hand_calculation_for_the_demo_cafe():
+    """Price +10% from month 3, 24 months, cafe defaults (sales 51,350 a month).
+
+    Hand check: 10% of 51,350 is about 5,135 a month, for the 22 months from month 3, so about 113,000
+    if nobody changed how often they visit. Fewer visits (the price rise makes some people come less)
+    trim that a little, so the answer must sit just under 113,000 -- not double it.
+    """
+    from btm_engine import run_deterministic
+    tpl = list_industries()[0]
+    base = tpl.default_baseline
+    decs = [Decision("price", 3, 10, "percent")]
+    br = profit_breakdown(base, tpl, decs, 24)
+
+    # Independent route: read the visits from the plain deterministic runs, and use
+    # (extra price per visit) x (average of the two visit counts) month by month.
+    s = run_deterministic(base, tpl, decs, 24)["visits"]
+    b = run_deterministic(base, tpl, [], 24)["visits"]
+    extra_price = np.where(np.arange(24) >= 2, 0.65, 0.0)          # 6.50 -> 7.15 from month 3
+    by_hand = float((extra_price * (s + b) / 2).sum())
+    assert br["drivers"]["price"] == pytest.approx(by_hand, rel=1e-9)
+
+    assert 0.9 * 112_970 < br["drivers"]["price"] < 112_970        # just under the no-visit-loss ceiling
+    assert br["drivers"]["price"] == pytest.approx(109_581, abs=1)  # the number the app shows
+    assert br["drivers"]["menu"] == pytest.approx(0, abs=1e-9)
+    assert br["drivers"]["visits"] < 0                              # people visit a little less
+    assert br["total"] == pytest.approx(26_894, abs=1)
+
+
+def test_a_menu_change_is_not_counted_as_price():
+    """Price +10% from month 1 together with a menu change of +8% on the average sale: what each visit
+    brings in rises by about 18.8%, but only the 10% is price. Before the split the whole amount
+    (about 225,000) was shown as 'price per sale'."""
+    tpl = list_industries()[0]
+    base = tpl.default_baseline
+    both = profit_breakdown(base, tpl, [Decision("price", 1, 10, "percent"), Decision("menu", 1, 8, "percent")], 24)
+    price_only = profit_breakdown(base, tpl, [Decision("price", 1, 10, "percent")], 24)
+    menu_only = profit_breakdown(base, tpl, [Decision("menu", 1, 8, "percent")], 24)
+
+    assert both["drivers"]["price"] + both["drivers"]["menu"] == pytest.approx(224_655, abs=5)
+    assert both["drivers"]["price"] < 0.6 * 224_655                  # nowhere near all of it
+    assert price_only["drivers"]["menu"] == pytest.approx(0, abs=1e-9)
+    assert menu_only["drivers"]["price"] == pytest.approx(0, abs=1e-9)
+    assert sum(both["drivers"].values()) == pytest.approx(both["total"], abs=1e-6)
+
+
+def test_regulars_are_reported_as_whole_numbers():
+    tpl = list_industries()[0]
+    base = tpl.default_baseline
+    scen = {"Raise": [Decision("price", 3, 10, "percent")]}
+    run = run_scenarios(base, tpl, scen, horizon=24, iterations=200, seed=5)
+    f = build_facts(base, tpl, scen, {k: v.summary for k, v in run.scenarios.items()}, 24, "USD")["scenarios"][0]
+    assert f["regulars_change_count"] == -26 and f["regulars_change_percent"] == -3
+    assert isinstance(f["moments"]["regulars_drop_amount"], int)
+
+
+def test_format_money():
+    from btm_engine import format_money
+    assert format_money(27_900, "USD") == "$27,900"
+    assert format_money(1234.6, "EUR") == "€1,235"
+    assert format_money(-4_500, "USD") == "-$4,500"
+    assert format_money(4_500, "CHF") == "CHF 4,500"
+    assert format_money(0.2, "USD") == "$0"
+    assert describe_decision(Decision("investment", 3, 5000, "amount"), "USD") == "Invest $5,000 from month 3"

@@ -402,7 +402,6 @@ export interface CoachOut {
   /** none = no AI in use; pending = this is the rule-based version and the AI is still writing;
    * done / failed = the AI finished (failed keeps the rule-based version). */
   ai_status: "none" | "pending" | "done" | "failed";
-  ai_elapsed_seconds: number | null;
 }
 
 export interface AskOut {

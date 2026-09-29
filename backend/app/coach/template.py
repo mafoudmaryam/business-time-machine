@@ -6,9 +6,13 @@ from __future__ import annotations
 
 from typing import Any
 
+from ..engine_bridge import format_money
+from .ideas import drop_repeated_opening, is_repeat
+
 
 def _money(x: float, currency: str) -> str:
-    return f"{abs(x):,.0f} {currency}"
+    """The amount as the owner sees it in the app ($27,900). The sign is said in words, so it is dropped."""
+    return format_money(abs(x), currency)
 
 
 def _best(facts: dict) -> dict:
@@ -40,19 +44,23 @@ def _scenario_sentence(s: dict, b: dict) -> str:
     return line
 
 
+def _verdict(s: dict) -> str:
+    ch, beats = s["profit_change"], s["futures"]["beats_change_nothing_of_10"]
+    if abs(ch) < 1:
+        return "would change very little"
+    if ch > 0:
+        return "looks like a good move" if beats is not None and beats >= 7 else "could pay off, but not in every future"
+    return "would probably cost you money"
+
+
 def _headline(facts: dict) -> str:
-    b, best = facts["business"], _best(facts)
-    ch = best["profit_change"]
+    """A short verdict with no numbers, so it does not repeat the first sentence of the story."""
+    best = _best(facts)
     if len(facts["scenarios"]) == 1:
-        s = facts["scenarios"][0]
-        if abs(ch) < 1:
-            return f"{_nice(s['name'])} would change very little over {b['months']} months."
-        return (f"{_nice(s['name'])} could leave you about {_money(ch, b['currency'])} "
-                f"{'better' if ch > 0 else 'worse'} off than changing nothing.")
-    if ch <= 0:
+        return f"{_nice(best['name'])} {_verdict(best)}."
+    if best["profit_change"] <= 0:
         return "None of these choices beats changing nothing on profit."
-    return (f"{_nice(best['name'])} looks like your strongest choice, about "
-            f"{_money(ch, b['currency'])} ahead of changing nothing.")
+    return f"{_nice(best['name'])} looks like your strongest choice."
 
 
 def _what_happens(facts: dict) -> str:
@@ -60,10 +68,11 @@ def _what_happens(facts: dict) -> str:
     parts = [_scenario_sentence(s, b) for s in facts["scenarios"]]
     s = _best(facts)
     m, words = s["moments"], b["customers_word"]
-    pct = s["regulars_change_percent"]
-    if abs(pct) >= 1:
-        parts.append(f"You would end with about {abs(pct):g}% {'more' if pct > 0 else 'fewer'} {words} "
-                     "than if you change nothing.")
+    count, pct = s["regulars_change_count"], s["regulars_change_percent"]
+    if abs(count) >= 1:
+        about_pct = f" (about {abs(pct)}%)" if abs(pct) >= 1 else ""
+        parts.append(f"You would end with about {abs(count):,} {'more' if count > 0 else 'fewer'} {words} "
+                     f"than if you change nothing{about_pct}.")
     if m["crossover_month"]:
         verb = "pulls ahead of" if m["crossover_direction"] == "overtakes" else "falls behind"
         parts.append(f"{_nice(s['name'])} {verb} changing nothing around month {m['crossover_month']}.")
@@ -144,21 +153,19 @@ def _ideas(facts: dict, raw: dict[str, list[dict]]) -> list[dict]:
         _idea(f"Add one more {staff}", f"An extra {staff} may help you serve more people at busy times.",
               "baseline", [{"type": "hiring", "start_month": 3, "value": 1, "unit": "fte"}]),
     ]
-    seen = {(i["decisions"][0]["type"], i["decisions"][0]["value"], i["builds_on"]) for i in ideas}
     for f in fillers:
-        key = (f["decisions"][0]["type"], f["decisions"][0]["value"], f["builds_on"])
         if len(ideas) >= 3:
             break
-        if key not in seen:
+        if not is_repeat(ideas, f):        # never two ideas that are nearly the same
             ideas.append(f)
-            seen.add(key)
     return ideas[:3]
 
 
 def build_coach(facts: dict, raw_decisions: dict[str, list[dict]]) -> dict[str, Any]:
+    headline = _headline(facts)
     return {
-        "headline": _headline(facts),
-        "what_happens": _what_happens(facts),
+        "headline": headline,
+        "what_happens": drop_repeated_opening(headline, _what_happens(facts)),
         "why": _why(facts),
         "watch_out": _watch_out(facts),
         "ideas": _ideas(facts, raw_decisions),

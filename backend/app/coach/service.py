@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 
 from .. import engine_bridge, models, settings
 from . import grounding, prompts, template
+from .ideas import drop_repeated_opening, is_repeat
 from .providers import Provider, ProviderError, make_provider
 
 MAX_IDEAS = 3
@@ -178,7 +179,10 @@ def _finalize_ideas(db: Session, run: models.SimulationRun, raw_ideas: Any,
         used = {d["type"] for d in raw_decisions.get(builds_on, [])}
         if any(d["type"] in used for d in decisions):
             continue
-        valid.append({"title": title, "why": why, "builds_on": builds_on, "decisions": decisions})
+        candidate = {"title": title, "why": why, "builds_on": builds_on, "decisions": decisions}
+        if is_repeat(valid, candidate):
+            continue  # nearly the same as an idea we already have (e.g. two small price rises)
+        valid.append(candidate)
         if len(valid) == MAX_IDEAS:
             break
     if not valid:
@@ -220,15 +224,16 @@ def _assemble(db: Session, run: models.SimulationRun, facts: dict, raw: dict, pa
     """The coach payload: the texts, plus ideas that the engine has validated and simulated."""
     ideas = _finalize_ideas(db, run, parsed.get("ideas"), raw)
     if len(ideas) < MIN_IDEAS:  # too few valid ideas: top up with the rule-based ones (also engine-tested)
-        seen = {json.dumps([i["builds_on"], i["decisions"]], sort_keys=True) for i in ideas}
         for extra in _finalize_ideas(db, run, template.build_coach(facts, raw)["ideas"], raw):
             if len(ideas) >= MAX_IDEAS:
                 break
-            if json.dumps([extra["builds_on"], extra["decisions"]], sort_keys=True) not in seen:
+            if not is_repeat(ideas, extra):
                 ideas.append(extra)
     return {
         "mode": mode, "model": model, "fallback": fallback,
-        "headline": parsed["headline"], "what_happens": parsed["what_happens"], "why": parsed["why"],
+        "headline": parsed["headline"],
+        "what_happens": drop_repeated_opening(parsed["headline"], parsed["what_happens"]),
+        "why": parsed["why"],
         "watch_out": [str(x) for x in parsed["watch_out"]],
         "ideas": ideas,
         "generated_at": _now().isoformat(),
@@ -250,13 +255,7 @@ def _save(db: Session, run_id: int, payload: dict) -> None:
 
 
 def _public(payload: dict) -> dict:
-    out = dict(payload)
-    started = out.get("ai_started_at")
-    out["ai_elapsed_seconds"] = (
-        max(0, int((_now() - dt.datetime.fromisoformat(started)).total_seconds()))
-        if out.get("ai_status") == "pending" and started else None
-    )
-    return out
+    return dict(payload)
 
 
 def read_coach(db: Session, run: models.SimulationRun) -> Optional[dict]:

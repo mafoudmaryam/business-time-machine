@@ -12,7 +12,7 @@ from jsonschema import ValidationError, validate as jsonschema_validate
 from sqlalchemy.orm import Session
 
 from btm_engine import (BusinessBaseline, DECISIONS_JSON_SCHEMA, Decision as EngineDecision,
-                        build_facts, describe_decision, get_template, list_industries, month_one_summary,
+                        build_facts, describe_decision, format_money, get_template, list_industries, month_one_summary,
                         run_scenarios)
 
 from . import models
