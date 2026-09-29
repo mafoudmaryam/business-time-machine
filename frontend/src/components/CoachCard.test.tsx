@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as api from "../api";
 import { CoachCard } from "./CoachCard";
 
 vi.mock("../api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../api")>();
-  return { ...actual, getCoachStatus: vi.fn(), requestCoach: vi.fn(), askCoach: vi.fn(), getScenario: vi.fn() };
+  return { ...actual, getCoachStatus: vi.fn(), requestCoach: vi.fn(), getCoach: vi.fn(), askCoach: vi.fn(), getScenario: vi.fn() };
 });
 
 const coach: api.CoachOut = {
@@ -19,6 +19,8 @@ const coach: api.CoachOut = {
   why: "Each sale brings in more.",
   watch_out: ["Keep an eye on your regulars."],
   generated_at: "2026-09-29T00:00:00Z",
+  ai_status: "none",
+  ai_elapsed_seconds: null,
   ideas: [
     {
       title: "Add one more barista",
@@ -158,5 +160,72 @@ describe("CoachCard", () => {
     await user.click(screen.getByRole("button", { name: "Will my cash run out?" }));
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).not.toMatch(/boom/);
+  });
+});
+
+describe("CoachCard while the AI is still writing", () => {
+  const aiVersion: api.CoachOut = {
+    ...coach,
+    mode: "ollama",
+    headline: "The detailed AI headline.",
+    ai_status: "done",
+  };
+  const ruleBased: api.CoachOut = { ...coach, mode: "template", ai_status: "pending", ai_elapsed_seconds: 4 };
+
+  beforeEach(() => {
+    vi.resetAllMocks();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(api.getCoachStatus).mockResolvedValue({ enabled: true, mode: null });
+    vi.mocked(api.requestCoach).mockResolvedValue(ruleBased);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("shows the rule-based coach at once with the note and a timer, then swaps in the AI version", async () => {
+    vi.mocked(api.getCoach).mockResolvedValueOnce(ruleBased).mockResolvedValue(aiVersion);
+    renderCard();
+
+    expect(await screen.findByText(coach.headline)).toBeTruthy(); // rule-based text is already readable
+    expect(screen.getByText(/Your coach is writing a more detailed explanation… \(about 1–2 minutes\)/)).toBeTruthy();
+    expect(screen.getByText("0:04")).toBeTruthy();
+
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(screen.getByText(coach.headline)).toBeTruthy(); // still pending after the first poll
+    await vi.advanceTimersByTimeAsync(3000);
+
+    expect(await screen.findByText("The detailed AI headline.")).toBeTruthy();
+    expect(screen.queryByText(/writing a more detailed explanation/)).toBeNull();
+    expect(api.getCoach).toHaveBeenCalledWith(9);
+  });
+
+  it("keeps the rule-based coach, without any error screen, when the AI fails", async () => {
+    vi.mocked(api.getCoach).mockResolvedValue({ ...ruleBased, ai_status: "failed", fallback: true });
+    renderCard();
+    await screen.findByText(coach.headline);
+    await vi.advanceTimersByTimeAsync(3000);
+
+    await waitFor(() => expect(screen.queryByText(/writing a more detailed explanation/)).toBeNull());
+    expect(screen.getByText(coach.headline)).toBeTruthy();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("ignores a failed poll and keeps waiting", async () => {
+    vi.mocked(api.getCoach).mockRejectedValueOnce(new api.ApiError(0, "offline")).mockResolvedValue(aiVersion);
+    renderCard();
+    await screen.findByText(coach.headline);
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(screen.queryByRole("alert")).toBeNull();
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(await screen.findByText("The detailed AI headline.")).toBeTruthy();
+  });
+
+  it("counts the elapsed time up every second", async () => {
+    vi.mocked(api.getCoach).mockResolvedValue(ruleBased);
+    renderCard();
+    await screen.findByText("0:04");
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(screen.getByText("0:09")).toBeTruthy();
   });
 });

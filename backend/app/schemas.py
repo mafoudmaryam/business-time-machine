@@ -246,6 +246,9 @@ class CoachOut(BaseModel):
     watch_out: list[str]
     ideas: list[CoachIdeaOut]
     generated_at: str
+    # none (no AI in use) | pending (AI still writing; this is the rule-based version) | done | failed
+    ai_status: str = "none"
+    ai_elapsed_seconds: Optional[int] = None
 
 
 class AskIn(BaseModel):

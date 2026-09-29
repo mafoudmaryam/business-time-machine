@@ -635,3 +635,17 @@ table.run-history-table td {
   border-color: #d9a441;
   box-shadow: 0 0 0 2px rgba(217, 164, 65, 0.35);
 }
+
+.coach-writing {
+  background: var(--band);
+  border-radius: 6px;
+  padding: 6px 12px;
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--muted-1);
+}
+
+.coach-elapsed {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}

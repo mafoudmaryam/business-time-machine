@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import time
 
 import pytest
 
@@ -13,6 +14,27 @@ from app.main import app
 
 IDEA_KEYS = {"profit_change_most_likely", "beats_change_nothing_of_10", "cash_runs_out_of_10",
              "profit_bad_case", "profit_most_likely", "profit_good_case"}
+
+
+def final(client, run):
+    """Start the coach, then read its finished state (background jobs run inline in most tests)."""
+    assert client.post(f"/simulation_runs/{run['id']}/coach").status_code == 200
+    resp = client.get(f"/simulation_runs/{run['id']}/coach")
+    assert resp.status_code == 200
+    return resp.json()
+
+
+@pytest.fixture(autouse=True)
+def inline_jobs(request, monkeypatch):
+    """Run the background AI job right away, so tests are deterministic. Tests that ask for
+    `real_threads` use the real worker thread instead."""
+    if "real_threads" not in request.fixturenames:
+        monkeypatch.setattr(service, "_submit", lambda fn, *a: fn(*a))
+
+
+@pytest.fixture()
+def real_threads():
+    yield
 
 
 class FakeProvider:
@@ -103,9 +125,9 @@ def test_template_coach_has_story_and_engine_tested_ideas(client, run):
 
 
 def test_coach_is_cached_per_run(client, run):
-    first = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    first = final(client, run)
     n = len(interactions())
-    second = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    second = final(client, run)
     assert second == first
     assert len(interactions()) == n
     third = client.post(f"/simulation_runs/{run['id']}/coach?regenerate=true")
@@ -128,7 +150,7 @@ def test_unknown_run_is_404(client):
 
 def test_ai_reply_used_and_idea_numbers_come_from_the_engine(client, run, use_provider):
     fake = use_provider(good_reply())
-    body = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    body = final(client, run)
     assert body["mode"] == "ollama" and body["model"] == "fake-model" and body["fallback"] is False
     assert body["headline"].startswith("Raising prices")
     assert len(body["ideas"]) == 2
@@ -144,7 +166,7 @@ def test_ai_reply_used_and_idea_numbers_come_from_the_engine(client, run, use_pr
 
 def test_idea_simulated_on_same_seed_matches_the_run(client, run, use_provider):
     use_provider(good_reply())
-    idea = client.post(f"/simulation_runs/{run['id']}/coach").json()["ideas"][0]
+    idea = final(client, run)["ideas"][0]
     assert idea["builds_on"] == "Raise prices"          # price +10% from month 3, plus 1 hire from month 6
     # Build exactly that scenario by hand and run it with the same seed as the original run.
     made = client.post(f"/businesses/{run['business_id']}/scenarios", json={"name": "By hand", "decisions": [
@@ -160,7 +182,7 @@ def test_idea_simulated_on_same_seed_matches_the_run(client, run, use_provider):
 def test_ungrounded_number_triggers_one_retry(client, run, use_provider):
     bad = good_reply(headline="You will make 987,654 EUR more.")
     fake = use_provider(bad, good_reply())
-    body = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    body = final(client, run)
     assert body["mode"] == "ollama" and body["fallback"] is False
     assert len(fake.calls) == 2 and "987654" in fake.calls[1][1]
     first, second = interactions()
@@ -171,7 +193,7 @@ def test_ungrounded_number_triggers_one_retry(client, run, use_provider):
 def test_two_ungrounded_replies_fall_back_to_template(client, run, use_provider):
     bad = good_reply(why="That adds up to 7,777,777 EUR.")
     fake = use_provider(bad, bad)
-    body = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    body = final(client, run)
     assert body["mode"] == "template" and body["fallback"] is True
     assert "7,777,777" not in json.dumps(body)
     assert [r.provider for r in interactions()] == ["ollama", "ollama", "template"]
@@ -180,7 +202,7 @@ def test_two_ungrounded_replies_fall_back_to_template(client, run, use_provider)
 
 def test_provider_error_falls_back_without_retry(client, run, use_provider):
     fake = use_provider(ProviderError("the local model took too long to answer"))
-    body = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    body = final(client, run)
     assert body["mode"] == "template" and body["fallback"] is True
     assert len(fake.calls) == 1
     first, _ = interactions()
@@ -189,13 +211,13 @@ def test_provider_error_falls_back_without_retry(client, run, use_provider):
 
 def test_invalid_json_twice_falls_back(client, run, use_provider):
     use_provider("not json at all", "{still: broken")
-    body = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    body = final(client, run)
     assert body["mode"] == "template" and body["fallback"] is True
 
 
 def test_json_in_code_fence_is_accepted(client, run, use_provider):
     use_provider("```json\n" + good_reply() + "\n```")
-    assert client.post(f"/simulation_runs/{run['id']}/coach").json()["mode"] == "ollama"
+    assert final(client, run)["mode"] == "ollama"
 
 
 def test_invalid_ideas_are_dropped(client, run, use_provider):
@@ -211,7 +233,7 @@ def test_invalid_ideas_are_dropped(client, run, use_provider):
          "decisions": [{"type": "marketing", "start_month": 2, "value": 20, "unit": "percent"}]},
     ]
     use_provider(good_reply(ideas=ideas))
-    body = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    body = final(client, run)
     titles = [i["title"] for i in body["ideas"]]
     assert titles[0] == "Good one"                      # the four invalid ideas are gone...
     assert 2 <= len(titles) <= 3 and "Bad unit" not in titles   # ...and rule-based ones fill up to two
@@ -221,7 +243,7 @@ def test_all_ideas_invalid_uses_rule_based_ideas(client, run, use_provider):
     bad = {"title": "Bad", "why": "x", "builds_on": "baseline",
            "decisions": [{"type": "price", "start_month": 0, "value": 1, "unit": "percent"}]}
     use_provider(good_reply(ideas=[bad]))
-    body = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    body = final(client, run)
     assert body["mode"] == "ollama" and 2 <= len(body["ideas"]) <= 3
 
 
@@ -231,7 +253,7 @@ def test_idea_that_repeats_a_lever_the_scenario_already_uses_is_dropped(client, 
     fine = {"title": "Open longer", "why": "More days.", "builds_on": "Raise prices",
             "decisions": [{"type": "hours", "start_month": 4, "value": 30, "unit": "days"}]}
     use_provider(good_reply(ideas=[again, fine]))
-    titles = [i["title"] for i in client.post(f"/simulation_runs/{run['id']}/coach").json()["ideas"]]
+    titles = [i["title"] for i in final(client, run)["ideas"]]
     assert "Price +1.1%" not in titles and titles[0] == "Open longer"
 
 
@@ -239,7 +261,7 @@ def test_idea_that_copies_an_existing_scenario_is_dropped(client, run, use_provi
     copy_ = {"title": "Same as before", "why": "Again.", "builds_on": "baseline",
              "decisions": [{"type": "price", "start_month": 3, "value": 10, "unit": "percent"}]}
     use_provider(good_reply(ideas=[copy_]))
-    titles = [i["title"] for i in client.post(f"/simulation_runs/{run['id']}/coach").json()["ideas"]]
+    titles = [i["title"] for i in final(client, run)["ideas"]]
     assert "Same as before" not in titles and len(titles) >= 2
 
 
@@ -254,12 +276,12 @@ def test_prompt_uses_plain_ascii_letters():
 def test_mojibake_from_small_models_is_repaired(client, run, use_provider):
     garbled = "your cafÃ©".encode().decode("unicode_escape")
     use_provider(good_reply(headline=garbled))
-    assert client.post(f"/simulation_runs/{run['id']}/coach").json()["headline"] == "your café".encode().decode("unicode_escape")
+    assert final(client, run)["headline"] == "your café".encode().decode("unicode_escape")
 
 
 def test_anthropic_without_key_uses_template(client, run, monkeypatch):
     monkeypatch.setenv("COACH_PROVIDER", "anthropic")
-    body = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    body = final(client, run)
     assert body["mode"] == "template" and body["fallback"] is True
 
 
@@ -360,3 +382,111 @@ def test_ollama_timeout_and_connection_errors_become_provider_errors(monkeypatch
         monkeypatch.setattr(httpx, "post", boom)
         with pytest.raises(ProviderError):
             OllamaProvider().complete("s", "u", {})
+
+
+# ---------- non-blocking coach: the AI works in the background ----------
+
+class SlowProvider(FakeProvider):
+    def __init__(self, replies, delay):
+        super().__init__(replies)
+        self.delay = delay
+
+    def complete(self, system, user, schema):
+        time.sleep(self.delay)
+        return super().complete(system, user, schema)
+
+
+def wait_until_finished(client, run_id, timeout=20):
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        body = client.get(f"/simulation_runs/{run_id}/coach").json()
+        if body["ai_status"] != "pending":
+            return body
+        time.sleep(0.1)
+    raise AssertionError("the background coach never finished")
+
+
+def test_simulate_and_coach_start_stay_fast_while_the_ai_is_slow(client, business, monkeypatch, real_threads):
+    slow = SlowProvider([good_reply(), good_reply()], delay=3.0)
+    monkeypatch.setenv("COACH_PROVIDER", "ollama")
+    monkeypatch.setattr(service, "make_provider", lambda name: slow)
+
+    made = client.post(f"/businesses/{business['id']}/scenarios", json={"name": "Raise prices", "decisions": [
+        {"type": "price", "start_month": 3, "value": 10, "unit": "percent", "confirmed": True}]}).json()
+    sim = {"scenario_ids": [made["id"]], "horizon": 24, "iterations": 1000, "seed": 1}
+    run = client.post(f"/businesses/{business['id']}/simulate", json=sim).json()
+
+    t = time.monotonic()
+    started = client.post(f"/simulation_runs/{run['id']}/coach")
+    start_time = time.monotonic() - t
+    assert started.status_code == 200
+    body = started.json()
+    # The rule-based coach comes back immediately; the AI is still busy.
+    assert body["ai_status"] == "pending" and body["mode"] == "template" and body["headline"]
+    assert body["ai_elapsed_seconds"] is not None
+    assert start_time < 2.0
+
+    # While the slow AI is working, simulating and reading the coach are not held up.
+    t = time.monotonic()
+    again = client.post(f"/businesses/{business['id']}/simulate", json=sim)
+    simulate_time = time.monotonic() - t
+    assert again.status_code == 201 and simulate_time < 2.0 < slow.delay
+    t = time.monotonic()
+    assert client.get(f"/simulation_runs/{run['id']}/coach").json()["ai_status"] == "pending"
+    assert time.monotonic() - t < 1.0
+
+    done = wait_until_finished(client, run["id"])            # then the AI version replaces it
+    assert done["ai_status"] == "done" and done["mode"] == "ollama"
+    assert done["headline"].startswith("Raising prices")
+
+
+def test_rule_based_coach_first_then_ai_replaces_it(client, run, use_provider):
+    use_provider(good_reply())
+    started = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    assert (started["mode"], started["ai_status"]) == ("template", "pending")
+    later = client.get(f"/simulation_runs/{run['id']}/coach").json()
+    assert (later["mode"], later["ai_status"], later["fallback"]) == ("ollama", "done", False)
+    assert later["ai_elapsed_seconds"] is None
+    assert later["headline"] != started["headline"]
+
+
+def test_failed_ai_keeps_the_rule_based_coach_without_an_error(client, run, use_provider):
+    use_provider(ProviderError("the local model took too long to answer"))
+    started = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    later = client.get(f"/simulation_runs/{run['id']}/coach")
+    assert later.status_code == 200
+    body = later.json()
+    assert body["ai_status"] == "failed" and body["mode"] == "template" and body["fallback"] is True
+    assert body["headline"] == started["headline"] and body["ideas"]
+    assert [r.provider for r in interactions()] == ["ollama", "template"]
+
+
+def test_template_mode_is_final_at_once(client, run):
+    body = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    assert body["ai_status"] == "none" and body["ai_elapsed_seconds"] is None
+
+
+def test_polling_before_the_coach_started_is_a_plain_404(client, run):
+    resp = client.get(f"/simulation_runs/{run['id']}/coach")
+    assert resp.status_code == 404 and "switched off" not in resp.json()["detail"]
+
+
+def test_starting_twice_does_not_start_a_second_ai_job(client, run, monkeypatch):
+    monkeypatch.setenv("COACH_PROVIDER", "ollama")
+    monkeypatch.setattr(service, "make_provider", lambda name: FakeProvider([]))
+    submitted = []
+    monkeypatch.setattr(service, "_submit", lambda fn, *a: submitted.append(a))    # job never runs
+    first = client.post(f"/simulation_runs/{run['id']}/coach").json()
+    second = client.post(f"/simulation_runs/{run['id']}/coach?regenerate=true").json()
+    assert len(submitted) == 1 and first["ai_status"] == second["ai_status"] == "pending"
+    service._active.discard(run["id"])
+
+
+def test_pending_coach_left_over_from_a_restart_becomes_failed(client, run, monkeypatch):
+    monkeypatch.setenv("COACH_PROVIDER", "ollama")
+    monkeypatch.setattr(service, "make_provider", lambda name: FakeProvider([]))
+    monkeypatch.setattr(service, "_submit", lambda fn, *a: None)
+    assert client.post(f"/simulation_runs/{run['id']}/coach").json()["ai_status"] == "pending"
+    service._active.discard(run["id"])                     # as after a server restart
+    body = client.get(f"/simulation_runs/{run['id']}/coach").json()
+    assert body["ai_status"] == "failed" and body["headline"]

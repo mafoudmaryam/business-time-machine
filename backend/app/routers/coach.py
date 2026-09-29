@@ -1,7 +1,9 @@
 """The AI coach: a friendly explanation of a finished simulation run.
 
 GET  /coach/status               -- is the coach on, and (if allowed) which mode.
-POST /simulation_runs/{id}/coach -- headline, story, watch-outs and tested ideas (cached per run).
+POST /simulation_runs/{id}/coach -- starts the coach and returns AT ONCE: the rule-based version, which a
+                                    background job replaces with the AI version when it is ready.
+GET  /simulation_runs/{id}/coach -- poll for progress (ai_status: pending -> done / failed).
 POST /simulation_runs/{id}/ask   -- answer a question from the run's facts only.
 """
 from __future__ import annotations
@@ -32,9 +34,21 @@ def coach_status():
 def coach(run_id: int, regenerate: bool = False, db: Session = Depends(get_db)):
     run = _get_run(db, run_id)
     try:
-        return service.get_coach(db, run, regenerate=regenerate)
+        return service.start_coach(db, run, regenerate=regenerate)
     except service.CoachDisabled:
         raise HTTPException(status_code=404, detail="the coach is switched off")
+
+
+@router.get("/simulation_runs/{run_id}/coach", response_model=schemas.CoachOut)
+def coach_progress(run_id: int, db: Session = Depends(get_db)):
+    run = _get_run(db, run_id)
+    try:
+        result = service.read_coach(db, run)
+    except service.CoachDisabled:
+        raise HTTPException(status_code=404, detail="the coach is switched off")
+    if result is None:
+        raise HTTPException(status_code=404, detail="the coach has not started for this run yet")
+    return result
 
 
 @router.post("/simulation_runs/{run_id}/ask", response_model=schemas.AskOut)

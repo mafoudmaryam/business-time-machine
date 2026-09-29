@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ApiError,
   askCoach,
+  getCoach,
   getCoachStatus,
   getScenario,
   requestCoach,
@@ -21,6 +22,13 @@ const MODE_LABELS: Record<string, string> = {
   ollama: "Local AI coach",
   anthropic: "Claude coach",
 };
+
+const POLL_EVERY_MS = 3000;
+const POLL_LIMIT_MS = 15 * 60 * 1000;
+
+function formatElapsed(seconds: number): string {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
 
 const EXAMPLE_QUESTIONS = ["Will my cash run out?", "Why does this happen?", "What should I watch for?"];
 
@@ -87,6 +95,12 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
   const [answers, setAnswers] = useState<{ question: string; answer: string }[]>([]);
   const [askError, setAskError] = useState<string | null>(null);
 
+  // While the AI writes its more detailed version, the rule-based coach is already on screen.
+  // aiStartMs is when the AI started (browser clock); "now" ticks once a second for the timer.
+  const [aiStartMs, setAiStartMs] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const aiPending = coach?.ai_status === "pending";
+
   useEffect(() => {
     let cancelled = false;
     getCoachStatus().then(
@@ -94,7 +108,11 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
       () => undefined,
     );
     requestCoach(runId).then(
-      (c) => !cancelled && setCoach(c),
+      (c) => {
+        if (cancelled) return;
+        setCoach(c);
+        if (c.ai_status === "pending") setAiStartMs(Date.now() - (c.ai_elapsed_seconds ?? 0) * 1000);
+      },
       (err) => {
         if (cancelled) return;
         if (err instanceof ApiError && err.status === 404 && /switched off/i.test(err.message)) setHidden(true);
@@ -106,7 +124,28 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
     };
   }, [runId, attempt]);
 
+  // Poll for the AI version every 3 s. A failed poll is ignored: the rule-based coach stays on screen.
+  useEffect(() => {
+    if (!aiPending) return;
+    const started = Date.now();
+    const timer = setInterval(() => {
+      setNow(Date.now());
+      getCoach(runId).then(
+        (c) => c.ai_status !== "pending" && setCoach(c),
+        () => undefined,
+      );
+      if (Date.now() - started > POLL_LIMIT_MS) clearInterval(timer);
+    }, POLL_EVERY_MS);
+    const ticker = setInterval(() => setNow(Date.now()), 1000);
+    return () => {
+      clearInterval(timer);
+      clearInterval(ticker);
+    };
+  }, [aiPending, runId]);
+
   if (hidden || (status && !status.enabled)) return null;
+
+  const elapsedSeconds = aiStartMs === null ? 0 : Math.max(0, Math.floor((now - aiStartMs) / 1000));
 
   function retry() {
     setError(null);
@@ -162,6 +201,12 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
 
       {coach && (
         <>
+          {aiPending && (
+            <p className="coach-writing" role="status">
+              Your coach is writing a more detailed explanation… (about 1–2 minutes){" "}
+              <span className="coach-elapsed">{formatElapsed(elapsedSeconds)}</span>
+            </p>
+          )}
           <p className="coach-headline">{coach.headline}</p>
           <p>{coach.what_happens}</p>
           <p>{coach.why}</p>

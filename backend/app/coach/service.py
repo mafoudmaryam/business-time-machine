@@ -9,7 +9,10 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import logging
 import re
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Optional
 
 from jsonschema import ValidationError, validate as jsonschema_validate
@@ -196,56 +199,138 @@ def status() -> dict:
     return {"enabled": enabled, "mode": settings.coach_provider() if enabled and show else None}
 
 
-def get_coach(db: Session, run: models.SimulationRun, regenerate: bool = False) -> dict:
-    if not settings.coach_enabled():
-        raise CoachDisabled()
-    cached = db.query(models.CoachResult).filter_by(simulation_run_id=run.id).one_or_none()
-    if cached is not None and not regenerate:
-        return cached.payload
+# AI coach jobs run on one background worker, one at a time: a local model can only do one thing at a
+# time anyway, and the web request that starts a job returns immediately.
+_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="coach")
+_active: set[int] = set()          # run ids with an AI job queued or running (in this server process)
+_lock = threading.Lock()
 
-    facts, raw = engine_bridge.build_run_facts(db, run)
-    name = settings.coach_provider()
-    provider = make_provider(name)
-    parsed: Optional[dict] = None
-    mode, model = "template", None
-    if provider is not None:
-        system, user = prompts.coach_prompt(facts)
-        parsed = _generate(db, run, "coach", provider, facts, system, user, prompts.COACH_SCHEMA,
-                           _coach_texts, _idea_numbers, prompts.COACH_REPLY_SCHEMA)
-        if parsed is not None:
-            mode, model = provider.name, provider.model
-    fallback = name != "template" and parsed is None
-    if parsed is None:
-        parsed = template.build_coach(facts, raw)
-        _fallback_row(db, run.id, "coach", facts, parsed)
 
+def _submit(fn: Callable, *args: Any) -> None:
+    _executor.submit(fn, *args)
+
+
+def _now() -> dt.datetime:
+    return dt.datetime.now(dt.timezone.utc)
+
+
+def _assemble(db: Session, run: models.SimulationRun, facts: dict, raw: dict, parsed: dict, mode: str,
+              model: Optional[str], fallback: bool, ai_status: str,
+              ai_started_at: Optional[str] = None) -> dict:
+    """The coach payload: the texts, plus ideas that the engine has validated and simulated."""
     ideas = _finalize_ideas(db, run, parsed.get("ideas"), raw)
-    if len(ideas) < MIN_IDEAS:  # too few valid AI ideas: top up with the rule-based ones (also engine-tested)
+    if len(ideas) < MIN_IDEAS:  # too few valid ideas: top up with the rule-based ones (also engine-tested)
         seen = {json.dumps([i["builds_on"], i["decisions"]], sort_keys=True) for i in ideas}
         for extra in _finalize_ideas(db, run, template.build_coach(facts, raw)["ideas"], raw):
             if len(ideas) >= MAX_IDEAS:
                 break
             if json.dumps([extra["builds_on"], extra["decisions"]], sort_keys=True) not in seen:
                 ideas.append(extra)
-
-    payload = {
+    return {
         "mode": mode, "model": model, "fallback": fallback,
         "headline": parsed["headline"], "what_happens": parsed["what_happens"], "why": parsed["why"],
         "watch_out": [str(x) for x in parsed["watch_out"]],
         "ideas": ideas,
-        "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "generated_at": _now().isoformat(),
+        "ai_status": ai_status,            # "none" | "pending" | "done" | "failed"
+        "ai_started_at": ai_started_at,
     }
-    if cached is not None:
-        cached.payload = payload
-        db.commit()
+
+
+def _save(db: Session, run_id: int, payload: dict) -> None:
+    row = db.query(models.CoachResult).filter_by(simulation_run_id=run_id).one_or_none()
+    if row is not None:
+        row.payload = payload
     else:
-        db.add(models.CoachResult(simulation_run_id=run.id, payload=payload))
+        db.add(models.CoachResult(simulation_run_id=run_id, payload=payload))
+    try:
+        db.commit()
+    except IntegrityError:  # two requests raced; keep the first
+        db.rollback()
+
+
+def _public(payload: dict) -> dict:
+    out = dict(payload)
+    started = out.get("ai_started_at")
+    out["ai_elapsed_seconds"] = (
+        max(0, int((_now() - dt.datetime.fromisoformat(started)).total_seconds()))
+        if out.get("ai_status") == "pending" and started else None
+    )
+    return out
+
+
+def read_coach(db: Session, run: models.SimulationRun) -> Optional[dict]:
+    """Current state of the coach for this run (used for polling). None if it was never started."""
+    if not settings.coach_enabled():
+        raise CoachDisabled()
+    row = db.query(models.CoachResult).filter_by(simulation_run_id=run.id).one_or_none()
+    if row is None:
+        return None
+    payload = row.payload
+    if payload.get("ai_status") == "pending" and run.id not in _active:
+        # The server restarted while the AI was writing: keep the rule-based version.
+        payload = {**payload, "ai_status": "failed", "fallback": True}
+        _save(db, run.id, payload)
+    return _public(payload)
+
+
+def start_coach(db: Session, run: models.SimulationRun, regenerate: bool = False) -> dict:
+    """Return the coach at once. With an AI provider this is the rule-based version, and a background
+    job then replaces it with the AI version (poll read_coach). Never waits for the AI."""
+    if not settings.coach_enabled():
+        raise CoachDisabled()
+    existing = read_coach(db, run)
+    if existing is not None and (not regenerate or run.id in _active):
+        return existing
+
+    facts, raw = engine_bridge.build_run_facts(db, run)
+    name = settings.coach_provider()
+    provider = make_provider(name)
+    rule_based = template.build_coach(facts, raw)
+    if provider is None:  # template mode, or an AI provider that cannot work at all (no key)
+        payload = _assemble(db, run, facts, raw, rule_based, "template", None, name != "template", "none")
+        _fallback_row(db, run.id, "coach", facts, rule_based)
+        _save(db, run.id, payload)
+        return _public(payload)
+
+    payload = _assemble(db, run, facts, raw, rule_based, "template", None, False, "pending", _now().isoformat())
+    _save(db, run.id, payload)
+    with _lock:
+        _active.add(run.id)
+    _submit(_ai_job, db.get_bind(), run.id)
+    return _public(payload)
+
+
+def _ai_job(bind: Any, run_id: int) -> None:
+    """Background: ask the AI provider; on success replace the rule-based coach, otherwise keep it."""
+    try:
+        with Session(bind) as db:
+            run = db.get(models.SimulationRun, run_id)
+            facts, raw = engine_bridge.build_run_facts(db, run)
+            provider = make_provider(settings.coach_provider())
+            parsed = None
+            if provider is not None:
+                system, user = prompts.coach_prompt(facts)
+                parsed = _generate(db, run, "coach", provider, facts, system, user, prompts.COACH_SCHEMA,
+                                   _coach_texts, _idea_numbers, prompts.COACH_REPLY_SCHEMA)
+            row = db.query(models.CoachResult).filter_by(simulation_run_id=run_id).one()
+            if parsed is not None:
+                _save(db, run_id, _assemble(db, run, facts, raw, parsed, provider.name, provider.model, False, "done"))
+            else:
+                _fallback_row(db, run_id, "coach", facts, template.build_coach(facts, raw))
+                _save(db, run_id, {**row.payload, "ai_status": "failed", "fallback": True})
+    except Exception:  # never leave a run stuck on "pending"
+        logging.getLogger(__name__).exception("coach job failed for run %s", run_id)
         try:
-            db.commit()
-        except IntegrityError:  # two requests raced; keep the first
-            db.rollback()
-            return db.query(models.CoachResult).filter_by(simulation_run_id=run.id).one().payload
-    return payload
+            with Session(bind) as db:
+                row = db.query(models.CoachResult).filter_by(simulation_run_id=run_id).one_or_none()
+                if row is not None:
+                    _save(db, run_id, {**row.payload, "ai_status": "failed", "fallback": True})
+        except Exception:
+            logging.getLogger(__name__).exception("could not mark coach job failed for run %s", run_id)
+    finally:
+        with _lock:
+            _active.discard(run_id)
 
 
 def ask(db: Session, run: models.SimulationRun, question: str) -> dict:

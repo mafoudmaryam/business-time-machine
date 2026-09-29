@@ -399,6 +399,10 @@ export interface CoachOut {
   watch_out: string[];
   ideas: CoachIdea[];
   generated_at: string;
+  /** none = no AI in use; pending = this is the rule-based version and the AI is still writing;
+   * done / failed = the AI finished (failed keeps the rule-based version). */
+  ai_status: "none" | "pending" | "done" | "failed";
+  ai_elapsed_seconds: number | null;
 }
 
 export interface AskOut {
@@ -413,6 +417,11 @@ export function getCoachStatus(): Promise<CoachStatus> {
 
 export function requestCoach(runId: number): Promise<CoachOut> {
   return request(`/simulation_runs/${runId}/coach`, { method: "POST" });
+}
+
+/** Progress of the coach for a run -- poll this while ai_status is "pending". */
+export function getCoach(runId: number): Promise<CoachOut> {
+  return request(`/simulation_runs/${runId}/coach`);
 }
 
 export function askCoach(runId: number, question: string): Promise<AskOut> {
