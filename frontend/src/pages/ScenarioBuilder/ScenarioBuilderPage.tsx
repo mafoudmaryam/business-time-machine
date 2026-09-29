@@ -14,6 +14,7 @@ import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
 import type { ScenarioPrefill } from "../../lib/coachIdea";
 import { DEFAULT_CURRENCY } from "../../lib/format";
+import { nextVersionName } from "../../lib/scenarioLabel";
 import { DecisionForm } from "./DecisionForm";
 import { DecisionList } from "./DecisionList";
 
@@ -62,7 +63,7 @@ export function ScenarioBuilderPage() {
   }
 
   function duplicateAsNewVersion(scenario: ScenarioOut) {
-    setName(`${scenario.name} v2`);
+    setName(nextVersionName(scenario.name, (scenarios.data ?? []).map((s) => s.name)));
     setParentScenarioId(scenario.id);
     setDecisions(scenario.decisions.map(decisionOutToForm));
     setSubmitError(null);

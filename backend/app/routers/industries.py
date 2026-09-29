@@ -2,10 +2,10 @@
 wording, defaults or field labels."""
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from .. import schemas
-from ..engine_bridge import list_industries
+from ..engine_bridge import list_industries, preview_starting_month, to_baseline
 
 router = APIRouter(tags=["industries"])
 
@@ -34,3 +34,12 @@ def get_industries():
         )
         for tpl in list_industries()
     ]
+
+
+@router.post("/industries/{industry_id}/preview", response_model=schemas.StartingMonthOut)
+def preview_starting_month_for(industry_id: str, baseline: schemas.BaselineIn):
+    """What a typical month looks like with these numbers (sales, costs, profit), computed by the
+    engine, so the setup wizard never does the math itself. Nothing is saved."""
+    if industry_id not in {t.id for t in list_industries()}:
+        raise HTTPException(status_code=404, detail="unknown industry")
+    return preview_starting_month(industry_id, to_baseline(baseline))

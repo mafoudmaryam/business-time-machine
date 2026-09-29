@@ -15,6 +15,8 @@ interface NumberFieldProps {
   error?: string;
   /** One-sentence plain-language explanation, shown via a "?" tooltip next to the label. */
   tooltip?: string;
+  /** Draws attention to the field (e.g. an example amount the owner still has to replace). */
+  highlight?: boolean;
 }
 
 function toText(value: number): string {
@@ -32,7 +34,7 @@ function toText(value: number): string {
  * (e.g. switching industries), never on every render, so it never fights the
  * user's own typing. Invalid/empty input is reported upward as NaN and left
  * for the caller to validate on Next/Save -- this field never forces a 0. */
-export function NumberField({ label, help, unit, value, onChange, error, tooltip }: NumberFieldProps) {
+export function NumberField({ label, help, unit, value, onChange, error, tooltip, highlight }: NumberFieldProps) {
   const id = `field-${label.replace(/\s+/g, "-").toLowerCase()}`;
   const [text, setText] = useState(() => toText(value));
 
@@ -54,7 +56,7 @@ export function NumberField({ label, help, unit, value, onChange, error, tooltip
   }
 
   return (
-    <div className="field">
+    <div className={highlight ? "field field-highlight" : "field"}>
       <label htmlFor={id}>
         {label} <span className="field-unit">({unit})</span>
         {tooltip && <InfoTip text={tooltip} />}

@@ -418,3 +418,23 @@ export function requestCoach(runId: number): Promise<CoachOut> {
 export function askCoach(runId: number, question: string): Promise<AskOut> {
   return request(`/simulation_runs/${runId}/ask`, { method: "POST", body: JSON.stringify({ question }) });
 }
+
+// ---------- starting-month preview (setup wizard) ----------
+
+export interface StartingMonth {
+  sales: number;
+  ingredient_costs: number;
+  staff_costs: number;
+  rent_and_other_costs: number;
+  marketing: number;
+  costs: number;
+  profit: number;
+}
+
+/** The engine's month 1 for numbers that are not saved yet. The frontend never does this math. */
+export function previewStartingMonth(industryId: string, baseline: BaselineFormValues): Promise<StartingMonth> {
+  return request(`/industries/${industryId}/preview`, {
+    method: "POST",
+    body: JSON.stringify(baselineFormToApi(baseline)),
+  });
+}

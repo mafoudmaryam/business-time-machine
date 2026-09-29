@@ -112,3 +112,30 @@ def test_describe_decision_covers_every_type():
     for decs in CASES.values():
         for d in decs:
             assert describe_decision(d, "USD")
+
+
+@pytest.mark.parametrize("tpl", TEMPLATES, ids=IDS)
+def test_month_one_summary_adds_up_and_matches_the_model(tpl):
+    from btm_engine import month_one_summary, run_deterministic
+    s = month_one_summary(tpl.default_baseline, tpl)
+    assert s["sales"] - s["costs"] == pytest.approx(s["profit"])
+    assert s["costs"] == pytest.approx(s["ingredient_costs"] + s["staff_costs"]
+                                       + s["rent_and_other_costs"] + s["marketing"])
+    assert s["profit"] == pytest.approx(run_deterministic(tpl.default_baseline, tpl, [], 1)["profit"][0])
+
+
+def test_month_one_summary_matches_the_hand_calculation():
+    from btm_engine import month_one_summary
+    tpl = list_industries()[0]
+    s = month_one_summary(tpl.default_baseline, tpl)       # cafe defaults: spec section 6
+    assert s["sales"] == pytest.approx(51_350)
+    assert s["profit"] == pytest.approx(5_545)
+
+
+def test_month_one_summary_shows_a_loss_for_costly_staff():
+    from dataclasses import replace
+    from btm_engine import month_one_summary
+    tpl = list_industries()[0]
+    base = replace(tpl.default_baseline, wage_per_fte=5_000, marketing=1_000, customers=500, visits_per_regular=10)
+    s = month_one_summary(base, tpl)
+    assert s["profit"] == pytest.approx(-6_875)

@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   baselineApiToForm,
   createBusiness,
   DEFAULT_BASELINE_FORM,
   listIndustries,
+  previewStartingMonth,
   type BaselineFormValues,
   type IndustryOut,
+  type StartingMonth,
 } from "../../api";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { NumberField } from "../../components/NumberField";
@@ -15,6 +17,7 @@ import { useAsync } from "../../hooks/useAsync";
 import { BASELINE_STEPS, CURRENCIES } from "../../constants";
 import { DEFAULT_CURRENCY, formatUnit } from "../../lib/format";
 import { heroImage } from "../../lib/images";
+import { describeStartingMonth } from "../../lib/startSummary";
 
 type FieldErrors = Record<string, string>;
 
@@ -60,6 +63,9 @@ export function BusinessSetupPage() {
   const [name, setName] = useState("");
   const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
   const [baseline, setBaseline] = useState<BaselineFormValues>({ ...DEFAULT_BASELINE_FORM });
+  // Money fields (unit has "{CUR}") that have been typed in. The example amounts are US dollars, so in
+  // any other currency they stay highlighted until edited.
+  const [editedMoney, setEditedMoney] = useState<Set<string>>(new Set());
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -67,16 +73,42 @@ export function BusinessSetupPage() {
 
   const totalSteps = BASELINE_STEPS.length + 1;
   const isLastStep = step === totalSteps - 1;
+
+  // On the last step, ask the engine what a typical month looks like with these numbers.
+  const [startMonth, setStartMonth] = useState<StartingMonth | null>(null);
+  const [startMonthFailed, setStartMonthFailed] = useState(false);
+  const allNumbersEntered = Object.values(baseline).every((v) => Number.isFinite(v));
+  useEffect(() => {
+    if (!isLastStep || !industryId || !allNumbersEntered) return;
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      previewStartingMonth(industryId, baseline).then(
+        (m) => {
+          if (cancelled) return;
+          setStartMonth(m);
+          setStartMonthFailed(false);
+        },
+        () => !cancelled && setStartMonthFailed(true),
+      );
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [isLastStep, industryId, baseline, allNumbersEntered]);
+  const startSummary = startMonth && isLastStep ? describeStartingMonth(startMonth, currency) : null;
   const selectedIndustry = industries.data?.find((i) => i.id === industryId) ?? null;
   const fieldLabels = selectedIndustry?.field_labels ?? {};
 
   function selectIndustry(industry: IndustryOut) {
     setIndustryId(industry.id);
     setBaseline(baselineApiToForm(industry.default_baseline));
+    setEditedMoney(new Set());
     setErrors({});
   }
 
   function updateField(key: string, value: number) {
+    setEditedMoney((s) => (s.has(key) ? s : new Set(s).add(key)));
     setBaseline((b) => ({ ...b, [key]: value }));
   }
 
@@ -111,6 +143,9 @@ export function BusinessSetupPage() {
   }
 
   const current = step === 0 ? null : BASELINE_STEPS[step - 1];
+  const needsAmounts = (key: string, unit: string) =>
+    currency !== "USD" && unit.includes("{CUR}") && !editedMoney.has(key);
+  const stepHasUnedited = current?.fields.some((f) => needsAmounts(f.key, f.unit)) ?? false;
   const heading = selectedIndustry
     ? `Tell us about your ${selectedIndustry.display_name.toLowerCase()}`
     : "What kind of business do you run?";
@@ -186,9 +221,16 @@ export function BusinessSetupPage() {
         </>
       )}
 
+      {stepHasUnedited && (
+        <p className="currency-notice" role="note">
+          These example amounts are in US dollars — please enter your own amounts in {currency}.
+        </p>
+      )}
+
       {current?.fields.map((field) => (
         <NumberField
           key={field.key}
+          highlight={needsAmounts(field.key, field.unit)}
           label={fieldLabels[field.key] ?? field.label}
           help={field.help}
           tooltip={field.help}
@@ -201,6 +243,16 @@ export function BusinessSetupPage() {
           error={errors[field.key]}
         />
       ))}
+
+      {isLastStep && (
+        <div className={startSummary?.isLoss ? "start-summary start-summary-loss" : "start-summary"} role="status">
+          <h3>A typical month, with your numbers</h3>
+          {!startSummary && !startMonthFailed && <p>Working it out…</p>}
+          {startMonthFailed && <p>We couldn't work out the summary right now, but you can still continue.</p>}
+          {startSummary && <p>{startSummary.text}</p>}
+          {startSummary?.hint && <p className="start-summary-hint">{startSummary.hint}</p>}
+        </div>
+      )}
 
       <ErrorBanner message={submitError} />
 

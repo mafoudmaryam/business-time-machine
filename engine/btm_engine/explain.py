@@ -66,6 +66,21 @@ def profit_breakdown(base: BusinessBaseline, tpl: IndustryTemplate, decisions: l
     }
 
 
+def month_one_summary(base: BusinessBaseline, tpl: IndustryTemplate) -> dict[str, float]:
+    """The starting month as a plain profit-and-loss: sales, costs, and what is left.
+    It is the engine's own deterministic month 1 (nothing decided, no randomness)."""
+    m = _central(base, tpl, [], 1)
+    sales = float(m["revenue"][0])
+    parts = {
+        "ingredient_costs": float(m["cogs"][0]),
+        "staff_costs": float(m["labour"][0]),
+        "rent_and_other_costs": float(m["fixed_costs"][0]),
+        "marketing": float(m["marketing"][0]),
+    }
+    costs = sum(parts.values())
+    return {"sales": sales, **parts, "costs": costs, "profit": sales - costs}
+
+
 def _first_true(mask: np.ndarray) -> int | None:
     idx = np.flatnonzero(mask)
     return int(idx[0]) + 1 if idx.size else None

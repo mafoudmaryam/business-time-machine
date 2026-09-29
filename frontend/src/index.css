@@ -598,3 +598,40 @@ table.run-history-table td {
   font-size: 12px;
   color: var(--text-muted);
 }
+
+.start-summary {
+  background: var(--band);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 16px;
+  margin: 16px 0;
+  max-width: 640px;
+}
+
+.start-summary h3 {
+  margin: 4px 0;
+}
+
+.start-summary-loss {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.start-summary-hint {
+  color: var(--danger);
+}
+
+.currency-notice {
+  background: #fff4d6;
+  border: 1px solid #d9a441;
+  border-radius: 6px;
+  padding: 8px 12px;
+  max-width: 420px;
+  color: var(--ink);
+}
+
+.field-highlight input {
+  background: #fff4d6;
+  border-color: #d9a441;
+  box-shadow: 0 0 0 2px rgba(217, 164, 65, 0.35);
+}

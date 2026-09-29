@@ -73,6 +73,18 @@ class IndustryOut(BaseModel):
     field_labels: dict[str, str]
 
 
+class StartingMonthOut(BaseModel):
+    """POST /industries/{id}/preview -- the engine's month 1 for unsaved numbers."""
+
+    sales: float
+    ingredient_costs: float
+    staff_costs: float
+    rent_and_other_costs: float
+    marketing: float
+    costs: float
+    profit: float
+
+
 # ---------- scenarios / decisions ----------
 
 

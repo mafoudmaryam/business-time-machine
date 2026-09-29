@@ -12,7 +12,8 @@ from jsonschema import ValidationError, validate as jsonschema_validate
 from sqlalchemy.orm import Session
 
 from btm_engine import (BusinessBaseline, DECISIONS_JSON_SCHEMA, Decision as EngineDecision,
-                        build_facts, describe_decision, get_template, list_industries, run_scenarios)
+                        build_facts, describe_decision, get_template, list_industries, month_one_summary,
+                        run_scenarios)
 
 from . import models
 
@@ -196,3 +197,8 @@ def simulate_ideas(db: Session, run: models.SimulationRun, ideas: list[dict]) ->
 
 def describe_flat_decisions(decision_dicts: list[dict], currency: str) -> list[str]:
     return [describe_decision(EngineDecision.from_dict(d), currency) for d in decision_dicts]
+
+
+def preview_starting_month(industry: str, baseline: BusinessBaseline) -> dict:
+    """The engine's month 1 for numbers that have not been saved yet (the setup wizard)."""
+    return month_one_summary(baseline, get_template(industry))
