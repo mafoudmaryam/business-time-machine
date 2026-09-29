@@ -69,7 +69,7 @@ export const BASELINE_STEPS: { title: string; fields: FieldSpec[] }[] = [
   {
     title: "Cash",
     fields: [
-      { key: "cash", label: "Starting cash", help: "Cash on hand today -- the engine tracks this month by month.", unit: "{CUR}", min: 0, step: 500 },
+      { key: "cash", label: "Starting cash", help: "Cash on hand today. The simulation tracks it month by month.", unit: "{CUR}", min: 0, step: 500 },
     ],
   },
 ];

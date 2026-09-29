@@ -27,7 +27,7 @@ describe("decisionSummary", () => {
 
   it("summarizes an absolute price change in USD by default", () => {
     expect(decisionSummary(decision({ type: "price", value: 7.5, unit: "absolute", start_month: 2 })))
-      .toBe("Set price to $8 from month 2");
+      .toBe("Set price to $7.50 from month 2");
   });
 
   it("formats money in the given currency, not a hard-coded one", () => {

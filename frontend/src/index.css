@@ -1,34 +1,46 @@
+/* =====================================================================
+   Business Time Machine -- styles
+   ---------------------------------------------------------------------
+   One idea: it should feel like a calm conversation at a café table.
+   So: a cream page, lots of space, few boxes, big readable text.
+
+   Sections:
+     1. Colors & fonts (CSS variables -- change a color once, here)
+     2. Page basics
+     3. The conversation (bubbles, typing dots)
+     4. Your replies (chips, photo choices, forms)
+     5. Results (paths, chart)
+     6. Other pages & small bits
+     7. Phones
+   ===================================================================== */
+
+/* ---------- 1. Colors & fonts ---------- */
 :root {
-  /* Café-house palette -- see docs/redesign-plan.md */
-  --page: #f3eae1;
-  --band: #eadbcd;
-  --card: #faf5ef;
-  --border: #e2d3c3;
-  --ink: #2b1d16;
-  --muted-1: #4a3527;
-  --muted-2: #6f5a4a;
-  --button: #6b4331;
-  --button-text: #fbf5ee;
+  --page: #f5ede4; /* the café wall */
+  --paper: #fffcf8; /* the advisor's messages */
+  --band: #ecdfd2; /* soft highlight */
+  --line: #e6d8c9; /* thin borders */
+  --ink: #2b1d16; /* main text */
+  --muted: #6a5444; /* quieter text (4.5:1 on --page) */
+  --brown: #6b4331; /* your messages and main buttons */
+  --brown-dark: #563425;
+  --cream: #fbf5ee; /* text on brown */
+  --good: #3f6a33;
+  --good-bg: #e8f0e1;
+  --bad: #a93226;
+  --bad-bg: #fbe9e6;
+  --amber-bg: #fff4d6;
+  --amber: #a8741a;
 
-  /* Aliases so existing rules pick up the new palette without a rewrite. */
-  --text: var(--ink);
-  --text-muted: var(--muted-2);
-  --bg: var(--card);
-  --bg-alt: var(--band);
-  --accent: var(--button);
-  --danger: #c0392b;
-  --danger-bg: #fdecea;
-  --success: #1baf7a;
+  --serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --sans: "Montserrat", system-ui, "Segoe UI", Roboto, sans-serif;
 
-  --font-heading: "Playfair Display", Georgia, serif;
-  --font-body: "Montserrat", system-ui, "Segoe UI", Roboto, sans-serif;
-  --font-script: "Great Vibes", cursive;
-
-  font: 16px/1.5 var(--font-body);
+  font: 16px/1.6 var(--sans);
   color: var(--ink);
   background: var(--page);
 }
 
+/* ---------- 2. Page basics ---------- */
 * {
   box-sizing: border-box;
 }
@@ -36,417 +48,33 @@
 body {
   margin: 0;
   background: var(--page);
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
 h2,
 h3 {
-  font-family: var(--font-heading);
-  color: var(--ink);
+  font-family: var(--serif);
+  line-height: 1.2;
+}
+
+a {
+  color: var(--brown);
+  text-underline-offset: 3px;
 }
 
 main {
-  max-width: 960px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 0 20px 140px; /* room at the bottom for the question bar */
 }
 
-h1 {
-  font-size: 28px;
-  margin: 8px 0 16px;
-}
-
-h2 {
-  font-size: 20px;
-  margin: 24px 0 8px;
-}
-
-h3 {
-  font-size: 16px;
-  margin: 16px 0 8px;
-}
-
-.navbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-alt);
-}
-
-.navbar-title {
-  font-weight: 600;
-}
-
-.navbar-links {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.navbar-links a {
-  color: var(--text-muted);
-  text-decoration: none;
-  text-transform: uppercase;
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  font-weight: 500;
-}
-
-.navbar-links a.active,
-.navbar-links a:hover {
-  color: var(--accent);
-}
-
-.page {
-  padding-bottom: 48px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 16px;
-  max-width: 420px;
-}
-
-.field label,
-.field > span {
-  font-weight: 600;
-}
-
-.field input,
-.field select {
-  padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 15px;
-}
-
-.field-unit {
-  font-weight: 400;
-  color: var(--text-muted);
-}
-
-.field-help {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.field-error {
-  font-size: 13px;
-  color: var(--danger);
-  margin: 0;
-}
-
-button {
-  padding: 10px 22px;
-  border: 1px solid var(--button);
-  border-radius: 10px;
-  background: var(--button);
-  color: var(--button-text);
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.info-tip {
-  cursor: help;
-  color: var(--text-muted);
-  border-bottom: 1px dotted var(--text-muted);
-}
-
-.chart-caption {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin: 0 0 8px;
-}
-
-.link-button {
-  background: none;
-  border: none;
-  color: var(--accent);
-  padding: 0;
-  text-decoration: underline;
-  font-size: 14px;
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: normal;
-  border-radius: 0;
-}
-
-.wizard-nav {
-  display: flex;
-  gap: 8px;
-}
-
-.step-indicator {
-  color: var(--text-muted);
-  margin-bottom: 16px;
-}
-
-.example-numbers-note {
-  color: var(--text-muted);
-  font-size: 13px;
-  font-style: italic;
-  margin-bottom: 16px;
-}
-
-.industry-picker {
-  margin-bottom: 16px;
-}
-
-.industry-cards {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.industry-card {
-  position: relative;
-  width: 220px;
-  height: 280px;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--card) center/cover no-repeat;
-  overflow: hidden;
-  text-transform: none;
-}
-
-.industry-card.selected {
-  outline: 3px solid var(--button);
-  outline-offset: -3px;
-}
-
-.industry-card-label {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  padding: 16px;
-  background: linear-gradient(to top, rgba(43, 29, 22, 0.78), transparent);
-  color: var(--button-text);
-  font-family: var(--font-heading);
-  font-size: 22px;
-  text-align: left;
-}
-
-.hero-banner {
-  position: relative;
-  border-radius: 10px;
-  padding: 40px 24px;
-  margin-bottom: 16px;
-  background-size: cover;
-  background-position: center;
-  overflow: hidden;
-}
-
-.hero-banner::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(243, 234, 225, 0.82);
-}
-
-.hero-banner h1 {
-  position: relative;
-  margin: 0;
-}
-
-.decision-tiles {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  max-width: 480px;
-  margin-bottom: 16px;
-}
-
-.decision-tile {
-  position: relative;
-  height: 110px;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--card) center/cover no-repeat;
-  overflow: hidden;
-  text-transform: none;
-}
-
-.decision-tile.selected {
-  outline: 3px solid var(--button);
-  outline-offset: -3px;
-}
-
-.decision-tile-label {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  padding: 6px 8px;
-  background: linear-gradient(to top, rgba(43, 29, 22, 0.8), transparent);
-  color: var(--button-text);
-  font-size: 12px;
-  font-weight: 600;
-  text-align: left;
-  letter-spacing: normal;
-}
-
-.error-banner {
-  background: var(--danger-bg);
-  color: var(--danger);
-  border: 1px solid var(--danger);
-  border-radius: 4px;
-  padding: 8px 12px;
-  margin: 8px 0;
-  max-width: 640px;
-}
-
-.success-message {
-  color: var(--success);
-  margin: 8px 0;
-}
-
-.spinner {
-  color: var(--text-muted);
-}
-
-.empty-hint {
-  color: var(--text-muted);
-}
-
-.decision-form {
-  border: 1px solid var(--border);
+/* A clear ring around whatever the keyboard (Tab key) is on. */
+:focus-visible {
+  outline: 3px solid #c0834d;
+  outline-offset: 2px;
   border-radius: 6px;
-  padding: 16px;
-  background: var(--bg-alt);
-  max-width: 420px;
-  margin-bottom: 16px;
 }
-
-.decision-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.decision-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 8px 12px;
-}
-
-.decision-summary {
-  flex: 1;
-  min-width: 220px;
-  font-weight: 500;
-}
-
-.confirm-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-.needs-confirmation {
-  font-size: 13px;
-  color: var(--danger);
-}
-
-.scenario-list,
-.scenario-checklist {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.scenario-list li {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.chart-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin: 16px 0;
-}
-
-@media (max-width: 720px) {
-  .chart-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.metric-chart {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 8px 0;
-}
-
-table.summary-table,
-table.run-history-table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 16px 0;
-  font-size: 14px;
-}
-
-table.summary-table th,
-table.summary-table td,
-table.run-history-table th,
-table.run-history-table td {
-  border: 1px solid var(--border);
-  padding: 6px 10px;
-  text-align: left;
-}
-
-.risk-alerts {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.risk-alert {
-  background: var(--danger-bg);
-  color: var(--danger);
-  border: 1px solid var(--danger);
-  border-radius: 4px;
-  padding: 8px 12px;
-}
-
-.run-meta {
-  color: var(--text-muted);
-  font-size: 13px;
-  margin-top: 8px;
-}
-
-/* ---------- AI coach ---------- */
 
 .visually-hidden {
   position: absolute;
@@ -457,216 +85,227 @@ table.run-history-table td {
   white-space: nowrap;
 }
 
-.coach-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-left: 6px solid var(--button);
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -48px;
+  z-index: 10;
+  padding: 8px 14px;
   border-radius: 8px;
-  padding: 16px 20px;
-  margin: 16px 0 24px;
+  background: var(--brown);
+  color: var(--cream);
 }
 
-.coach-card h2 {
-  margin-top: 0;
+.skip-link:focus {
+  top: 12px;
 }
 
-.coach-headline {
-  font-family: var(--font-heading);
-  font-size: 1.25rem;
+.muted {
+  color: var(--muted);
+}
+
+/* Top bar: just the name and two quiet links. */
+.topbar {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.wordmark {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 700;
   color: var(--ink);
+  text-decoration: none;
+}
+
+.topbar-links {
+  display: flex;
+  gap: 18px;
+  font-size: 14px;
+}
+
+.topbar-links a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.topbar-links a:hover,
+.topbar-links a.active {
+  color: var(--brown);
+  text-decoration: underline;
+}
+
+/* ---------- 3. The conversation ---------- */
+.advisor-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 28px 0 20px;
+}
+
+.advisor-intro h1 {
+  margin: 14px 0 4px;
+  font-size: clamp(28px, 5vw, 38px);
+}
+
+.advisor-intro p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.advisor-avatar {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--brown);
+  color: var(--cream);
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.msg {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  animation: rise 0.25s ease-out;
+}
+
+.msg-you {
+  justify-content: flex-end;
+}
+
+.bubble {
+  max-width: 560px;
+  padding: 12px 16px;
+  border-radius: 20px;
+  overflow-wrap: anywhere;
+}
+
+.bubble p {
   margin: 0 0 8px;
 }
 
-.coach-watch {
-  background: var(--band);
-  border-radius: 6px;
-  padding: 8px 16px;
-  margin: 12px 0;
+.bubble p:last-child,
+.bubble ul:last-child {
+  margin-bottom: 0;
 }
 
-.coach-watch h3 {
-  margin: 4px 0;
+.bubble ul,
+.bubble ol {
+  margin: 6px 0;
+  padding-left: 20px;
 }
 
-.idea-grid {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
+.bubble-advisor {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-bottom-left-radius: 6px;
+  box-shadow: 0 1px 2px rgba(43, 29, 22, 0.05);
 }
 
-.idea-card {
-  background: var(--page);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.idea-card h4 {
-  margin: 0;
-  font-family: var(--font-heading);
-}
-
-.idea-card p {
-  margin: 0;
-}
-
-.idea-decisions {
-  margin: 0;
-  padding-left: 18px;
-  font-size: 14px;
-  color: var(--muted-1);
-}
-
-.idea-builds-on {
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.idea-result {
-  margin: 4px 0;
-  font-size: 14px;
-}
-
-.idea-result > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.idea-result dt {
-  color: var(--text-muted);
-}
-
-.idea-result dd {
-  margin: 0;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.idea-card button {
-  margin-top: auto;
-  align-self: flex-start;
-}
-
-.coach-ask form {
-  display: flex;
-  gap: 8px;
-  max-width: 560px;
-}
-
-.coach-ask input {
+.bubble-wide {
+  max-width: none;
   flex: 1;
-  padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--bg);
-  color: var(--text);
-  font: inherit;
+  min-width: 0;
 }
 
-.coach-examples {
+.bubble-you {
+  background: var(--brown);
+  color: var(--cream);
+  border-bottom-right-radius: 6px;
+}
+
+.typing {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 5px;
+  padding: 16px 18px;
 }
 
-.coach-answer {
-  background: var(--page);
-  border-radius: 6px;
-  padding: 8px 12px;
-  margin-top: 8px;
-  max-width: 640px;
+.typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: 0.4;
+  animation: blink 1.2s infinite;
 }
 
-.coach-answer p {
-  margin: 4px 0;
+.typing span:nth-child(2) {
+  animation-delay: 0.2s;
 }
 
-.coach-question {
-  font-weight: 600;
-  color: var(--muted-1);
+.typing span:nth-child(3) {
+  animation-delay: 0.4s;
 }
 
-.coach-footer {
-  margin: 16px 0 0;
-  font-size: 12px;
-  color: var(--text-muted);
+@keyframes blink {
+  50% {
+    opacity: 1;
+  }
 }
 
-.start-summary {
-  background: var(--band);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 16px;
-  margin: 16px 0;
-  max-width: 640px;
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
 
-.start-summary h3 {
-  margin: 4px 0;
-}
-
-.start-summary-loss {
-  border-color: var(--danger);
-  background: var(--danger-bg);
-}
-
-.start-summary-hint {
-  color: var(--danger);
-}
-
-.currency-notice {
-  background: #fff4d6;
-  border: 1px solid #d9a441;
-  border-radius: 6px;
-  padding: 8px 12px;
-  max-width: 420px;
-  color: var(--ink);
-}
-
-.field-highlight input {
-  background: #fff4d6;
-  border-color: #d9a441;
-  box-shadow: 0 0 0 2px rgba(217, 164, 65, 0.35);
+.coach-headline {
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.35;
 }
 
 .coach-writing {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 12px;
   font-size: 14px;
-  color: var(--text-muted);
+  color: var(--muted);
   font-style: italic;
 }
 
+/* A softly "breathing" dot while the AI adds more detail -- calmer than a timer. */
 .coach-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--button);
-  opacity: 0.35;
-  animation: coach-breathe 1.8s ease-in-out infinite;
+  background: var(--brown);
+  animation: breathe 1.8s ease-in-out infinite;
 }
 
-@keyframes coach-breathe {
-  0%, 100% { opacity: 0.25; transform: scale(0.85); }
-  50% { opacity: 0.85; transform: scale(1.1); }
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.1);
+  }
 }
 
 .coach-fade {
-  animation: coach-fade-in 0.6s ease-out;
+  animation: fade-in 0.6s ease-out;
 }
 
-@keyframes coach-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
 }
 
 .coach-updated-tag {
@@ -674,15 +313,849 @@ table.run-history-table td {
   margin-bottom: 8px;
   padding: 2px 10px;
   border-radius: 999px;
-  background: var(--band);
-  color: var(--muted-1);
+  background: var(--good-bg);
+  color: var(--good);
   font-size: 12px;
   font-weight: 600;
 }
 
+.small-print {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.warning-text {
+  color: var(--bad);
+}
+
+/* ---------- 4. Your replies ---------- */
+
+/* The reply area sits where your next message will go (right side, like a chat). */
+.reply {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  padding-left: 46px;
+  animation: rise 0.25s ease-out;
+}
+
+.reply-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.reply-row-quiet {
+  gap: 18px;
+}
+
+/* A "chip" is a rounded answer button. */
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.chip {
+  padding: 9px 18px;
+  border: 1.5px solid var(--brown);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--brown);
+  font-size: 15px;
+  font-weight: 600;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    transform 0.1s;
+}
+
+.chip:hover:not(:disabled) {
+  background: var(--band);
+}
+
+.chip:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.chip-primary {
+  background: var(--brown);
+  color: var(--cream);
+}
+
+.chip-primary:hover:not(:disabled) {
+  background: var(--brown-dark);
+}
+
+.chip-quiet {
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.text-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--brown);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Choices with a photo: business types and kinds of decision. */
+.photo-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.photo-choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  background: var(--paper);
+  overflow: hidden;
+  text-align: left;
+  transition:
+    transform 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.photo-choice:hover {
+  transform: translateY(-2px);
+  border-color: var(--brown);
+  box-shadow: 0 6px 18px rgba(43, 29, 22, 0.1);
+}
+
+.photo-choice img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-choice span {
+  padding: 10px 14px 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.photo-choices-small img {
+  height: 84px;
+}
+
+.photo-choices-small span {
+  font-size: 14px;
+}
+
+.reply-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: min(100%, 360px);
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--band);
+}
+
+.reply-form .chip {
+  margin-top: 8px;
+  align-self: flex-end;
+}
+
+.reply-form-wide {
+  width: 100%;
+}
+
+.reply-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.reply-input,
+.field input,
+.field select,
+.ask-bar input,
+.sentence select {
+  padding: 10px 12px;
+  border: 1px solid #d6c3b0;
+  border-radius: 12px;
+  background: #fffefb;
+  color: var(--ink);
+  font: inherit;
+}
+
+.reply-input:focus,
+.field input:focus,
+.ask-bar input:focus,
+.inline-number:focus {
+  outline: none;
+  border-color: var(--brown);
+  box-shadow: 0 0 0 3px rgba(107, 67, 49, 0.18);
+}
+
+.form-problem {
+  margin: 4px 0 0;
+  color: var(--bad);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* A decision written as a sentence with little number boxes inside it. */
+.sentence-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: var(--band);
+}
+
+.sentence {
+  margin: 0;
+  align-self: stretch;
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 2;
+}
+
+.sentence-small {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 2.2;
+}
+
+.sentence select {
+  padding: 2px 8px;
+  font-family: var(--serif);
+  font-size: 20px;
+  border-radius: 10px;
+}
+
+.sentence-small select {
+  font-family: var(--sans);
+  font-size: 15px;
+}
+
+.inline-number {
+  padding: 0 6px;
+  margin: 0 2px;
+  border: none;
+  border-bottom: 2px solid var(--brown);
+  border-radius: 6px 6px 0 0;
+  background: var(--paper);
+  color: var(--brown);
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+}
+
+.inline-number[aria-invalid="true"] {
+  border-bottom-color: var(--bad);
+  background: var(--bad-bg);
+}
+
+.sentence-now,
+.sentence-hint {
+  margin: 0;
+  align-self: stretch;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.sentence-form .text-button {
+  align-self: flex-start;
+}
+
+/* The plan you're about to confirm. */
+.plan {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 20px;
+  background: var(--band);
+}
+
+.plan-title {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.plan-steps {
+  margin: 0 0 14px;
+  padding-left: 22px;
+  font-family: var(--serif);
+  font-size: 19px;
+}
+
+.plan-steps li {
+  padding: 3px 0;
+}
+
+.plan-steps .text-button {
+  margin-left: 10px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.tag {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--paper);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  vertical-align: middle;
+}
+
+.compare-list {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+}
+
+.compare-list li {
+  padding: 4px 0;
+}
+
+.compare-list input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brown);
+  vertical-align: -3px;
+}
+
+.compare-list .is-disabled {
+  color: var(--muted);
+}
+
+/* The "About your business" numbers. */
+.numbers-card {
+  width: 100%;
+}
+
+.numbers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 4px 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 12px;
+}
+
+.field label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.field-unit {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.field-help {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.field-error {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bad);
+}
+
+.field input[aria-invalid="true"] {
+  border-color: var(--bad);
+}
+
+.currency-notice {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--amber-bg);
+  border-left: 4px solid var(--amber);
+}
+
+.field-highlight input {
+  background: var(--amber-bg);
+  border-color: var(--amber);
+}
+
+/* "Look ahead: 12 / 24 / 36 months" */
+.look-ahead {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--band);
+  font-size: 14px;
+}
+
+.look-ahead > span {
+  padding: 0 8px 0 10px;
+  color: var(--muted);
+}
+
+.seg {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.seg.is-on {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(43, 29, 22, 0.12);
+}
+
+/* The question bar, stuck to the bottom like in a messaging app. */
+.ask-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: min(720px, calc(100% - 24px));
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 30px rgba(43, 29, 22, 0.15);
+}
+
+.ask-bar input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  padding-left: 14px;
+}
+
+.ask-bar input:focus {
+  box-shadow: none;
+}
+
+/* ---------- 5. Results ---------- */
+.result-headline {
+  font-family: var(--serif);
+  font-size: 21px;
+  line-height: 1.35;
+}
+
+/* Each path (keep as is / your decision) as a row with a colored edge. */
+.paths {
+  list-style: none;
+  margin: 12px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.path {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding: 10px 14px;
+  border-left: 5px solid;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.path-keep {
+  border-left-style: dashed;
+  background: transparent;
+}
+
+.path-name {
+  font-weight: 600;
+}
+
+.path-profit {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.path-profit-label {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.path-odds {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.path-diff {
+  grid-row: 2;
+  grid-column: 2;
+  justify-self: end;
+  padding: 1px 10px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.up {
+  color: var(--good);
+}
+
+.down {
+  color: var(--bad);
+}
+
+.path-diff.up {
+  background: var(--good-bg);
+}
+
+.path-diff.down {
+  background: var(--bad-bg);
+}
+
+.result-warning {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.cash-chart {
+  margin: 14px 0 6px;
+}
+
+.cash-chart figcaption {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.chart-note {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.all-numbers summary {
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--brown);
+  font-weight: 600;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+table.summary-table {
+  border-collapse: collapse;
+  min-width: 640px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+table.summary-table th,
+table.summary-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  vertical-align: top;
+}
+
+table.summary-table th:first-child,
+table.summary-table td:first-child {
+  text-align: left;
+}
+
+.run-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* The coach's ideas */
+.ideas {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.idea {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--page);
+}
+
+.idea p {
+  margin: 0 0 4px;
+}
+
+.idea-title {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.idea-result {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.idea .chip {
+  margin-top: 6px;
+  padding: 6px 14px;
+  font-size: 14px;
+}
+
+/* "Your decision" -- the card you'd pin above the till. */
+.decision-card {
+  padding: 6px 4px;
+}
+
+.decision-card-title {
+  margin: 10px 0 2px !important;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.decision-card-name {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* ---------- 6. Other pages & small bits ---------- */
+.past h1 {
+  margin: 24px 0 4px;
+  font-size: 34px;
+}
+
+.past .reply-row {
+  justify-content: flex-start;
+  margin: 16px 0;
+}
+
+.past-list {
+  list-style: none;
+  margin: 16px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.past-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  text-align: left;
+  transition: border-color 0.15s;
+}
+
+.past-item:hover {
+  border-color: var(--brown);
+}
+
+.past-name {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.past-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.error-banner {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.spinner {
+  color: var(--muted);
+}
+
+/* The "?" help bubble: shows on hover, keyboard focus or a tap. */
+.info-tip {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: var(--band);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: 1px;
+  cursor: help;
+}
+
+.info-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  z-index: 20;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  width: max-content;
+  max-width: 240px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--cream);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: left;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px);
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+}
+
+.info-tip:hover::after,
+.info-tip:focus::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* People who switch off animations in their system settings get none here. */
 @media (prefers-reduced-motion: reduce) {
-  .coach-dot,
-  .coach-fade {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---------- 7. Phones ---------- */
+@media (max-width: 600px) {
+  main {
+    padding: 0 12px 130px;
+  }
+
+  .topbar {
+    padding: 14px 12px;
+  }
+
+  .topbar-links {
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  .advisor-intro {
+    padding: 12px 0 14px;
+  }
+
+  .advisor-avatar {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .advisor-intro .advisor-avatar {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .msg-advisor {
+    gap: 6px;
+  }
+
+  .reply {
+    padding-left: 0;
+  }
+
+  .photo-choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .photo-choice img {
+    height: 96px;
+  }
+
+  .photo-choices-small img {
+    height: 64px;
+  }
+
+  .sentence {
+    font-size: 19px;
+  }
+
+  .path {
+    grid-template-columns: 1fr;
+  }
+
+  .path-profit {
+    text-align: left;
+  }
+
+  .path-diff {
+    grid-row: auto;
+    grid-column: auto;
+    justify-self: start;
+  }
+
+  .look-ahead {
+    flex-wrap: wrap;
+    border-radius: 16px;
+  }
+
+  .info-tip::after {
+    max-width: 180px;
   }
 }

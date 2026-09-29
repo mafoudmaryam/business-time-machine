@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { capitalize, currencySymbol, formatCount, formatMoney, formatUnit } from "./format";
+import { capitalize, currencySymbol, formatCount, formatMoney, formatPrice, formatUnit } from "./format";
 
 describe("currencySymbol", () => {
   it("gives the right symbol per currency, no hard-coded default", () => {
@@ -40,5 +40,15 @@ describe("capitalize", () => {
 describe("formatCount", () => {
   it("rounds and adds thousands separators", () => {
     expect(formatCount(1234.6)).toBe("1,235");
+  });
+});
+
+describe("formatPrice", () => {
+  it("keeps the cents on a small price", () => {
+    expect(formatPrice(6.5, "USD")).toBe("$6.50");
+  });
+  it("uses whole units for round or large amounts", () => {
+    expect(formatPrice(7, "USD")).toBe("$7");
+    expect(formatPrice(1234.5, "USD")).toBe("$1,235");
   });
 });

@@ -1,5 +1,5 @@
 import type { DecisionFormValues } from "../api";
-import { DEFAULT_CURRENCY, formatMonth, formatMoney } from "./format";
+import { DEFAULT_CURRENCY, formatMonth, formatMoney, formatPrice } from "./format";
 
 function pluralize(noun: string, value: number): string {
   return Math.abs(value) === 1 ? noun : `${noun}s`;
@@ -17,7 +17,7 @@ export function decisionSummary(d: DecisionFormValues, staffNoun?: string, curre
 
   switch (d.type) {
     case "price":
-      if (d.unit === "absolute") return `Set price to ${money(d.value)} ${from}`;
+      if (d.unit === "absolute") return `Set price to ${formatPrice(d.value, currency)} ${from}`;
       return d.value >= 0 ? `Raise prices ${d.value}% ${from}` : `Cut prices ${Math.abs(d.value)}% ${from}`;
 
     case "hiring": {
