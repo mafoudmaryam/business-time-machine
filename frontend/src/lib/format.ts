@@ -45,3 +45,20 @@ export function capitalize(word: string): string {
 export function formatCount(value: number): string {
   return Math.round(value).toLocaleString();
 }
+
+/** True when a money field (unit contains "{CUR}") still shows the US-dollar example
+ * while the business uses another currency, so the owner should type their own amount. */
+export function needsOwnAmount(field: { key: string; unit: string }, currency: string, editedMoney: Set<string>): boolean {
+  return currency !== "USD" && field.unit.includes("{CUR}") && !editedMoney.has(field.key);
+}
+
+/** Like formatMoney, but keeps the cents for small amounts such as a price per visit
+ * ($6.50, not $7). Large amounts are still shown in whole units. */
+export function formatPrice(value: number, currency: string): string {
+  if (Math.abs(value) >= 100 || Number.isInteger(value)) return formatMoney(value, currency);
+  try {
+    return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(value); // the currency's own decimals: $6.50, ¥8
+  } catch {
+    return formatMoney(value, currency);
+  }
+}

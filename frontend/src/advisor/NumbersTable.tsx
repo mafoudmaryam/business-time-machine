@@ -1,7 +1,7 @@
-import type { ScenarioResultOut } from "../../api";
-import { InfoTip } from "../../components/InfoTip";
-import { DEFAULT_CURRENCY, capitalize, formatCount, formatMoney, formatPercent } from "../../lib/format";
-import { displayScenarioName } from "../../lib/scenarioLabel";
+import type { ScenarioResultOut } from "../api";
+import { InfoTip } from "../components/InfoTip";
+import { DEFAULT_CURRENCY, capitalize, formatCount, formatMoney, formatPercent } from "../lib/format";
+import { displayScenarioName } from "../lib/scenarioLabel";
 
 interface Props {
   results: ScenarioResultOut[];
@@ -11,21 +11,21 @@ interface Props {
 
 /** Doubles as the accessible table view of the charts: every number the charts
  * show is also here as text. */
-export function SummaryTable({ results, customerNoun = "customers", currency = DEFAULT_CURRENCY }: Props) {
+export function NumbersTable({ results, customerNoun = "customers", currency = DEFAULT_CURRENCY }: Props) {
   return (
     <table className="summary-table">
       <thead>
         <tr>
           <th>Scenario</th>
           <th>
-            Total profit -- bad case{" "}
+            Total profit, bad case{" "}
             <InfoTip text="A pessimistic outcome: only 1 in 10 simulated futures did worse than this." />
           </th>
           <th>
-            Total profit -- most likely <InfoTip text="The middle outcome: half of simulated futures did better, half did worse." />
+            Total profit, most likely <InfoTip text="The middle outcome: half of simulated futures did better, half did worse." />
           </th>
           <th>
-            Total profit -- good case{" "}
+            Total profit, good case{" "}
             <InfoTip text="An optimistic outcome: only 1 in 10 simulated futures did better than this." />
           </th>
           <th>

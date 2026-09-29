@@ -1,21 +1,26 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import { NavBar } from "./components/NavBar";
-import { BusinessSetupPage } from "./pages/BusinessSetup/BusinessSetupPage";
-import { ComparisonDashboardPage } from "./pages/Comparison/ComparisonDashboardPage";
-import { RunHistoryPage } from "./pages/RunHistory/RunHistoryPage";
-import { ScenarioBuilderPage } from "./pages/ScenarioBuilder/ScenarioBuilderPage";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { AdvisorPage } from "./advisor/AdvisorPage";
+import { PastDecisionsPage } from "./advisor/PastDecisionsPage";
+import { Header } from "./components/Header";
 
 export function App() {
+  const location = useLocation();
+  // "New conversation" and "Past decisions → open" pass a new `fresh` value, which gives the
+  // advisor a new key, so React starts a brand-new conversation.
+  const fresh = (location.state as { fresh?: number } | null)?.fresh ?? 0;
+
   return (
     <>
-      <NavBar />
-      <main>
+      <a href="#main" className="skip-link">
+        Skip to content
+      </a>
+      <Header />
+      <main id="main">
         <Routes>
-          <Route path="/" element={<Navigate to="/setup" replace />} />
-          <Route path="/setup" element={<BusinessSetupPage />} />
-          <Route path="/scenarios" element={<ScenarioBuilderPage />} />
-          <Route path="/compare" element={<ComparisonDashboardPage />} />
-          <Route path="/history" element={<RunHistoryPage />} />
+          <Route path="/" element={<AdvisorPage key={fresh} />} />
+          <Route path="/history" element={<PastDecisionsPage />} />
+          {/* Old addresses from before the advisor still work. */}
+          <Route path="*" element={<Navigate to={`/${location.search}`} replace />} />
         </Routes>
       </main>
     </>

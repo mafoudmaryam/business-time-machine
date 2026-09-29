@@ -1,4 +1,6 @@
-# Frontend redesign plan (on hold)
+# Frontend redesign plan (superseded)
+
+> **Superseded (Sept 2026).** After seeing this dashboard-style redesign built, the owner found it too busy. The app is now one conversation with an advisor -- see `CLAUDE.md` ("frontend") and `frontend/src/advisor/`. Kept for the record.
 
 Status: **approved, on hold** pending the multi-industry task (café / restaurant /
 bakery). Do not implement until that task lands and this doc has been revisited for

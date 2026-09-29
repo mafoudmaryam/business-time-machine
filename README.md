@@ -98,9 +98,11 @@ npm run build   # type-checks and bundles
   simulation runs; `app/engine_bridge.py` is the only file that imports the engine.
   `seed_demo.py` seeds sample data.
 - `frontend/` -- React + TypeScript + Vite, Recharts for the bad-case/most-likely/
-  good-case band charts. `src/api.ts` is the single typed client for the backend;
-  `src/pages/` holds the four pages (business setup, scenario builder, comparison
-  dashboard, run history). Money is formatted with `Intl.NumberFormat` in each
+  good-case band charts. `src/api.ts` is the single typed client for the backend.
+  The whole app is one conversation with an advisor (`src/advisor/AdvisorPage.tsx`):
+  set up the business, describe a decision as a sentence, confirm the plan, see the
+  result and talk it through with the coach. `Past decisions` reopens earlier runs.
+  Money is formatted with `Intl.NumberFormat` in each
   business's own currency -- nothing is hard-coded to one currency.
 - `start.ps1` / `stop.ps1` -- start or stop both dev servers together.
 - `CLAUDE.md` -- project context and ground rules for AI-assisted development.
