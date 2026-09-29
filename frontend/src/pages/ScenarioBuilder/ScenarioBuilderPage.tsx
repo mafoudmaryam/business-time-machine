@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import {
   createScenario,
   decisionOutToForm,
@@ -12,6 +12,7 @@ import {
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
+import type { ScenarioPrefill } from "../../lib/coachIdea";
 import { DEFAULT_CURRENCY } from "../../lib/format";
 import { DecisionForm } from "./DecisionForm";
 import { DecisionList } from "./DecisionList";
@@ -31,12 +32,20 @@ export function ScenarioBuilderPage() {
   const selectedBusiness = businesses.data?.find((b) => b.id === businessId) ?? null;
   const industry = industries.data?.find((i) => i.id === selectedBusiness?.industry) ?? null;
 
-  const [name, setName] = useState("");
-  const [parentScenarioId, setParentScenarioId] = useState<number | undefined>(undefined);
-  const [decisions, setDecisions] = useState<DecisionFormValues[]>([]);
+  // "Try this idea" in the coach card arrives here with the idea already filled in. Every decision
+  // is still unconfirmed: the owner reviews and confirms them before saving.
+  const location = useLocation();
+  const [prefill] = useState<ScenarioPrefill | undefined>(
+    () => (location.state as { prefill?: ScenarioPrefill } | null)?.prefill,
+  );
+
+  const [name, setName] = useState(prefill?.name ?? "");
+  const [parentScenarioId, setParentScenarioId] = useState<number | undefined>(prefill?.parentScenarioId);
+  const [decisions, setDecisions] = useState<DecisionFormValues[]>(prefill?.decisions ?? []);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [fromCoach, setFromCoach] = useState(prefill !== undefined);
 
   function selectBusiness(id: number) {
     setParams({ business: String(id) });
@@ -49,6 +58,7 @@ export function ScenarioBuilderPage() {
     setDecisions([]);
     setSubmitError(null);
     setSavedMessage(null);
+    setFromCoach(false);
   }
 
   function duplicateAsNewVersion(scenario: ScenarioOut) {
@@ -57,6 +67,7 @@ export function ScenarioBuilderPage() {
     setDecisions(scenario.decisions.map(decisionOutToForm));
     setSubmitError(null);
     setSavedMessage(null);
+    setFromCoach(false);
   }
 
   function addDecision(decision: DecisionFormValues) {
@@ -80,6 +91,7 @@ export function ScenarioBuilderPage() {
       const created = await createScenario(businessId, name.trim(), decisions, parentScenarioId);
       setSavedMessage(`Saved "${created.name}".`);
       resetFormKeepBusiness();
+      setFromCoach(false);
       scenarios.reload();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : String(err));
@@ -145,7 +157,12 @@ export function ScenarioBuilderPage() {
 
           <section>
             <h2>{parentScenarioId ? "New version" : "New scenario"}</h2>
-            {parentScenarioId && (
+            {fromCoach && (
+              <p className="empty-hint">
+                Your coach suggested this idea. Check each decision below and tick "confirm" before saving.
+              </p>
+            )}
+            {parentScenarioId && !fromCoach && (
               <p className="empty-hint">
                 Based on{" "}
                 {scenarios.data?.find((s) => s.id === parentScenarioId)?.name ?? `scenario #${parentScenarioId}`}

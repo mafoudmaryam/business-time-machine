@@ -5,6 +5,12 @@ from __future__ import annotations
 import os
 import tempfile
 
+# Tests must never depend on a developer's backend/.env: real environment variables win over .env,
+# so pin the coach to the free rule-based mode before the app is imported.
+os.environ["COACH_PROVIDER"] = "template"
+os.environ["COACH_ENABLED"] = "true"
+os.environ["COACH_SHOW_MODE"] = "false"
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -12,6 +18,14 @@ from sqlalchemy.orm import sessionmaker
 
 from app.database import Base, get_db
 from app.main import app
+
+
+@pytest.fixture(autouse=True)
+def _coach_defaults(monkeypatch):
+    monkeypatch.setenv("COACH_PROVIDER", "template")
+    monkeypatch.setenv("COACH_ENABLED", "true")
+    monkeypatch.setenv("COACH_SHOW_MODE", "false")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
 
 
 @pytest.fixture()

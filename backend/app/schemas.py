@@ -193,3 +193,54 @@ class SimulationRunSummaryOut(BaseModel):
     horizon: int
     created_at: dt.datetime
     scenario_names: list[str]
+
+
+# ---------- coach ----------
+
+
+class CoachStatusOut(BaseModel):
+    enabled: bool
+    mode: Optional[str] = None  # only filled in when COACH_SHOW_MODE=true
+
+
+class IdeaResultOut(BaseModel):
+    """All numbers here come straight from the engine's simulation of the idea."""
+
+    profit_change_most_likely: float
+    beats_change_nothing_of_10: int
+    cash_runs_out_of_10: int
+    profit_bad_case: float
+    profit_most_likely: float
+    profit_good_case: float
+
+
+class CoachIdeaOut(BaseModel):
+    title: str
+    why: str
+    builds_on: str  # a scenario name from the run, or "baseline"
+    builds_on_scenario_id: Optional[int] = None
+    decisions: list[dict[str, Any]]  # flat DECISIONS_JSON_SCHEMA shape, to be added on top of builds_on
+    decision_texts: list[str]
+    result: IdeaResultOut
+
+
+class CoachOut(BaseModel):
+    mode: str
+    model: Optional[str] = None
+    fallback: bool
+    headline: str
+    what_happens: str
+    why: str
+    watch_out: list[str]
+    ideas: list[CoachIdeaOut]
+    generated_at: str
+
+
+class AskIn(BaseModel):
+    question: str = Field(min_length=1, max_length=500)
+
+
+class AskOut(BaseModel):
+    answer: str
+    mode: str
+    fallback: bool

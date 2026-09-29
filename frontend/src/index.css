@@ -445,3 +445,156 @@ table.run-history-table td {
   font-size: 13px;
   margin-top: 8px;
 }
+
+/* ---------- AI coach ---------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.coach-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 6px solid var(--button);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0 24px;
+}
+
+.coach-card h2 {
+  margin-top: 0;
+}
+
+.coach-headline {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.coach-watch {
+  background: var(--band);
+  border-radius: 6px;
+  padding: 8px 16px;
+  margin: 12px 0;
+}
+
+.coach-watch h3 {
+  margin: 4px 0;
+}
+
+.idea-grid {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.idea-card {
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.idea-card h4 {
+  margin: 0;
+  font-family: var(--font-heading);
+}
+
+.idea-card p {
+  margin: 0;
+}
+
+.idea-decisions {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 14px;
+  color: var(--muted-1);
+}
+
+.idea-builds-on {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.idea-result {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.idea-result > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.idea-result dt {
+  color: var(--text-muted);
+}
+
+.idea-result dd {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.idea-card button {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.coach-ask form {
+  display: flex;
+  gap: 8px;
+  max-width: 560px;
+}
+
+.coach-ask input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.coach-examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.coach-answer {
+  background: var(--page);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  max-width: 640px;
+}
+
+.coach-answer p {
+  margin: 4px 0;
+}
+
+.coach-question {
+  font-weight: 600;
+  color: var(--muted-1);
+}
+
+.coach-footer {
+  margin: 16px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, JSON, String, UniqueConstraint
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -131,3 +131,37 @@ class SimulationResult(Base):
     summary = Column(JSON, nullable=False)
 
     run = relationship("SimulationRun", back_populates="results")
+
+
+class AiInteraction(Base):
+    """Every call to a coach provider (and every template answer), kept as thesis data.
+    grounding says whether the numbers in the response were all found in the facts."""
+
+    __tablename__ = "ai_interactions"
+
+    id = Column(Integer, primary_key=True)
+    simulation_run_id = Column(Integer, ForeignKey("simulation_runs.id"), nullable=False)
+    kind = Column(String, nullable=False)              # "coach" | "ask"
+    provider = Column(String, nullable=False)          # "template" | "ollama" | "anthropic"
+    model = Column(String, nullable=True)
+    attempt = Column(Integer, nullable=False, default=1)
+    prompt = Column(Text, nullable=False)
+    response = Column(Text, nullable=True)
+    prompt_tokens = Column(Integer, nullable=True)
+    completion_tokens = Column(Integer, nullable=True)
+    duration_ms = Column(Integer, nullable=True)
+    grounding = Column(JSON, nullable=True)            # {"passed": bool, "unmatched": [numbers]}
+    error = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
+
+
+class CoachResult(Base):
+    """The finished coach for a run, cached so reopening a run is instant."""
+
+    __tablename__ = "coach_results"
+    __table_args__ = (UniqueConstraint("simulation_run_id", name="uq_coach_run"),)
+
+    id = Column(Integer, primary_key=True)
+    simulation_run_id = Column(Integer, ForeignKey("simulation_runs.id"), nullable=False)
+    payload = Column(JSON, nullable=False)
+    created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)

@@ -348,3 +348,73 @@ export function listSimulationRuns(businessId: number): Promise<SimulationRunSum
 export function getSimulationRun(runId: number): Promise<SimulationRunOut> {
   return request(`/simulation_runs/${runId}`);
 }
+
+// ---------- AI coach ----------
+
+export interface CoachStatus {
+  enabled: boolean;
+  mode: string | null; // only filled in when the server allows showing it
+}
+
+/** All numbers come from the engine's own simulation of the idea. */
+export interface IdeaResult {
+  profit_change_most_likely: number;
+  beats_change_nothing_of_10: number;
+  cash_runs_out_of_10: number;
+  profit_bad_case: number;
+  profit_most_likely: number;
+  profit_good_case: number;
+}
+
+/** Flat decision shape of the backend's DECISIONS_JSON_SCHEMA (ratios, not percentages). */
+export interface IdeaDecision {
+  type: string;
+  start_month: number;
+  value: number;
+  unit: string;
+  loan_months?: number;
+  annual_rate?: number;
+  capacity_pct?: number;
+  cogs_ratio?: number;
+  investment?: number;
+}
+
+export interface CoachIdea {
+  title: string;
+  why: string;
+  builds_on: string; // a scenario name from the run, or "baseline"
+  builds_on_scenario_id: number | null;
+  decisions: IdeaDecision[];
+  decision_texts: string[];
+  result: IdeaResult;
+}
+
+export interface CoachOut {
+  mode: string;
+  model: string | null;
+  fallback: boolean;
+  headline: string;
+  what_happens: string;
+  why: string;
+  watch_out: string[];
+  ideas: CoachIdea[];
+  generated_at: string;
+}
+
+export interface AskOut {
+  answer: string;
+  mode: string;
+  fallback: boolean;
+}
+
+export function getCoachStatus(): Promise<CoachStatus> {
+  return request("/coach/status");
+}
+
+export function requestCoach(runId: number): Promise<CoachOut> {
+  return request(`/simulation_runs/${runId}/coach`, { method: "POST" });
+}
+
+export function askCoach(runId: number, question: string): Promise<AskOut> {
+  return request(`/simulation_runs/${runId}/ask`, { method: "POST", body: JSON.stringify({ question }) });
+}

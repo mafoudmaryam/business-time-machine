@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { listBusinesses, listIndustries, listScenarios, simulateBusiness, type SimulationRunOut } from "../../api";
+import { CoachCard } from "../../components/CoachCard";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
 import { MAX_SCENARIOS_PER_RUN } from "../../constants";
@@ -170,6 +171,12 @@ export function ComparisonDashboardPage() {
 
           {run && (
             <section className="run-results">
+              <CoachCard
+                key={run.id}
+                runId={run.id}
+                businessId={run.business_id}
+                currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
+              />
               <RiskAlerts results={run.results} />
               <ChartCaption />
               <div className="chart-grid">

@@ -12,7 +12,7 @@ from jsonschema import ValidationError, validate as jsonschema_validate
 from sqlalchemy.orm import Session
 
 from btm_engine import (BusinessBaseline, DECISIONS_JSON_SCHEMA, Decision as EngineDecision,
-                        get_template, list_industries, run_scenarios)
+                        build_facts, describe_decision, get_template, list_industries, run_scenarios)
 
 from . import models
 
@@ -109,3 +109,90 @@ def run_simulation(
     db.commit()
     db.refresh(run_row)
     return run_row
+
+
+# ---------- coach support ----------
+
+_EXTRA_KEYS = ("loan_months", "annual_rate", "capacity_pct", "cogs_ratio", "investment")
+DECISION_ITEM_SCHEMA = DECISIONS_JSON_SCHEMA["properties"]["decisions"]["items"]
+
+
+def decision_to_flat(d: EngineDecision) -> dict:
+    """The flat shape used by DECISIONS_JSON_SCHEMA and the scenario API."""
+    return {"type": d.type, "start_month": d.start_month, "value": d.value, "unit": d.unit, **d.extra}
+
+
+def clean_idea_decisions(decision_dicts: list[dict], horizon: int) -> list[dict]:
+    """Validate an AI-written list of decisions against DECISIONS_JSON_SCHEMA and the engine's
+    own rules. Returns the cleaned flat dicts (unknown keys dropped); raises ValueError if invalid."""
+    if not decision_dicts:
+        raise ValueError("an idea needs at least one decision")
+    cleaned = []
+    for d in decision_dicts:
+        if not isinstance(d, dict):
+            raise ValueError("decision must be an object")
+        keep = {k: d[k] for k in ("type", "start_month", "value", "unit", *_EXTRA_KEYS) if k in d and d[k] is not None}
+        cleaned.append(keep)
+    validate_decisions_payload(cleaned)
+    for d in cleaned:
+        EngineDecision.from_dict(d).validate(horizon)
+    return cleaned
+
+
+def _baseline_at_run_time(business: models.Business, run: models.SimulationRun) -> models.BusinessSnapshot:
+    older = [s for s in business.snapshots if s.created_at <= run.created_at]
+    return (older or business.snapshots)[-1]
+
+
+def _run_decisions(db: Session, run: models.SimulationRun) -> dict[str, list[EngineDecision]]:
+    """Scenario name -> engine decisions, for the non-baseline scenarios of a stored run."""
+    out: dict[str, list[EngineDecision]] = {}
+    for result in run.results:
+        if result.scenario_name == "baseline":
+            continue
+        scenario = db.get(models.Scenario, result.scenario_id) if result.scenario_id else None
+        out[result.scenario_name] = to_engine_decisions(scenario.decisions) if scenario else []
+    return out
+
+
+def build_run_facts(db: Session, run: models.SimulationRun) -> tuple[dict, dict[str, list[dict]]]:
+    """The coach's facts for a stored run, plus each scenario's raw decisions (flat dicts)."""
+    business = run.business
+    base = to_baseline(_baseline_at_run_time(business, run))
+    tpl = get_template(business.industry)
+    decisions = _run_decisions(db, run)
+    summaries = {r.scenario_name: r.summary for r in run.results}
+    facts = build_facts(base, tpl, decisions, summaries, run.horizon, business.currency)
+    raw = {name: [decision_to_flat(d) for d in decs] for name, decs in decisions.items()}
+    return facts, raw
+
+
+def simulate_ideas(db: Session, run: models.SimulationRun, ideas: list[dict]) -> list[dict]:
+    """Simulate each idea (its parent scenario's decisions + the idea's own) on the SAME seed,
+    iterations and horizon as the run. Returns one engine-number dict per idea, in order.
+    An idea's `builds_on` is a scenario name from the run, or "baseline" for a standalone idea."""
+    business = run.business
+    base = to_baseline(_baseline_at_run_time(business, run))
+    tpl = get_template(business.industry)
+    parents = _run_decisions(db, run)
+    scenario_map = {}
+    for i, idea in enumerate(ideas):
+        parent = parents.get(idea["builds_on"], [])
+        scenario_map[f"idea {i + 1}"] = list(parent) + [EngineDecision.from_dict(d) for d in idea["decisions"]]
+    result = run_scenarios(base, tpl, scenario_map, horizon=run.horizon, iterations=run.iterations, seed=run.seed)
+    out = []
+    for i in range(len(ideas)):
+        sm = result.scenarios[f"idea {i + 1}"].summary
+        out.append({
+            "profit_change_most_likely": round(sm["profit_vs_baseline_p50"]),
+            "beats_change_nothing_of_10": int(round(sm["prob_beats_baseline_profit"] * 10)),
+            "cash_runs_out_of_10": int(round(sm["prob_cash_negative"] * 10)),
+            "profit_bad_case": round(sm["total_profit_p10"]),
+            "profit_most_likely": round(sm["total_profit_p50"]),
+            "profit_good_case": round(sm["total_profit_p90"]),
+        })
+    return out
+
+
+def describe_flat_decisions(decision_dicts: list[dict], currency: str) -> list[str]:
+    return [describe_decision(EngineDecision.from_dict(d), currency) for d in decision_dicts]

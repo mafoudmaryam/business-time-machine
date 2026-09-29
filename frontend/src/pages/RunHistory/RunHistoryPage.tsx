@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getSimulationRun, listBusinesses, listIndustries, listSimulationRuns, type SimulationRunOut } from "../../api";
+import { CoachCard } from "../../components/CoachCard";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
@@ -130,6 +131,7 @@ export function RunHistoryPage() {
           {openedRun && (
             <section className="run-results">
               <h2>Run #{openedRun.id}</h2>
+              <CoachCard key={openedRun.id} runId={openedRun.id} businessId={openedRun.business_id} currency={currency} />
               <RiskAlerts results={openedRun.results} />
               <ChartCaption />
               <div className="chart-grid">

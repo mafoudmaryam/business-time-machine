@@ -8,7 +8,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import businesses, industries, scenarios, simulations
+from .routers import businesses, coach, industries, scenarios, simulations
 
 app = FastAPI(
     title="Business Time Machine API",
@@ -28,6 +28,7 @@ app.include_router(businesses.router)
 app.include_router(industries.router)
 app.include_router(scenarios.router)
 app.include_router(simulations.router)
+app.include_router(coach.router)
 
 
 @app.get("/health", tags=["health"])
