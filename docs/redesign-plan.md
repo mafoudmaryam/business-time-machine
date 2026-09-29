@@ -1,6 +1,6 @@
-# Frontend redesign plan (on hold)
+# Frontend redesign plan (shipped)
 
-Status: **approved, on hold** pending the multi-industry task (café / restaurant /
+Status: **shipped** (branch `frontend-redesign`). Deviations from the plan: the live "rough estimate" was dropped because the wizard now shows the engine's own month-1 summary instead (two different sales numbers would confuse owners); no "last played" in the header (the current business name is shown instead); no month-name mapping for `start_month`, because a simulation month is not a calendar month; charts use one shared legend above the grid instead of per-chart legends with end values; the result table keeps percentages (it is the "all the numbers" view), while cards use "X of 10 futures". Original status: approved, on hold pending the multi-industry task (café / restaurant /
 bakery). Do not implement until that task lands and this doc has been revisited for
 industry-specific details (see "Open questions for the industries task" at the
 bottom). Visual/UX only — no changes to `api.ts`, the engine, the backend, or any

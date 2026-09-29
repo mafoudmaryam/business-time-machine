@@ -18,14 +18,14 @@ export function SummaryTable({ results, customerNoun = "customers", currency = D
         <tr>
           <th>Scenario</th>
           <th>
-            Total profit -- bad case{" "}
+            Total profit, bad case{" "}
             <InfoTip text="A pessimistic outcome: only 1 in 10 simulated futures did worse than this." />
           </th>
           <th>
-            Total profit -- most likely <InfoTip text="The middle outcome: half of simulated futures did better, half did worse." />
+            Total profit, most likely <InfoTip text="The middle outcome: half of simulated futures did better, half did worse." />
           </th>
           <th>
-            Total profit -- good case{" "}
+            Total profit, good case{" "}
             <InfoTip text="An optimistic outcome: only 1 in 10 simulated futures did better than this." />
           </th>
           <th>

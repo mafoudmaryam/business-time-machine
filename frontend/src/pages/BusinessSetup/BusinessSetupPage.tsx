@@ -12,6 +12,7 @@ import {
 } from "../../api";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { NumberField } from "../../components/NumberField";
+import { PageHeading } from "../../components/PageHeading";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
 import { BASELINE_STEPS, CURRENCIES } from "../../constants";
@@ -142,128 +143,159 @@ export function BusinessSetupPage() {
     }
   }
 
+
   const current = step === 0 ? null : BASELINE_STEPS[step - 1];
-  const needsAmounts = (key: string, unit: string) =>
-    currency !== "USD" && unit.includes("{CUR}") && !editedMoney.has(key);
-  const stepHasUnedited = current?.fields.some((f) => needsAmounts(f.key, f.unit)) ?? false;
+  const stepNames = ["Business type", ...BASELINE_STEPS.map((s) => s.title)];
   const heading = selectedIndustry
     ? `Tell us about your ${selectedIndustry.display_name.toLowerCase()}`
     : "What kind of business do you run?";
+  const needsAmounts = (key: string, unit: string) =>
+    currency !== "USD" && unit.includes("{CUR}") && !editedMoney.has(key);
+  const stepHasUnedited = current?.fields.some((f) => needsAmounts(f.key, f.unit)) ?? false;
 
   return (
     <div className="page">
-      {selectedIndustry && step > 0 ? (
-        <div className="hero-banner" style={{ backgroundImage: `url(${heroImage(selectedIndustry.id, "setup")})` }}>
-          <h1>{heading}</h1>
-        </div>
-      ) : (
-        <h1>{heading}</h1>
-      )}
-      <p className="step-indicator">
-        Step {step + 1} of {totalSteps}: {step === 0 ? "Business type" : current!.title}
+      <PageHeading
+        title={heading}
+        subtitle={
+          step === 0
+            ? "Pick the closest match. We'll fill in typical numbers you can change."
+            : "Example numbers are for a typical small US business — replace them with your own."
+        }
+        image={selectedIndustry && step > 0 ? heroImage(selectedIndustry.id, "setup") : undefined}
+      />
+
+      <ol className="progress" aria-label="Setup steps">
+        {stepNames.map((label, i) => (
+          <li
+            key={label}
+            className={i === step ? "progress-step is-current" : i < step ? "progress-step is-done" : "progress-step"}
+            aria-current={i === step ? "step" : undefined}
+          >
+            <span className="progress-dot" aria-hidden="true">
+              {i < step ? "✓" : i + 1}
+            </span>
+            <span className="progress-label">{label}</span>
+          </li>
+        ))}
+      </ol>
+      <p className="visually-hidden" aria-live="polite">
+        Step {step + 1} of {totalSteps}: {stepNames[step]}
       </p>
 
-      {step === 0 && (
-        <div className="industry-picker">
-          {industries.loading && <Spinner label="Loading business types…" />}
-          <ErrorBanner message={industries.error} />
-          {industries.data && (
-            <div className="industry-cards">
-              {industries.data.map((ind) => (
-                <button
-                  key={ind.id}
-                  type="button"
-                  className={ind.id === industryId ? "industry-card selected" : "industry-card"}
-                  style={{ backgroundImage: `url(${heroImage(ind.id, "setup")})` }}
-                  onClick={() => selectIndustry(ind)}
-                >
-                  <span className="industry-card-label">{ind.display_name}</span>
-                </button>
-              ))}
+      {/* A real <form>, so pressing Enter in any field works like clicking Next. */}
+      <form
+        className="card wizard-card"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          goNext();
+        }}
+      >
+        {step === 0 && (
+          <div className="industry-picker">
+            {industries.loading && <Spinner label="Loading business types…" />}
+            <ErrorBanner message={industries.error} />
+            {industries.data && (
+              <div className="industry-cards">
+                {industries.data.map((ind) => (
+                  <button
+                    key={ind.id}
+                    type="button"
+                    aria-pressed={ind.id === industryId}
+                    className={ind.id === industryId ? "industry-card selected" : "industry-card"}
+                    style={{ backgroundImage: `url(${heroImage(ind.id, "setup")})` }}
+                    onClick={() => selectIndustry(ind)}
+                  >
+                    <span className="industry-card-label">{ind.display_name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {errors.industry && <p className="field-error">{errors.industry}</p>}
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="field-grid">
+            <div className="field">
+              <label htmlFor="business-name">Business name</label>
+              <input
+                id="business-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={industryId ? NAME_PLACEHOLDER[industryId] : "Corner Café"}
+                aria-invalid={errors.name ? "true" : undefined}
+              />
+              <p className="field-help">Shown at the top of every page.</p>
+              {errors.name && <p className="field-error">{errors.name}</p>}
             </div>
+
+            <div className="field">
+              <label htmlFor="business-currency">Currency</label>
+              <select id="business-currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                {CURRENCIES.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </select>
+              <p className="field-help">Every money amount and chart uses this currency.</p>
+            </div>
+          </div>
+        )}
+
+        {stepHasUnedited && (
+          <p className="currency-notice" role="note">
+            These example amounts are in US dollars — please enter your own amounts in {currency}.
+          </p>
+        )}
+
+        {current && (
+          <div className="field-grid">
+            {current.fields.map((field) => (
+              <NumberField
+                key={field.key}
+                highlight={needsAmounts(field.key, field.unit)}
+                label={fieldLabels[field.key] ?? field.label}
+                help={field.help}
+                tooltip={field.help}
+                unit={formatUnit(field.unit, currency)}
+                min={field.min}
+                max={field.max}
+                step={field.step}
+                value={baseline[field.key as keyof BaselineFormValues]}
+                onChange={(v) => updateField(field.key, v)}
+                error={errors[field.key]}
+              />
+            ))}
+          </div>
+        )}
+
+        {isLastStep && (
+          <div className={startSummary?.isLoss ? "start-summary start-summary-loss" : "start-summary"} role="status">
+            <h3>A typical month, with your numbers</h3>
+            {!startSummary && !startMonthFailed && <p>Working it out…</p>}
+            {startMonthFailed && <p>We couldn't work out the summary right now, but you can still continue.</p>}
+            {startSummary && <p>{startSummary.text}</p>}
+            {startSummary?.hint && <p className="start-summary-hint">{startSummary.hint}</p>}
+          </div>
+        )}
+
+        <ErrorBanner message={submitError} />
+
+        <div className="wizard-nav">
+          {step > 0 && (
+            <button type="button" className="button-secondary" onClick={goBack} disabled={submitting}>
+              Back
+            </button>
           )}
-          {errors.industry && <p className="field-error">{errors.industry}</p>}
+          <button type="submit" disabled={submitting}>
+            {isLastStep ? (submitting ? "Creating…" : "Create business") : "Next"}
+          </button>
         </div>
-      )}
-
-      {step >= 1 && (
-        <p className="example-numbers-note">
-          Example numbers are for a typical small US business — replace them with your own.
-        </p>
-      )}
-
-      {step === 1 && (
-        <>
-          <div className="field">
-            <label htmlFor="business-name">Business name</label>
-            <input
-              id="business-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={industryId ? NAME_PLACEHOLDER[industryId] : "Corner Café"}
-            />
-            <p className="field-help">Shown in scenario and run-history lists.</p>
-            {errors.name && <p className="field-error">{errors.name}</p>}
-          </div>
-
-          <div className="field">
-            <label htmlFor="business-currency">Currency</label>
-            <select id="business-currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
-              {CURRENCIES.map((code) => (
-                <option key={code} value={code}>
-                  {code}
-                </option>
-              ))}
-            </select>
-            <p className="field-help">Every money amount and chart uses this currency.</p>
-          </div>
-        </>
-      )}
-
-      {stepHasUnedited && (
-        <p className="currency-notice" role="note">
-          These example amounts are in US dollars — please enter your own amounts in {currency}.
-        </p>
-      )}
-
-      {current?.fields.map((field) => (
-        <NumberField
-          key={field.key}
-          highlight={needsAmounts(field.key, field.unit)}
-          label={fieldLabels[field.key] ?? field.label}
-          help={field.help}
-          tooltip={field.help}
-          unit={formatUnit(field.unit, currency)}
-          min={field.min}
-          max={field.max}
-          step={field.step}
-          value={baseline[field.key as keyof BaselineFormValues]}
-          onChange={(v) => updateField(field.key, v)}
-          error={errors[field.key]}
-        />
-      ))}
-
-      {isLastStep && (
-        <div className={startSummary?.isLoss ? "start-summary start-summary-loss" : "start-summary"} role="status">
-          <h3>A typical month, with your numbers</h3>
-          {!startSummary && !startMonthFailed && <p>Working it out…</p>}
-          {startMonthFailed && <p>We couldn't work out the summary right now, but you can still continue.</p>}
-          {startSummary && <p>{startSummary.text}</p>}
-          {startSummary?.hint && <p className="start-summary-hint">{startSummary.hint}</p>}
-        </div>
-      )}
-
-      <ErrorBanner message={submitError} />
-
-      <div className="wizard-nav">
-        <button type="button" onClick={goBack} disabled={step === 0 || submitting}>
-          Back
-        </button>
-        <button type="button" onClick={goNext} disabled={submitting}>
-          {isLastStep ? (submitting ? "Creating…" : "Create business") : "Next"}
-        </button>
-      </div>
+      </form>
     </div>
   );
 }

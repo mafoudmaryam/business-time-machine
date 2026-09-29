@@ -1,39 +1,31 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { listBusinesses, listIndustries, listScenarios, simulateBusiness, type SimulationRunOut } from "../../api";
-import { CoachCard } from "../../components/CoachCard";
+import {
+  decisionOutToForm,
+  listBusinesses,
+  listIndustries,
+  listScenarios,
+  simulateBusiness,
+  type SimulationRunOut,
+} from "../../api";
+import { BusinessPicker } from "../../components/BusinessPicker";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { PageHeading } from "../../components/PageHeading";
 import { Spinner } from "../../components/Spinner";
 import { MAX_SCENARIOS_PER_RUN } from "../../constants";
 import { useAsync } from "../../hooks/useAsync";
-import { DEFAULT_CURRENCY, capitalize } from "../../lib/format";
+import { readBusinessId, withBusiness } from "../../lib/businessParam";
+import { decisionSummary } from "../../lib/decisionSummary";
+import { DEFAULT_CURRENCY } from "../../lib/format";
 import { friendlyErrorMessage } from "../../lib/friendlyError";
 import { heroImage } from "../../lib/images";
-import { ChartCaption } from "./ChartCaption";
-import { MetricChart } from "./MetricChart";
-import { RiskAlerts } from "./RiskAlert";
-import { RunMeta } from "./RunMeta";
-import { SummaryTable } from "./SummaryTable";
+import { RunResults } from "./RunResults";
 
 const HORIZONS = [12, 24, 36];
 
-function buildCharts(customerNoun: string): { metric: string; title: string; tooltip: string; isMoney: boolean }[] {
-  return [
-    { metric: "revenue", title: "Revenue", tooltip: "Total sales before any costs are taken out.", isMoney: true },
-    { metric: "profit", title: "Profit", tooltip: "What's left after every cost is paid.", isMoney: true },
-    { metric: "cash", title: "Cash", tooltip: "Money actually in the bank, month by month.", isMoney: true },
-    {
-      metric: "customers",
-      title: capitalize(customerNoun),
-      tooltip: `How many ${customerNoun} keep coming back, month by month.`,
-      isMoney: false,
-    },
-  ];
-}
-
 export function ComparisonDashboardPage() {
   const [params, setParams] = useSearchParams();
-  const businessId = params.get("business") ? Number(params.get("business")) : null;
+  const businessId = readBusinessId(params);
 
   const businesses = useAsync(listBusinesses, []);
   const industries = useAsync(listIndustries, []);
@@ -42,7 +34,7 @@ export function ComparisonDashboardPage() {
   const selectedBusiness = businesses.data?.find((b) => b.id === businessId) ?? null;
   const industry = industries.data?.find((i) => i.id === selectedBusiness?.industry) ?? null;
   const customerNoun = industry?.customer_noun ?? "customers";
-  const charts = buildCharts(customerNoun);
+  const currency = selectedBusiness?.currency ?? DEFAULT_CURRENCY;
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [horizon, setHorizon] = useState(24);
@@ -80,128 +72,113 @@ export function ComparisonDashboardPage() {
     }
   }
 
+  const full = selectedIds.length >= MAX_SCENARIOS_PER_RUN;
+
   return (
     <div className="page">
-      {industry && (
-        <div className="hero-banner" style={{ backgroundImage: `url(${heroImage(industry.id, "compare")})` }}>
-          <h1>Comparison dashboard</h1>
-        </div>
-      )}
-      {!industry && <h1>Comparison dashboard</h1>}
+      <PageHeading
+        title="Compare possible futures"
+        subtitle="Pick up to three what-ifs and see how each one plays out against changing nothing."
+        image={industry ? heroImage(industry.id, "compare") : undefined}
+      />
 
-      <div className="field">
-        <label htmlFor="business-select">Business</label>
-        {businesses.loading && <Spinner label="Loading businesses…" />}
-        <ErrorBanner message={businesses.error} />
-        {businesses.data && (
-          <select
-            id="business-select"
-            value={businessId ?? ""}
-            onChange={(e) => selectBusiness(Number(e.target.value))}
-          >
-            <option value="" disabled>
-              Choose a business…
-            </option>
-            {businesses.data.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
+      <BusinessPicker businesses={businesses} businessId={businessId} onSelect={selectBusiness} />
 
       {businessId && (
-        <>
-          <div className="field">
-            <span>Scenarios to compare (up to {MAX_SCENARIOS_PER_RUN}; "if you change nothing" is always included)</span>
-            {scenarios.loading && <Spinner label="Loading scenarios…" />}
+        <div className="card run-setup">
+          <fieldset className="plain-fieldset">
+            <legend className="step-title">
+              <span className="step-badge">1</span> Choose what-ifs to compare
+              <span className="step-hint">
+                {selectedIds.length} of {MAX_SCENARIOS_PER_RUN} chosen · "If you change nothing" is always included
+              </span>
+            </legend>
+
+            {scenarios.loading && <Spinner label="Loading what-ifs…" />}
             <ErrorBanner message={scenarios.error} />
             {scenarios.data && scenarios.data.length === 0 && (
-              <p className="empty-hint">This business has no scenarios yet.</p>
+              <div className="empty-state">
+                <p>This business has no what-ifs yet.</p>
+                <Link to={withBusiness("/scenarios", businessId)} className="button">
+                  Create your first what-if
+                </Link>
+              </div>
             )}
             {scenarios.data && scenarios.data.length > 0 && (
-              <ul className="scenario-checklist">
+              <ul className="pick-grid">
                 {scenarios.data.map((s) => {
                   const needsConfirmation = s.decisions.some((d) => !d.confirmed);
+                  const checked = selectedIds.includes(s.id);
+                  const disabled = needsConfirmation || (!checked && full);
                   return (
                     <li key={s.id}>
-                      <label>
+                      <label className={`pick-card${checked ? " is-checked" : ""}${disabled ? " is-disabled" : ""}`}>
                         <input
                           type="checkbox"
-                          checked={selectedIds.includes(s.id)}
-                          disabled={
-                            needsConfirmation ||
-                            (!selectedIds.includes(s.id) && selectedIds.length >= MAX_SCENARIOS_PER_RUN)
-                          }
+                          checked={checked}
+                          disabled={disabled}
                           onChange={() => toggleScenario(s.id)}
                         />
-                        {s.name}
+                        <span className="pick-card-body">
+                          <span className="pick-card-title">{s.name}</span>
+                          <span className="pick-card-detail">
+                            {s.decisions
+                              .map((d) => decisionSummary(decisionOutToForm(d), industry?.staff_noun, currency))
+                              .join(" · ")}
+                          </span>
+                        </span>
                       </label>
                       {needsConfirmation && (
-                        <span className="needs-confirmation">
-                          {" "}
-                          needs confirmation --{" "}
-                          <Link to={`/scenarios?business=${businessId}`}>confirm in scenario builder</Link>
-                        </span>
+                        <p className="needs-confirmation">
+                          Not confirmed yet —{" "}
+                          <Link to={withBusiness("/scenarios", businessId)}>confirm it in What-ifs</Link>
+                        </p>
                       )}
                     </li>
                   );
                 })}
               </ul>
             )}
-          </div>
+          </fieldset>
 
-          <div className="field">
-            <label htmlFor="horizon-select">Months to simulate</label>
-            <select id="horizon-select" value={horizon} onChange={(e) => setHorizon(Number(e.target.value))}>
+          <fieldset className="plain-fieldset">
+            <legend className="step-title">
+              <span className="step-badge">2</span> How far ahead?
+            </legend>
+            <div className="pill-group" role="radiogroup" aria-label="Months to simulate">
               {HORIZONS.map((h) => (
-                <option key={h} value={h}>
+                <button
+                  key={h}
+                  type="button"
+                  role="radio"
+                  aria-checked={horizon === h}
+                  className={horizon === h ? "pill is-on" : "pill"}
+                  onClick={() => setHorizon(h)}
+                >
                   {h} months
-                </option>
+                </button>
               ))}
-            </select>
+            </div>
+          </fieldset>
+
+          <div className="run-actions">
+            <button
+              type="button"
+              className="button-large"
+              onClick={runSimulation}
+              disabled={selectedIds.length === 0 || running}
+            >
+              {running ? "Simulating 1,000 futures…" : run ? "Run again" : "See what happens"}
+            </button>
+            {selectedIds.length === 0 && scenarios.data && scenarios.data.length > 0 && (
+              <span className="hint">Choose at least one what-if first.</span>
+            )}
           </div>
-
-          <button type="button" onClick={runSimulation} disabled={selectedIds.length === 0 || running}>
-            {running ? "Running…" : "Run simulation"}
-          </button>
-
           <ErrorBanner message={runError} />
-
-          {run && (
-            <section className="run-results">
-              <CoachCard
-                key={run.id}
-                runId={run.id}
-                businessId={run.business_id}
-                currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
-              />
-              <RiskAlerts results={run.results} />
-              <ChartCaption />
-              <div className="chart-grid">
-                {charts.map((c) => (
-                  <MetricChart
-                    key={c.metric}
-                    title={c.title}
-                    tooltip={c.tooltip}
-                    metric={c.metric}
-                    results={run.results}
-                    isMoney={c.isMoney}
-                    currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
-                  />
-                ))}
-              </div>
-              <SummaryTable
-                results={run.results}
-                customerNoun={customerNoun}
-                currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
-              />
-              <RunMeta run={run} />
-            </section>
-          )}
-        </>
+        </div>
       )}
+
+      {run && <RunResults run={run} currency={currency} customerNoun={customerNoun} />}
     </div>
   );
 }

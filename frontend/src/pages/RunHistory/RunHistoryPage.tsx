@@ -1,35 +1,23 @@
-import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { getSimulationRun, listBusinesses, listIndustries, listSimulationRuns, type SimulationRunOut } from "../../api";
-import { CoachCard } from "../../components/CoachCard";
+import { BusinessPicker } from "../../components/BusinessPicker";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { PageHeading } from "../../components/PageHeading";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
-import { DEFAULT_CURRENCY, capitalize } from "../../lib/format";
+import { readBusinessId, withBusiness } from "../../lib/businessParam";
+import { DEFAULT_CURRENCY } from "../../lib/format";
 import { displayScenarioName } from "../../lib/scenarioLabel";
-import { ChartCaption } from "../Comparison/ChartCaption";
-import { MetricChart } from "../Comparison/MetricChart";
-import { RiskAlerts } from "../Comparison/RiskAlert";
-import { RunMeta } from "../Comparison/RunMeta";
-import { SummaryTable } from "../Comparison/SummaryTable";
+import { RunResults } from "../Comparison/RunResults";
 
-function buildCharts(customerNoun: string): { metric: string; title: string; tooltip: string; isMoney: boolean }[] {
-  return [
-    { metric: "revenue", title: "Revenue", tooltip: "Total sales before any costs are taken out.", isMoney: true },
-    { metric: "profit", title: "Profit", tooltip: "What's left after every cost is paid.", isMoney: true },
-    { metric: "cash", title: "Cash", tooltip: "Money actually in the bank, month by month.", isMoney: true },
-    {
-      metric: "customers",
-      title: capitalize(customerNoun),
-      tooltip: `How many ${customerNoun} keep coming back, month by month.`,
-      isMoney: false,
-    },
-  ];
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
 
 export function RunHistoryPage() {
   const [params, setParams] = useSearchParams();
-  const businessId = params.get("business") ? Number(params.get("business")) : null;
+  const businessId = readBusinessId(params);
 
   const businesses = useAsync(listBusinesses, []);
   const industries = useAsync(listIndustries, []);
@@ -39,11 +27,17 @@ export function RunHistoryPage() {
   const industry = industries.data?.find((i) => i.id === selectedBusiness?.industry) ?? null;
   const customerNoun = industry?.customer_noun ?? "customers";
   const currency = selectedBusiness?.currency ?? DEFAULT_CURRENCY;
-  const charts = buildCharts(customerNoun);
 
   const [openedRun, setOpenedRun] = useState<SimulationRunOut | null>(null);
   const [openError, setOpenError] = useState<string | null>(null);
   const [openingId, setOpeningId] = useState<number | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  // After a past result opens, scroll down to it -- otherwise on a long list it
+  // opens off-screen and looks like nothing happened.
+  useEffect(() => {
+    if (openedRun) resultsRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+  }, [openedRun]);
 
   function selectBusiness(id: number) {
     setParams({ business: String(id) });
@@ -55,8 +49,7 @@ export function RunHistoryPage() {
     setOpeningId(id);
     setOpenError(null);
     try {
-      const run = await getSimulationRun(id);
-      setOpenedRun(run);
+      setOpenedRun(await getSimulationRun(id));
     } catch (err) {
       setOpenError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -66,90 +59,61 @@ export function RunHistoryPage() {
 
   return (
     <div className="page">
-      <h1>Run history</h1>
+      <PageHeading title="Past results" subtitle="Every simulation you have run is saved here. Open one to see it again." />
 
-      <div className="field">
-        <label htmlFor="business-select">Business</label>
-        {businesses.loading && <Spinner label="Loading businesses…" />}
-        <ErrorBanner message={businesses.error} />
-        {businesses.data && (
-          <select
-            id="business-select"
-            value={businessId ?? ""}
-            onChange={(e) => selectBusiness(Number(e.target.value))}
-          >
-            <option value="" disabled>
-              Choose a business…
-            </option>
-            {businesses.data.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
+      <BusinessPicker businesses={businesses} businessId={businessId} onSelect={selectBusiness} />
 
       {businessId && (
         <>
-          {runs.loading && <Spinner label="Loading run history…" />}
+          {runs.loading && <Spinner label="Loading past results…" />}
           <ErrorBanner message={runs.error} />
-          {runs.data && runs.data.length === 0 && <p className="empty-hint">No simulation runs yet.</p>}
+          {runs.data && runs.data.length === 0 && (
+            <div className="empty-state">
+              <p>No simulations yet.</p>
+              <Link to={withBusiness("/compare", businessId)} className="button">
+                Run your first comparison
+              </Link>
+            </div>
+          )}
           {runs.data && runs.data.length > 0 && (
-            <table className="run-history-table">
-              <thead>
-                <tr>
-                  <th>Run</th>
-                  <th>Created</th>
-                  <th>Months simulated</th>
-                  <th>Scenarios</th>
-                  <th>Seed</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {runs.data.map((r) => (
-                  <tr key={r.id}>
-                    <td>#{r.id}</td>
-                    <td>{new Date(r.created_at).toLocaleString()}</td>
-                    <td>{r.horizon} months</td>
-                    <td>{r.scenario_names.map(displayScenarioName).join(", ")}</td>
-                    <td>{r.seed}</td>
-                    <td>
-                      <button type="button" className="link-button" onClick={() => openRun(r.id)}>
-                        {openingId === r.id ? "Opening…" : "Reopen"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <ul className="history-list">
+              {runs.data.map((r) => {
+                const isOpen = openedRun?.id === r.id;
+                return (
+                  <li key={r.id} className={isOpen ? "history-item is-open" : "history-item"}>
+                    <div className="history-main">
+                      <p className="history-title">
+                        {r.scenario_names
+                          .filter((n) => n !== "baseline")
+                          .map(displayScenarioName)
+                          .join(" vs. ") || "If you change nothing"}
+                      </p>
+                      <p className="history-meta">
+                        {formatDate(r.created_at)} · {r.horizon} months · run #{r.id} · seed {r.seed}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className={isOpen ? "button-secondary" : undefined}
+                      onClick={() => openRun(r.id)}
+                      disabled={openingId === r.id}
+                      aria-label={`Open run #${r.id}`}
+                    >
+                      {openingId === r.id ? "Opening…" : isOpen ? "Showing" : "Open"}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           )}
 
           <ErrorBanner message={openError} />
 
           {openedRun && (
-            <section className="run-results">
-              <h2>Run #{openedRun.id}</h2>
-              <CoachCard key={openedRun.id} runId={openedRun.id} businessId={openedRun.business_id} currency={currency} />
-              <RiskAlerts results={openedRun.results} />
-              <ChartCaption />
-              <div className="chart-grid">
-                {charts.map((c) => (
-                  <MetricChart
-                    key={c.metric}
-                    title={c.title}
-                    tooltip={c.tooltip}
-                    metric={c.metric}
-                    results={openedRun.results}
-                    isMoney={c.isMoney}
-                    currency={currency}
-                  />
-                ))}
-              </div>
-              <SummaryTable results={openedRun.results} customerNoun={customerNoun} currency={currency} />
-              <RunMeta run={openedRun} />
-            </section>
+            <div ref={resultsRef} className="scroll-target">
+              <h2 className="section-title">Run #{openedRun.id}</h2>
+              <RunResults run={openedRun} currency={currency} customerNoun={customerNoun} />
+            </div>
           )}
         </>
       )}

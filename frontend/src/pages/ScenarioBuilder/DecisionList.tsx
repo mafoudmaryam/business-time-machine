@@ -9,27 +9,35 @@ interface Props {
   onRemove: (index: number) => void;
 }
 
-/** Each decision's plain-language sentence plus its own "I confirm these
- * parameters" checkbox -- the human-in-the-loop step (golden rule 2). */
+/** "The recipe": each change as a numbered step in plain words, with its own
+ * Confirm checkbox -- the human-in-the-loop step (golden rule 2). */
 export function DecisionList({ decisions, staffNoun, currency, onToggleConfirmed, onRemove }: Props) {
   if (decisions.length === 0) {
-    return <p className="empty-hint">No decisions added yet.</p>;
+    return <p className="empty-hint">No changes yet. Pick one on the left and press “Add to recipe”.</p>;
   }
 
   return (
-    <ul className="decision-list">
+    <ol className="recipe-steps">
       {decisions.map((d, i) => (
-        <li key={i} className="decision-row">
-          <p className="decision-summary">{decisionSummary(d, staffNoun, currency)}</p>
-          <label className="confirm-checkbox">
-            <input type="checkbox" checked={d.confirmed} onChange={() => onToggleConfirmed(i)} />
-            I confirm these parameters
-          </label>
-          <button type="button" className="link-button" onClick={() => onRemove(i)}>
-            Remove
-          </button>
+        <li key={i} className={d.confirmed ? "recipe-step is-confirmed" : "recipe-step"}>
+          <span className="recipe-number" aria-hidden="true">
+            {i + 1}
+          </span>
+          <div className="recipe-body">
+            <p className="decision-summary">{decisionSummary(d, staffNoun, currency)}</p>
+            {d.source === "ai" && <span className="badge badge-soft">Suggested by your coach</span>}
+            <div className="recipe-actions">
+              <label className="confirm-checkbox">
+                <input type="checkbox" checked={d.confirmed} onChange={() => onToggleConfirmed(i)} />
+                Confirm
+              </label>
+              <button type="button" className="link-button" onClick={() => onRemove(i)}>
+                Remove
+              </button>
+            </div>
+          </div>
         </li>
       ))}
-    </ul>
+    </ol>
   );
 }

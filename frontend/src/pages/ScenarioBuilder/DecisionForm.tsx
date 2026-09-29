@@ -83,13 +83,14 @@ export function DecisionForm({ industryId, staffNoun, currency, onAdd }: Props) 
   return (
     <div className="decision-form">
       <div className="field">
-        <span>Decision type</span>
+        <span>What do you want to change?</span>
         <div className="decision-tiles">
           {DECISION_TYPES.map((t) => (
             <button
               key={t}
               type="button"
               className={t === draft.type ? "decision-tile selected" : "decision-tile"}
+              aria-pressed={t === draft.type}
               style={{ backgroundImage: `url(${decisionTypeImage(industryId, t)})` }}
               onClick={() => changeType(t)}
             >
@@ -271,7 +272,7 @@ export function DecisionForm({ industryId, staffNoun, currency, onAdd }: Props) 
       )}
 
       <button type="button" onClick={add}>
-        Add decision
+        Add to recipe
       </button>
     </div>
   );

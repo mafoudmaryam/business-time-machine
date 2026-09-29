@@ -1,5 +1,7 @@
-/** Fixed chart/legend colors: index 0 is always "if you change nothing". */
-export const SCENARIO_COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"] as const;
+/** Fixed chart/legend colors: index 0 is always "if you change nothing" (drawn
+ * dashed, in a quiet brown). The other three are warm café colors, each dark
+ * enough to stand out against the cream card background (3:1 or better). */
+export const SCENARIO_COLORS = ["#7a6656", "#a0522d", "#4f6f3f", "#9a6b12"] as const;
 
 export const MAX_SCENARIOS_PER_RUN = 3;
 
@@ -69,7 +71,7 @@ export const BASELINE_STEPS: { title: string; fields: FieldSpec[] }[] = [
   {
     title: "Cash",
     fields: [
-      { key: "cash", label: "Starting cash", help: "Cash on hand today -- the engine tracks this month by month.", unit: "{CUR}", min: 0, step: 500 },
+      { key: "cash", label: "Starting cash", help: "Cash on hand today. The simulation tracks it month by month.", unit: "{CUR}", min: 0, step: 500 },
     ],
   },
 ];

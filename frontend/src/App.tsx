@@ -8,8 +8,12 @@ import { ScenarioBuilderPage } from "./pages/ScenarioBuilder/ScenarioBuilderPage
 export function App() {
   return (
     <>
+      {/* Lets keyboard users jump past the menu straight to the page content. */}
+      <a href="#main" className="skip-link">
+        Skip to content
+      </a>
       <NavBar />
-      <main>
+      <main id="main">
         <Routes>
           <Route path="/" element={<Navigate to="/setup" replace />} />
           <Route path="/setup" element={<BusinessSetupPage />} />

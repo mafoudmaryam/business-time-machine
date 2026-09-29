@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import {
   createScenario,
   decisionOutToForm,
@@ -9,22 +9,23 @@ import {
   type DecisionFormValues,
   type ScenarioOut,
 } from "../../api";
+import { BusinessPicker } from "../../components/BusinessPicker";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { PageHeading } from "../../components/PageHeading";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
+import { readBusinessId, withBusiness } from "../../lib/businessParam";
 import type { ScenarioPrefill } from "../../lib/coachIdea";
+import { decisionSummary } from "../../lib/decisionSummary";
 import { DEFAULT_CURRENCY } from "../../lib/format";
+import { saveBlocker } from "../../lib/scenarioDraft";
 import { nextVersionName } from "../../lib/scenarioLabel";
 import { DecisionForm } from "./DecisionForm";
 import { DecisionList } from "./DecisionList";
 
-function scenarioLabel(s: ScenarioOut): string {
-  return s.parent_scenario_name ? `${s.name} (v. of ${s.parent_scenario_name})` : s.name;
-}
-
 export function ScenarioBuilderPage() {
   const [params, setParams] = useSearchParams();
-  const businessId = params.get("business") ? Number(params.get("business")) : null;
+  const businessId = readBusinessId(params);
 
   const businesses = useAsync(listBusinesses, []);
   const industries = useAsync(listIndustries, []);
@@ -32,6 +33,7 @@ export function ScenarioBuilderPage() {
 
   const selectedBusiness = businesses.data?.find((b) => b.id === businessId) ?? null;
   const industry = industries.data?.find((i) => i.id === selectedBusiness?.industry) ?? null;
+  const currency = selectedBusiness?.currency ?? DEFAULT_CURRENCY;
 
   // "Try this idea" in the coach card arrives here with the idea already filled in. Every decision
   // is still unconfirmed: the owner reviews and confirms them before saving.
@@ -45,20 +47,20 @@ export function ScenarioBuilderPage() {
   const [decisions, setDecisions] = useState<DecisionFormValues[]>(prefill?.decisions ?? []);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [savedName, setSavedName] = useState<string | null>(null);
   const [fromCoach, setFromCoach] = useState(prefill !== undefined);
 
   function selectBusiness(id: number) {
     setParams({ business: String(id) });
-    resetForm();
+    clearDraft();
+    setSubmitError(null);
+    setSavedName(null);
   }
 
-  function resetForm() {
+  function clearDraft() {
     setName("");
     setParentScenarioId(undefined);
     setDecisions([]);
-    setSubmitError(null);
-    setSavedMessage(null);
     setFromCoach(false);
   }
 
@@ -67,12 +69,14 @@ export function ScenarioBuilderPage() {
     setParentScenarioId(scenario.id);
     setDecisions(scenario.decisions.map(decisionOutToForm));
     setSubmitError(null);
-    setSavedMessage(null);
+    setSavedName(null);
     setFromCoach(false);
+    window.scrollTo?.({ top: 0, behavior: "smooth" });
   }
 
   function addDecision(decision: DecisionFormValues) {
     setDecisions((d) => [...d, decision]);
+    setSavedName(null);
   }
 
   function toggleConfirmed(index: number) {
@@ -87,12 +91,11 @@ export function ScenarioBuilderPage() {
     if (!businessId) return;
     setSubmitting(true);
     setSubmitError(null);
-    setSavedMessage(null);
+    setSavedName(null);
     try {
       const created = await createScenario(businessId, name.trim(), decisions, parentScenarioId);
-      setSavedMessage(`Saved "${created.name}".`);
-      resetFormKeepBusiness();
-      setFromCoach(false);
+      setSavedName(created.name);
+      clearDraft();
       scenarios.reload();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : String(err));
@@ -101,113 +104,129 @@ export function ScenarioBuilderPage() {
     }
   }
 
-  function resetFormKeepBusiness() {
-    setName("");
-    setParentScenarioId(undefined);
-    setDecisions([]);
-  }
-
-  const canSave = businessId !== null && name.trim().length > 0 && decisions.length > 0 && !submitting;
+  const blocker = saveBlocker(name, decisions);
+  const parentName = parentScenarioId
+    ? (scenarios.data?.find((s) => s.id === parentScenarioId)?.name ?? `what-if #${parentScenarioId}`)
+    : null;
 
   return (
     <div className="page">
-      <h1>Scenario builder</h1>
+      <PageHeading
+        title="What if…?"
+        subtitle="Build a what-if from one or more changes, check each step, then save it to compare later."
+      />
 
-      <div className="field">
-        <label htmlFor="business-select">Business</label>
-        {businesses.loading && <Spinner label="Loading businesses…" />}
-        <ErrorBanner message={businesses.error} />
-        {businesses.data && (
-          <select
-            id="business-select"
-            value={businessId ?? ""}
-            onChange={(e) => selectBusiness(Number(e.target.value))}
-          >
-            <option value="" disabled>
-              Choose a business…
-            </option>
-            {businesses.data.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
+      <BusinessPicker businesses={businesses} businessId={businessId} onSelect={selectBusiness} />
 
       {businessId && (
         <>
-          <section>
-            <h2>Existing scenarios</h2>
-            {scenarios.loading && <Spinner label="Loading scenarios…" />}
+          {savedName && (
+            <div className="success-banner" role="status">
+              Saved “{savedName}”.{" "}
+              <Link to={withBusiness("/compare", businessId)}>Compare it now →</Link>
+            </div>
+          )}
+
+          {fromCoach && (
+            <p className="info-banner">
+              Your coach suggested this idea. Check each step in the recipe and tick “Confirm” before saving.
+            </p>
+          )}
+          {parentName && !fromCoach && (
+            <p className="info-banner">New version of “{parentName}”. Change what you like, then save.</p>
+          )}
+
+          <div className="builder-layout">
+            <section className="card builder-main" aria-labelledby="build-title">
+              <h2 id="build-title" className="card-title">
+                {parentScenarioId ? "New version" : "New what-if"}
+              </h2>
+              <div className="field field-wide">
+                <label htmlFor="scenario-name">Name</label>
+                <input
+                  id="scenario-name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Raise prices 10% in month 3"
+                />
+                <p className="field-help">A short name you'll recognise on the Compare page.</p>
+              </div>
+
+              {!industry && <Spinner label="Loading business details…" />}
+              {industry && (
+                <DecisionForm
+                  industryId={industry.id}
+                  staffNoun={industry.staff_noun}
+                  currency={currency}
+                  onAdd={addDecision}
+                />
+              )}
+            </section>
+
+            <aside className="card recipe" aria-labelledby="recipe-title">
+              <h2 id="recipe-title" className="card-title">
+                The recipe
+              </h2>
+              <p className="recipe-name">{name.trim() || "Untitled what-if"}</p>
+              {industry && (
+                <DecisionList
+                  decisions={decisions}
+                  staffNoun={industry.staff_noun}
+                  currency={currency}
+                  onToggleConfirmed={toggleConfirmed}
+                  onRemove={removeDecision}
+                />
+              )}
+              <ErrorBanner message={submitError} />
+              <button
+                type="button"
+                className="button-block"
+                onClick={save}
+                disabled={blocker !== null || submitting}
+                aria-describedby="save-hint"
+              >
+                {submitting ? "Saving…" : "Save what-if"}
+              </button>
+              <p id="save-hint" className="hint">
+                {blocker ?? "Ready to save."}
+              </p>
+              {decisions.length > 0 && (
+                <button type="button" className="link-button" onClick={clearDraft}>
+                  Start over
+                </button>
+              )}
+            </aside>
+          </div>
+
+          <section aria-labelledby="saved-title">
+            <h2 id="saved-title" className="section-title">
+              Your saved what-ifs
+            </h2>
+            {scenarios.loading && <Spinner label="Loading what-ifs…" />}
             <ErrorBanner message={scenarios.error} />
-            {scenarios.data && scenarios.data.length === 0 && <p className="empty-hint">No scenarios yet.</p>}
+            {scenarios.data && scenarios.data.length === 0 && <p className="empty-hint">None yet — build one above.</p>}
             {scenarios.data && scenarios.data.length > 0 && (
-              <ul className="scenario-list">
+              <ul className="saved-grid">
                 {scenarios.data.map((s) => (
-                  <li key={s.id}>
-                    <span>{scenarioLabel(s)}</span>
-                    <button type="button" className="link-button" onClick={() => duplicateAsNewVersion(s)}>
-                      Duplicate as new version
+                  <li key={s.id} className="saved-card">
+                    <h3>{s.name}</h3>
+                    {s.parent_scenario_name && <p className="saved-parent">Version of “{s.parent_scenario_name}”</p>}
+                    <ul className="saved-steps">
+                      {s.decisions.map((d) => (
+                        <li key={d.id}>
+                          {decisionSummary(decisionOutToForm(d), industry?.staff_noun, currency)}
+                          {!d.confirmed && <span className="needs-confirmation"> (not confirmed)</span>}
+                        </li>
+                      ))}
+                    </ul>
+                    <button type="button" className="button-secondary" onClick={() => duplicateAsNewVersion(s)}>
+                      Make a new version
                     </button>
                   </li>
                 ))}
               </ul>
             )}
-          </section>
-
-          <section>
-            <h2>{parentScenarioId ? "New version" : "New scenario"}</h2>
-            {fromCoach && (
-              <p className="empty-hint">
-                Your coach suggested this idea. Check each decision below and tick "confirm" before saving.
-              </p>
-            )}
-            {parentScenarioId && !fromCoach && (
-              <p className="empty-hint">
-                Based on{" "}
-                {scenarios.data?.find((s) => s.id === parentScenarioId)?.name ?? `scenario #${parentScenarioId}`}
-                . Edit the decisions below, then save.
-              </p>
-            )}
-
-            <div className="field">
-              <label htmlFor="scenario-name">Scenario name</label>
-              <input
-                id="scenario-name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Raise prices 10% in March"
-              />
-            </div>
-
-            <h3>Decisions</h3>
-            {!industry && <Spinner label="Loading business details…" />}
-            {industry && (
-              <>
-                <DecisionList
-                  decisions={decisions}
-                  staffNoun={industry.staff_noun}
-                  currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
-                  onToggleConfirmed={toggleConfirmed}
-                  onRemove={removeDecision}
-                />
-                <DecisionForm
-                  industryId={industry.id}
-                  staffNoun={industry.staff_noun}
-                  currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
-                  onAdd={addDecision}
-                />
-              </>
-            )}
-
-            <ErrorBanner message={submitError} />
-            {savedMessage && <p className="success-message">{savedMessage}</p>}
-
-            <button type="button" onClick={save} disabled={!canSave}>
-              {submitting ? "Saving…" : "Save scenario"}
-            </button>
           </section>
         </>
       )}
