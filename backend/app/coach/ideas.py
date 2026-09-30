@@ -31,6 +31,37 @@ def is_repeat(ideas: list[dict], candidate: dict) -> bool:
     return any(near_duplicate(candidate, other) for other in ideas)
 
 
+# The three areas an owner thinks in: what you charge, how you bring people in, and what it costs to serve them.
+AREAS = {"price": "price", "menu": "sales", "marketing": "sales",
+         "hiring": "costs", "hours": "costs", "investment": "costs"}
+
+
+def areas_of(idea: dict) -> set[str]:
+    return {AREAS[d["type"]] for d in idea["decisions"] if d["type"] in AREAS}
+
+
+def choose_diverse(candidates: list[dict], used_types: set[str], limit: int, minimum: int = 2) -> list[dict]:
+    """Pick ideas so that no two are about the same area (price / menu or marketing / costs or hours).
+
+    Ideas from areas the owner's scenarios do not touch come first. An idea from an area they already use
+    is only added when there are still fewer than `minimum` ideas, so there is always something to try.
+    """
+    used_areas = {AREAS[t] for t in used_types if t in AREAS}
+    fresh = [c for c in candidates if not areas_of(c) & used_areas]
+    stale = [c for c in candidates if areas_of(c) & used_areas]
+    picked: list[dict] = []
+    taken: set[str] = set()
+    for group, cap in ((fresh, limit), (stale, minimum)):
+        for c in group:
+            if len(picked) >= cap:
+                break
+            if areas_of(c) & taken or is_repeat(picked, c):
+                continue
+            picked.append(c)
+            taken |= areas_of(c)
+    return picked
+
+
 def _words(text: str) -> set[str]:
     return set(re.findall(r"[a-z]+", text.lower()))
 

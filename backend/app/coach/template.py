@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..engine_bridge import format_money
-from .ideas import drop_repeated_opening, is_repeat
+from .ideas import choose_diverse, drop_repeated_opening
 from .summary import build_summary, decide_verdict, driver_label
 
 
@@ -153,15 +153,15 @@ def _ideas(facts: dict, raw: dict[str, list[dict]]) -> list[dict]:
               "baseline", [{"type": "price", "start_month": 2, "value": 3, "unit": "percent"}]),
         _idea("Add a tempting menu extra", "One extra item can lift what each guest spends.",
               "baseline", [{"type": "menu", "start_month": 3, "value": 4, "unit": "percent"}]),
+        _idea("Spend a little more on marketing", "More people may hear about you.",
+              "baseline", [{"type": "marketing", "start_month": 2, "value": 20, "unit": "percent"}]),
         _idea(f"Add one more {staff}", f"An extra {staff} helps you serve more people.",
               "baseline", [{"type": "hiring", "start_month": 3, "value": 1, "unit": "fte"}]),
     ]
-    for f in fillers:
-        if len(ideas) >= 3:
-            break
-        if not is_repeat(ideas, f):        # never two ideas that are nearly the same
-            ideas.append(f)
-    return ideas[:3]
+    # One idea per area (price / menu or marketing / costs or hours), never two of the same kind, preferring
+    # areas the owner's scenarios do not already use.
+    used_types = {d["type"] for decs in raw.values() for d in decs}
+    return choose_diverse(ideas + fillers, used_types, 3)
 
 
 def build_coach(facts: dict, raw_decisions: dict[str, list[dict]]) -> dict[str, Any]:

@@ -690,6 +690,9 @@ table.run-history-table td {
 /* ---------- Coach card, skimmable layout ---------- */
 
 .coach-card {
+  /* lining numerals: Playfair's old-style digits make $25,000 look like $25,ooo */
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "lnum" 1;
   --good: #17704f;
   --good-bg: #e0f2e9;
   --bad: #a5301f;
@@ -783,10 +786,17 @@ table.run-history-table td {
   color: var(--ink);
 }
 
+.trend-same .coach-trend { background: #e6e2dd; color: #4a4038; }
 .trend-up .coach-trend { background: var(--good-bg); color: var(--good); }
 .trend-down .coach-trend { background: var(--bad-bg); color: var(--bad); }
 
-.coach-why h3 { margin: 4px 0 8px; }
+.coach-why h3 { margin: 4px 0 2px; }
+
+.coach-why-caption {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
 
 .coach-bars {
   list-style: none;
@@ -799,7 +809,8 @@ table.run-history-table td {
 
 .coach-bars li {
   display: grid;
-  grid-template-columns: minmax(96px, 1fr) minmax(80px, 2fr) auto;
+  /* fixed label and amount columns, so every bar starts and ends at the same x */
+  grid-template-columns: 10.5rem minmax(60px, 1fr) 5.5rem;
   align-items: center;
   gap: 4px 10px;
   font-size: 0.9rem;
@@ -883,4 +894,29 @@ table.run-history-table td {
   .coach-bars li { grid-template-columns: 1fr auto; }
   .coach-bars .bar-track { grid-column: 1 / -1; grid-row: 2; }
   .idea-grid { grid-template-columns: 1fr; }
+}
+
+.coach-examples .chip-button {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--page);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.coach-examples .chip-button:hover:not(:disabled) {
+  background: var(--band);
+}
+
+.coach-examples .chip-button:focus-visible {
+  outline: 3px solid var(--button);
+  outline-offset: 2px;
+}
+
+.coach-examples .chip-button:disabled {
+  opacity: 0.6;
+  cursor: default;
 }

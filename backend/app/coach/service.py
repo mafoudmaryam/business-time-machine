@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 
 from .. import engine_bridge, models, settings
 from . import grounding, prompts, template
-from .ideas import drop_repeated_opening, is_repeat, limit_sentences
+from .ideas import areas_of, choose_diverse, drop_repeated_opening, is_repeat, limit_sentences
 from .summary import build_summary
 from .providers import Provider, ProviderError, make_provider
 
@@ -185,8 +185,10 @@ def _finalize_ideas(db: Session, run: models.SimulationRun, raw_ideas: Any,
         if is_repeat(valid, candidate):
             continue  # nearly the same as an idea we already have (e.g. two small price rises)
         valid.append(candidate)
-        if len(valid) == MAX_IDEAS:
-            break
+    # At most one idea per area (price / menu or marketing / costs or hours), preferring areas the owner's
+    # scenarios do not already use.
+    used_types = {d["type"] for decs in raw_decisions.values() for d in decs}
+    valid = choose_diverse(valid, used_types, MAX_IDEAS, MIN_IDEAS)
     if not valid:
         return []
     results = engine_bridge.simulate_ideas(db, run, valid)
@@ -229,7 +231,7 @@ def _assemble(db: Session, run: models.SimulationRun, facts: dict, raw: dict, pa
         for extra in _finalize_ideas(db, run, template.build_coach(facts, raw)["ideas"], raw):
             if len(ideas) >= MAX_IDEAS:
                 break
-            if not is_repeat(ideas, extra):
+            if not is_repeat(ideas, extra) and not any(areas_of(extra) & areas_of(i) for i in ideas):
                 ideas.append(extra)
     # The card is meant to be read in seconds: a short headline, at most two sentences per section, and a
     # warning line only when the engine's numbers show a real risk. The verdict, the tiles and the bars come

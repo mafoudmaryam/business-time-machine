@@ -218,3 +218,59 @@ def test_old_cached_coach_without_a_summary_still_gets_a_card(client, run):
     assert body["what_happens"] == "An old saved story."               # the old text is kept, not regenerated
     assert {t["key"] for t in body["summary"]["tiles"]} == {"profit", "cash", "customers"}
     assert body["summary"]["verdict"]["label"]
+
+
+# ---------- ideas cover different areas ----------
+
+from app.coach.ideas import AREAS, areas_of, choose_diverse  # noqa: E402
+
+
+def idea(dtype, value=5, start=3, unit="percent"):
+    return {"title": f"{dtype} {value}", "why": "x", "builds_on": "baseline",
+            "decisions": [{"type": dtype, "start_month": start, "value": value, "unit": unit}]}
+
+
+def test_areas_group_the_six_levers_into_three_kinds():
+    assert {AREAS[t] for t in ("menu", "marketing")} == {"sales"}
+    assert {AREAS[t] for t in ("hiring", "hours", "investment")} == {"costs"}
+    assert AREAS["price"] == "price"
+
+
+def test_never_two_ideas_of_the_same_kind():
+    picked = choose_diverse([idea("marketing", 20), idea("menu", 4), idea("hiring", 1, unit="fte"),
+                             idea("hours", 22, unit="days"), idea("price", 3)], set(), 3)
+    kinds = [next(iter(areas_of(i))) for i in picked]
+    assert sorted(kinds) == ["costs", "price", "sales"]           # three ideas, three different areas
+
+
+def test_a_kind_the_scenario_already_uses_is_skipped_when_something_else_is_available():
+    picked = choose_diverse([idea("price", 3), idea("menu", 4), idea("hiring", 1, unit="fte")], {"price"}, 3)
+    assert [i["decisions"][0]["type"] for i in picked] == ["menu", "hiring"]
+
+
+def test_a_used_kind_is_only_added_to_reach_two_ideas():
+    picked = choose_diverse([idea("price", 3), idea("menu", 4)], {"price", "hiring"}, 3)
+    assert [i["decisions"][0]["type"] for i in picked] == ["menu", "price"]      # fresh first, then the used one
+
+
+def test_template_ideas_cover_different_areas_and_skip_the_scenarios_own_kind(client, run):
+    body = client.post(f"/simulation_runs/{run['id']}/coach").json()      # the scenario raises prices
+    kinds = [{AREAS[d["type"]] for d in i["decisions"]} for i in body["ideas"]]
+    assert len(body["ideas"]) >= 2
+    assert all(len(k) == 1 for k in kinds) and len({next(iter(k)) for k in kinds}) == len(kinds)
+    assert "price" not in {next(iter(k)) for k in kinds}
+
+
+def test_ai_ideas_of_the_same_kind_are_cut_down_to_one(client, run, use_provider):
+    same_area = [
+        {"title": "More marketing", "why": "More people may hear about you.", "builds_on": "baseline",
+         "decisions": [{"type": "marketing", "start_month": 2, "value": 20, "unit": "percent"}]},
+        {"title": "A tempting extra", "why": "Guests may spend a bit more.", "builds_on": "baseline",
+         "decisions": [{"type": "menu", "start_month": 3, "value": 4, "unit": "percent"}]},
+        {"title": "Add one more barista", "why": "Busy months.", "builds_on": "Raise prices",
+         "decisions": [{"type": "hiring", "start_month": 6, "value": 1, "unit": "fte"}]},
+    ]
+    use_provider(good_reply(ideas=same_area))
+    body = final(client, run)
+    types = [i["decisions"][0]["type"] for i in body["ideas"]]
+    assert "hiring" in types and len([t for t in types if t in ("menu", "marketing")]) == 1

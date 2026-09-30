@@ -14,8 +14,9 @@ export const VERDICT_CLASS: Record<VerdictKey, string> = {
   no: "verdict-no",
 };
 
-/** Bar widths as percentages: the biggest driver is 100%, the rest are in proportion, never thinner than a label needs. */
-export function barWidths(bars: CoachBar[], minPercent = 22): number[] {
+/** Bar widths as percentages: the biggest driver is 100% and every other bar is in true proportion to it,
+ * with only a sliver as the minimum so a tiny driver stays visible but clearly small. */
+export function barWidths(bars: CoachBar[], minPercent = 4): number[] {
   const biggest = Math.max(...bars.map((b) => Math.abs(b.amount)), 0);
   if (biggest === 0) return bars.map(() => minPercent);
   return bars.map((b) => Math.max(minPercent, Math.round((Math.abs(b.amount) / biggest) * 100)));
@@ -31,10 +32,13 @@ export function yearsText(months: number): string {
 
 export type Trend = "up" | "down" | "same";
 
-/** Up, down or "about the same". Differences under 2% are treated as the same, so a rounding wobble is not a headline. */
+const SAME_BELOW = 0.03;
+
+/** Up, down or "about the same". A change under 3% counts as the same, so it shows a neutral grey chip
+ * instead of green or red. */
 export function trendOf(now: number, later: number): Trend {
   const biggest = Math.max(Math.abs(now), Math.abs(later));
-  if (biggest === 0 || Math.abs(later - now) <= 0.02 * biggest) return "same";
+  if (biggest === 0 || Math.abs(later - now) < SAME_BELOW * biggest) return "same";
   return later > now ? "up" : "down";
 }
 

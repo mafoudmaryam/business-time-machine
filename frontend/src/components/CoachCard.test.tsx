@@ -147,6 +147,32 @@ describe("CoachCard", () => {
     expect(screen.getByText("hurts")).toBeTruthy();
   });
 
+  it("says what the bars are compared with", async () => {
+    renderCard();
+    await screen.findByText(coach.headline);
+    expect(screen.getByText("Over 2 years, compared with changing nothing.")).toBeTruthy();
+  });
+
+  it("shows the suggested questions as small chip buttons, not links", async () => {
+    renderCard();
+    await screen.findByText(coach.headline);
+    const chip = screen.getByRole("button", { name: "Will my cash run out?" });
+    expect(chip.className).toMatch(/chip-button/);
+    expect(chip.className).not.toMatch(/link-button/);
+  });
+
+  it("shows a small change as a neutral 'About the same' chip", async () => {
+    vi.mocked(api.requestCoach).mockResolvedValue({
+      ...coach,
+      summary: { ...coach.summary, tiles: [{ key: "profit", now: 2000, later: 2040 }, coach.summary.tiles[1], coach.summary.tiles[2]] },
+    });
+    renderCard();
+    await screen.findByText(coach.headline);
+    const first = within(screen.getByRole("list", { name: "How things change" })).getAllByRole("listitem")[0];
+    expect(first.className).toMatch(/trend-same/);
+    expect(first.textContent).toMatch(/About the same/);
+  });
+
   it("shows no Watch out line when there is no real risk", async () => {
     vi.mocked(api.requestCoach).mockResolvedValue({
       ...coach,

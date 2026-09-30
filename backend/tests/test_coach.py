@@ -544,7 +544,8 @@ def test_near_duplicate_ai_ideas_are_dropped(client, run, use_provider):
     use_provider(good_reply(ideas=ideas))
     titles = [i["title"] for i in final(client, run)["ideas"]]
     assert "Small rise" in titles and "Slightly bigger rise" not in titles       # 3% vs 5%: too alike
-    assert "Price cut" in titles                                                # opposite direction: different
+    assert "Price cut" not in titles                                            # a second price idea: same kind
+    assert "Open longer" in titles                                              # a different area is kept
 
 
 def test_template_ideas_are_never_near_duplicates(client, run):

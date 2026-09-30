@@ -74,7 +74,7 @@ function Tiles({ summary, currency }: { summary: CoachSummary; currency: string 
   );
 }
 
-function WhyBars({ bars, currency }: { bars: CoachBar[]; currency: string }) {
+function WhyBars({ bars, currency, months }: { bars: CoachBar[]; currency: string; months: number }) {
   if (bars.length === 0) return null;
   const widths = barWidths(bars);
   return (
@@ -82,6 +82,7 @@ function WhyBars({ bars, currency }: { bars: CoachBar[]; currency: string }) {
       <h3>
         Why? <InfoTip text="Where the change in profit comes from, over the whole period. Green helps your profit, red hurts it." />
       </h3>
+      <p className="coach-why-caption">Over {yearsText(months)}, compared with changing nothing.</p>
       <ul className="coach-bars">
         {bars.map((b, i) => {
           const helps = b.amount >= 0;
@@ -273,7 +274,7 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
           </div>
 
           <Tiles summary={coach.summary} currency={currency} />
-          <WhyBars bars={coach.summary.bars} currency={currency} />
+          <WhyBars bars={coach.summary.bars} currency={currency} months={coach.summary.months} />
 
           {coach.watch_out.length > 0 && (
             <p className="coach-watch" role="note">
@@ -313,7 +314,7 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
             <h3>Ask the coach</h3>
             <div className="coach-examples">
               {EXAMPLE_QUESTIONS.map((q) => (
-                <button key={q} type="button" className="link-button" onClick={() => ask(q)} disabled={asking}>
+                <button key={q} type="button" className="chip-button" onClick={() => ask(q)} disabled={asking}>
                   {q}
                 </button>
               ))}

@@ -71,7 +71,8 @@ Write the coach note as JSON with these fields:
 - why: at most 2 short sentences on WHY, using the drivers (biggest help and biggest drag).
 - watch_out: a list with at most ONE short sentence about a REAL risk to WATCH OUT for (cash running low, getting too busy,
   {customers_word} leaving).
-- ideas: exactly 2 IDEAS TO TRY. Each has:
+- ideas: exactly 2 IDEAS TO TRY, about two DIFFERENT areas (price; menu or marketing; staff, opening days or equipment),
+  and not about a lever the scenario already changes. Each has:
     title: short and friendly, max 6 words
     why: one sentence on why it might help; no numbers except ones in its own decisions or in the FACTS
     builds_on: the exact name of one scenario from the FACTS to add this on top of, or "baseline" to start
