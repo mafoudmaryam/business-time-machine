@@ -1080,3 +1080,146 @@ table.run-history-table td {
     gap: 8px;
   }
 }
+
+/* ---------- Compare page: scenario cards ---------- */
+
+.pick-heading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0 0 8px;
+}
+
+.pick-counter {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.pick-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+}
+
+.pick-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pick-card-chosen {
+  border-color: var(--button);
+  box-shadow: 0 0 0 2px var(--band);
+}
+
+.pick-card-base {
+  background: var(--band);
+}
+
+.pick-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pick-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+}
+
+.pick-label input {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.pick-name {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.pick-summary {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.pick-always {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.pick-check {
+  white-space: nowrap;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+}
+
+.pick-panel {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.pick-panel p,
+.pick-panel ul {
+  margin: 4px 0;
+}
+
+.pick-panel ul {
+  padding-left: 18px;
+}
+
+.pick-panel-title {
+  font-weight: 600;
+}
+
+.pick-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.pick-edit {
+  color: var(--button);
+  font-weight: 600;
+}
+
+.pick-label:focus-within,
+.pick-check:focus-visible,
+.pick-edit:focus-visible {
+  outline: 3px solid var(--button);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (max-width: 480px) {
+  .pick-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -71,3 +71,17 @@ def get_scenario(scenario_id: int, db: Session = Depends(get_db)):
     if scenario is None:
         raise HTTPException(status_code=404, detail="scenario not found")
     return scenario
+
+
+@router.post("/scenarios/{scenario_id}/confirm", response_model=schemas.ScenarioOut)
+def confirm_scenario(scenario_id: int, db: Session = Depends(get_db)):
+    """The owner has reviewed the scenario's decisions (the "Looks right" button): mark them all confirmed.
+    Nothing is simulated until this has happened (golden rule 2); simulate still refuses unconfirmed decisions."""
+    scenario = db.get(models.Scenario, scenario_id)
+    if scenario is None:
+        raise HTTPException(status_code=404, detail="scenario not found")
+    for decision in scenario.decisions:
+        decision.confirmed = True
+    db.commit()
+    db.refresh(scenario)
+    return scenario

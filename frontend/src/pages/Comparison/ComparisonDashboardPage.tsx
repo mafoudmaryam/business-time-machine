@@ -1,6 +1,13 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { listBusinesses, listIndustries, listScenarios, simulateBusiness, type SimulationRunOut } from "../../api";
+import { useSearchParams } from "react-router-dom";
+import {
+  confirmScenario,
+  listBusinesses,
+  listIndustries,
+  listScenarios,
+  simulateBusiness,
+  type SimulationRunOut,
+} from "../../api";
 import { CoachCard } from "../../components/CoachCard";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
@@ -13,6 +20,7 @@ import { ChartCaption } from "./ChartCaption";
 import { MetricChart } from "./MetricChart";
 import { RiskAlerts } from "./RiskAlert";
 import { RunMeta } from "./RunMeta";
+import { ScenarioPicker } from "./ScenarioPicker";
 import { SummaryTable } from "./SummaryTable";
 
 const HORIZONS = [12, 24, 36];
@@ -65,6 +73,13 @@ export function ComparisonDashboardPage() {
     });
   }
 
+  /** "Looks right": confirm on the server, refresh the list, and tick the card (if there is room). */
+  async function confirmAndPick(id: number) {
+    await confirmScenario(id);
+    scenarios.reload();
+    setSelectedIds((ids) => (ids.includes(id) || ids.length >= MAX_SCENARIOS_PER_RUN ? ids : [...ids, id]));
+  }
+
   async function runSimulation() {
     if (!businessId || selectedIds.length === 0) return;
     setRunning(true);
@@ -114,41 +129,21 @@ export function ComparisonDashboardPage() {
       {businessId && (
         <>
           <div className="field">
-            <span>Scenarios to compare (up to {MAX_SCENARIOS_PER_RUN}; "if you change nothing" is always included)</span>
             {scenarios.loading && <Spinner label="Loading scenarios…" />}
             <ErrorBanner message={scenarios.error} />
             {scenarios.data && scenarios.data.length === 0 && (
               <p className="empty-hint">This business has no scenarios yet.</p>
             )}
             {scenarios.data && scenarios.data.length > 0 && (
-              <ul className="scenario-checklist">
-                {scenarios.data.map((s) => {
-                  const needsConfirmation = s.decisions.some((d) => !d.confirmed);
-                  return (
-                    <li key={s.id}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.includes(s.id)}
-                          disabled={
-                            needsConfirmation ||
-                            (!selectedIds.includes(s.id) && selectedIds.length >= MAX_SCENARIOS_PER_RUN)
-                          }
-                          onChange={() => toggleScenario(s.id)}
-                        />
-                        {s.name}
-                      </label>
-                      {needsConfirmation && (
-                        <span className="needs-confirmation">
-                          {" "}
-                          needs confirmation --{" "}
-                          <Link to={`/scenarios?business=${businessId}`}>confirm in scenario builder</Link>
-                        </span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
+              <ScenarioPicker
+                scenarios={scenarios.data}
+                businessId={businessId}
+                staffNoun={industry?.staff_noun ?? "staff member"}
+                currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
+                selectedIds={selectedIds}
+                onToggle={toggleScenario}
+                onConfirm={confirmAndPick}
+              />
             )}
           </div>
 

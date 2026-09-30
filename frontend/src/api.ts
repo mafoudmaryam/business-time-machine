@@ -557,3 +557,8 @@ export function logInterpretOutcome(
     body: JSON.stringify({ decisions: decisions.map(decisionFormToApi), scenario_id: scenarioId ?? null }),
   });
 }
+
+/** "Looks right": the owner reviewed the scenario's decisions, so mark them all confirmed. */
+export function confirmScenario(scenarioId: number): Promise<ScenarioOut> {
+  return request(`/scenarios/${scenarioId}/confirm`, { method: "POST" });
+}

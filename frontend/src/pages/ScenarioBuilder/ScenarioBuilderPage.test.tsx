@@ -147,4 +147,21 @@ describe("ScenarioBuilderPage: describe it in your own words", () => {
     expect(screen.queryByText("Raise prices 8% from month 6")).toBeNull();
     expect(screen.getByText("Raise prices 10% from month 1")).toBeTruthy(); // the hand-added step is still there
   });
+
+  it("'Edit' on the Compare page opens that scenario here as a new, unconfirmed version", async () => {
+    vi.mocked(api.listScenarios).mockResolvedValue([
+      {
+        id: 5, business_id: 1, name: "Hire a baker", parent_scenario_id: null, parent_scenario_name: null, created_at: "x",
+        decisions: [{ id: 9, type: "hiring", start_month: 6, value: 1, unit: "fte", extra: {}, source: "user", confirmed: false }],
+      },
+    ]);
+    render(
+      <MemoryRouter initialEntries={["/scenarios?business=1&duplicate=5"]}>
+        <ScenarioBuilderPage />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText("Hire 1 baker from month 6")).toBeTruthy();
+    expect((screen.getByLabelText("Scenario name") as HTMLInputElement).value).toBe("Hire a baker v2");
+    expect((screen.getAllByRole("checkbox")[0] as HTMLInputElement).checked).toBe(false);
+  });
 });

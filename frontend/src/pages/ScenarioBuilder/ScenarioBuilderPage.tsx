@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import {
   createScenario,
@@ -78,6 +78,18 @@ export function ScenarioBuilderPage() {
     setFromCoach(false);
     setInterpretationId(null);
   }
+
+  // "Edit" on the Compare page arrives with ?duplicate=<id>: open that scenario here as a new version.
+  const duplicateId = params.get("duplicate") ? Number(params.get("duplicate")) : null;
+  const handledDuplicate = useRef<number | null>(null);
+  useEffect(() => {
+    if (duplicateId === null || handledDuplicate.current === duplicateId || !scenarios.data) return;
+    const found = scenarios.data.find((s) => s.id === duplicateId);
+    handledDuplicate.current = duplicateId;
+    if (found) duplicateAsNewVersion(found);
+    setParams({ business: String(businessId) }, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [duplicateId, scenarios.data]);
 
   function addDecision(decision: DecisionFormValues) {
     setDecisions((d) => [...d, decision]);

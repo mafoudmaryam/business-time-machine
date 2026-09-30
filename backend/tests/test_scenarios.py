@@ -92,3 +92,20 @@ def test_scenario_versioning_reports_parent_name(client, business):
     assert versioned["parent_scenario_name"] == "Price +10%"
     original = next(s for s in listed if s["name"] == "Price +10%")
     assert original["parent_scenario_name"] is None
+
+
+def test_confirming_a_scenario_ticks_all_its_decisions_and_unlocks_simulation(client, business):
+    made = client.post(f"/businesses/{business['id']}/scenarios", json={"name": "Raise prices", "decisions": [
+        {"type": "price", "start_month": 2, "value": 5, "unit": "percent"},
+        {"type": "hiring", "start_month": 3, "value": 1, "unit": "fte", "confirmed": True}]}).json()
+    body = {"scenario_ids": [made["id"]], "horizon": 12, "iterations": 100, "seed": 1}
+    assert client.post(f"/businesses/{business['id']}/simulate", json=body).status_code == 409   # not yet reviewed
+
+    resp = client.post(f"/scenarios/{made['id']}/confirm")
+    assert resp.status_code == 200 and all(d["confirmed"] for d in resp.json()["decisions"])
+    assert client.get(f"/scenarios/{made['id']}").json()["decisions"][0]["confirmed"] is True   # it was saved
+    assert client.post(f"/businesses/{business['id']}/simulate", json=body).status_code == 201
+
+
+def test_confirming_an_unknown_scenario_is_404(client):
+    assert client.post("/scenarios/999/confirm").status_code == 404
