@@ -7,13 +7,16 @@ import {
   getCoachStatus,
   getScenario,
   requestCoach,
+  type CoachBar,
   type CoachIdea,
   type CoachOut,
   type CoachStatus,
+  type CoachSummary,
 } from "../api";
-import { formatMoney } from "../lib/format";
 import { buildIdeaPrefill } from "../lib/coachIdea";
+import { barWidths, buildTiles, signedMoney, VERDICT_CLASS, yearsText } from "../lib/coachView";
 import { displayScenarioName } from "../lib/scenarioLabel";
+import { ArrowRight, TrendIcon, VerdictIcon } from "./CoachIcons";
 import { InfoTip } from "./InfoTip";
 import { Spinner } from "./Spinner";
 
@@ -28,47 +31,111 @@ const POLL_LIMIT_MS = 15 * 60 * 1000;
 
 const EXAMPLE_QUESTIONS = ["Will my cash run out?", "Why does this happen?", "What should I watch for?"];
 
-function signedMoney(value: number, currency: string): string {
-  return `${value >= 0 ? "+" : "−"}${formatMoney(Math.abs(value), currency)}`;
-}
-
 function friendlyCoachError(err: unknown): string {
   if (err instanceof ApiError && err.status === 0) return "Your coach can't be reached right now. Is the app running?";
   return "Your coach couldn't put the notes together this time. You can still read the charts below.";
 }
 
+function VerdictBadge({ summary }: { summary: CoachSummary }) {
+  const { key, label } = summary.verdict;
+  return (
+    <span className={`verdict-badge ${VERDICT_CLASS[key]}`}>
+      <VerdictIcon verdict={key} />
+      {label}
+    </span>
+  );
+}
+
+function Tiles({ summary, currency }: { summary: CoachSummary; currency: string }) {
+  const later = `in ${yearsText(summary.months)}`;
+  return (
+    <ul className="coach-tiles" aria-label="How things change">
+      {buildTiles(summary, currency).map((t) => (
+        <li key={t.key} className={`coach-tile trend-${t.trend}`}>
+          <span className="coach-tile-title">
+            {t.title} <InfoTip text={t.tip} />
+          </span>
+          <span className="visually-hidden">{t.spoken}</span>
+          <span className="coach-tile-values" aria-hidden="true">
+            <span className="coach-tile-now">{t.now}</span>
+            <ArrowRight />
+            <span className="coach-tile-later">{t.later}</span>
+          </span>
+          <span className="coach-tile-when" aria-hidden="true">
+            now → {later}
+          </span>
+          <span className="coach-trend" aria-hidden="true">
+            <TrendIcon trend={t.trend} />
+            {t.trendLabel}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function WhyBars({ bars, currency }: { bars: CoachBar[]; currency: string }) {
+  if (bars.length === 0) return null;
+  const widths = barWidths(bars);
+  return (
+    <div className="coach-why">
+      <h3>
+        Why? <InfoTip text="Where the change in profit comes from, over the whole period. Green helps your profit, red hurts it." />
+      </h3>
+      <ul className="coach-bars">
+        {bars.map((b, i) => {
+          const helps = b.amount >= 0;
+          return (
+            <li key={b.key} className={helps ? "bar-helps" : "bar-hurts"}>
+              <span className="bar-label">{b.label}</span>
+              <span className="bar-track" aria-hidden="true">
+                <span className="bar-fill" style={{ width: `${widths[i]}%` }} />
+              </span>
+              <span className="bar-amount">
+                {signedMoney(b.amount, currency)}
+                <span className="visually-hidden">{helps ? " helps" : " hurts"}</span>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 function IdeaCard({ idea, currency, onTry, busy }: { idea: CoachIdea; currency: string; onTry: () => void; busy: boolean }) {
   const r = idea.result;
+  const change = r.profit_change_most_likely;
   return (
     <li className="idea-card">
       <h4>{idea.title}</h4>
-      <p>{idea.why}</p>
-      <ul className="idea-decisions">
-        {idea.decision_texts.map((t) => (
-          <li key={t}>{t}</li>
-        ))}
-      </ul>
-      <p className="idea-builds-on">Added to: {displayScenarioName(idea.builds_on)}</p>
-      <dl className="idea-result" aria-label="Tested result">
-        <div>
-          <dt>
-            Most likely profit vs. changing nothing <InfoTip text="We tested this idea in 1,000 possible futures. This is the middle result." />
-          </dt>
-          <dd>{signedMoney(r.profit_change_most_likely, currency)}</dd>
-        </div>
-        <div>
-          <dt>Comes out ahead</dt>
-          <dd>in {r.beats_change_nothing_of_10} of 10 futures</dd>
-        </div>
+      <p className="idea-chips" aria-label="Tested result">
+        <span className={`idea-chip ${change >= 0 ? "chip-good" : "chip-bad"}`}>
+          {signedMoney(change, currency)} {change >= 0 ? "better" : "worse"}
+        </span>
+        <span className="idea-chip">ahead in {r.beats_change_nothing_of_10} of 10 futures</span>
         {r.cash_runs_out_of_10 > 0 && (
-          <div>
-            <dt>Cash runs out</dt>
-            <dd>in {r.cash_runs_out_of_10} of 10 futures</dd>
-          </div>
+          <span className="idea-chip chip-bad">cash runs out in {r.cash_runs_out_of_10} of 10</span>
         )}
-      </dl>
-      <button type="button" onClick={onTry} disabled={busy}>
-        {busy ? "Opening…" : "Try this idea"}
+      </p>
+      <details className="idea-more">
+        <summary>Details</summary>
+        <p>{idea.why}</p>
+        <ul className="idea-decisions">
+          {idea.decision_texts.map((t) => (
+            <li key={t}>{t}</li>
+          ))}
+        </ul>
+        <p className="idea-builds-on">Added to: {displayScenarioName(idea.builds_on)}</p>
+      </details>
+      <button type="button" onClick={onTry} disabled={busy} aria-label={`Try it: ${idea.title}`}>
+        {busy ? (
+          "Opening…"
+        ) : (
+          <>
+            Try it <ArrowRight />
+          </>
+        )}
       </button>
     </li>
   );
@@ -200,20 +267,25 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
           )}
           {updated && !aiPending && <span className="coach-updated-tag">Updated with more detail</span>}
           <div key={coach.generated_at} className={updated ? "coach-fade" : undefined}>
-          <p className="coach-headline">{coach.headline}</p>
-          <p>{coach.what_happens}</p>
-          <p>{coach.why}</p>
+          <div className="coach-top">
+            <VerdictBadge summary={coach.summary} />
+            <p className="coach-headline">{coach.headline}</p>
+          </div>
+
+          <Tiles summary={coach.summary} currency={currency} />
+          <WhyBars bars={coach.summary.bars} currency={currency} />
 
           {coach.watch_out.length > 0 && (
-            <div className="coach-watch">
-              <h3>Watch out</h3>
-              <ul>
-                {coach.watch_out.map((w) => (
-                  <li key={w}>{w}</li>
-                ))}
-              </ul>
-            </div>
+            <p className="coach-watch" role="note">
+              <strong>Watch out:</strong> {coach.watch_out[0]}
+            </p>
           )}
+
+          <details className="coach-story">
+            <summary>Read the full story</summary>
+            <p>{coach.what_happens}</p>
+            <p>{coach.why}</p>
+          </details>
 
           {coach.ideas.length > 0 && (
             <>

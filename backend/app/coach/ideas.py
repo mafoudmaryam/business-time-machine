@@ -49,3 +49,9 @@ def drop_repeated_opening(headline: str, what_happens: str) -> str:
     if len(sentences) > 1 and sounds_alike(headline, sentences[0]):
         return " ".join(sentences[1:])
     return what_happens
+
+
+def limit_sentences(text: str, maximum: int = 2) -> str:
+    """Keep at most `maximum` sentences (the coach is meant to be short)."""
+    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
+    return " ".join(sentences[:maximum])

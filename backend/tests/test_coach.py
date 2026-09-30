@@ -115,7 +115,8 @@ def test_template_coach_has_story_and_engine_tested_ideas(client, run):
     assert resp.status_code == 200
     body = resp.json()
     assert body["mode"] == "template" and body["fallback"] is False
-    assert body["headline"] and body["what_happens"] and body["why"] and body["watch_out"]
+    assert body["headline"] and body["what_happens"] and body["why"]
+    assert body["summary"]["verdict"]["label"] in ("Good idea", "Worth a try", "Risky", "Not worth it")
     assert "$" in body["what_happens"] and "USD" not in json.dumps(body)
     assert 2 <= len(body["ideas"]) <= 3
     for idea in body["ideas"]:

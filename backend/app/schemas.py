@@ -236,6 +236,40 @@ class CoachIdeaOut(BaseModel):
     result: IdeaResultOut
 
 
+class VerdictOut(BaseModel):
+    key: str   # good | try | risky | no  (decided by rules from the engine facts, never by the AI)
+    label: str
+
+
+class BarOut(BaseModel):
+    key: str
+    label: str    # plain words, e.g. "Higher prices"
+    amount: float  # money; positive helps, negative hurts
+
+
+class TileOut(BaseModel):
+    key: str        # profit | cash | customers
+    now: float
+    later: float
+
+
+class CoachSummaryOut(BaseModel):
+    """The skimmable part of the card. Every number comes from the engine."""
+
+    tiles: list[TileOut]
+    customers_word: str
+    scenario: str
+    verdict: VerdictOut
+    months: int
+    profit_change: float
+    better_of_10: Optional[int] = None
+    regulars_change_count: int
+    regulars_change_percent: int
+    bars: list[BarOut]
+    risk_flags: list[str]
+    has_risk: bool
+
+
 class CoachOut(BaseModel):
     mode: str
     model: Optional[str] = None
@@ -244,6 +278,7 @@ class CoachOut(BaseModel):
     what_happens: str
     why: str
     watch_out: list[str]
+    summary: CoachSummaryOut
     ideas: list[CoachIdeaOut]
     generated_at: str
     # none (no AI in use) | pending (AI still writing; this is the rule-based version) | done | failed

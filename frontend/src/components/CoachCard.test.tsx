@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -18,6 +18,27 @@ const coach: api.CoachOut = {
   what_happens: "You could make about 4,200 USD more.",
   why: "Each sale brings in more.",
   watch_out: ["Keep an eye on your regulars."],
+  summary: {
+    tiles: [
+      { key: "profit", now: 2100, later: 3900 },
+      { key: "cash", now: 25000, later: 24000 },
+      { key: "customers", now: 900, later: 900 },
+    ],
+    customers_word: "regulars",
+    scenario: "Raise prices",
+    verdict: { key: "good", label: "Good idea" },
+    months: 24,
+    profit_change: 26900,
+    better_of_10: 8,
+    regulars_change_count: 0,
+    regulars_change_percent: 0,
+    bars: [
+      { key: "price", label: "Higher prices", amount: 31000 },
+      { key: "visits", label: "Fewer visits", amount: -4100 },
+    ],
+    risk_flags: ["regulars"],
+    has_risk: true,
+  },
   generated_at: "2026-09-29T00:00:00Z",
   ai_status: "none",
   ideas: [
@@ -79,19 +100,80 @@ describe("CoachCard", () => {
     vi.mocked(api.requestCoach).mockResolvedValue(coach);
   });
 
-  it("starts right away, shows the loading text, then the story, watch-out, idea and footer", async () => {
+  it("starts right away, shows the loading text, then the badge, tiles, bars, watch-out, idea and footer", async () => {
     renderCard();
     expect(screen.getByText("Your coach is reading the results…")).toBeTruthy();
     expect(api.requestCoach).toHaveBeenCalledWith(9);
 
     expect(await screen.findByText("Raising prices looks like a good move.")).toBeTruthy();
-    expect(screen.getByText("Keep an eye on your regulars.")).toBeTruthy();
+    expect(screen.getByText("Good idea")).toBeTruthy(); // the verdict badge
+    expect(screen.getByText(/Keep an eye on your regulars\./)).toBeTruthy();
     expect(screen.getByText("Add one more barista")).toBeTruthy();
     expect(screen.getByText("Hire 1 full-time staff from month 5")).toBeTruthy();
-    expect(screen.getByText(/in 7 of 10 futures/)).toBeTruthy();
-    expect(screen.getByText(/in 2 of 10 futures/)).toBeTruthy();
+    expect(screen.getByText(/ahead in 7 of 10 futures/)).toBeTruthy();
+    expect(screen.getByText(/cash runs out in 2 of 10/)).toBeTruthy();
     expect(screen.getByText(/\+\$1,500/)).toBeTruthy();
     expect(screen.getByText(/not financial advice/)).toBeTruthy();
+  });
+
+  it("shows three now-to-later tiles, each with a text label and not only a colour", async () => {
+    renderCard();
+    await screen.findByText(coach.headline);
+    const tiles = screen.getByRole("list", { name: "How things change" });
+    const items = within(tiles).getAllByRole("listitem");
+    expect(items).toHaveLength(3);
+    expect(items[0].textContent).toMatch(/Profit a month/);
+    expect(items[0].textContent).toMatch(/\$2,100/);
+    expect(items[0].textContent).toMatch(/\$3,900/);
+    expect(items[0].textContent).toMatch(/Better/);
+    expect(items[0].className).toMatch(/trend-up/);
+    expect(items[1].textContent).toMatch(/Cash in the bank/);
+    expect(items[1].textContent).toMatch(/Lower/);
+    expect(items[1].className).toMatch(/trend-down/);
+    expect(items[2].textContent).toMatch(/Regulars/);
+    expect(items[2].textContent).toMatch(/About the same/);
+    // a plain sentence for screen readers
+    expect(within(items[0]).getByText(/Now \$2,100, in 2 years \$3,900\. Better\./)).toBeTruthy();
+  });
+
+  it("shows the bars it is given, with amounts and a helps/hurts word", async () => {
+    renderCard();
+    await screen.findByText(coach.headline);
+    expect(screen.getByText("Higher prices")).toBeTruthy();
+    expect(screen.getByText("Fewer visits")).toBeTruthy();
+    expect(screen.getByText(/\+\$31,000/)).toBeTruthy();
+    expect(screen.getByText(/−\$4,100/)).toBeTruthy();
+    expect(screen.getByText("helps")).toBeTruthy();
+    expect(screen.getByText("hurts")).toBeTruthy();
+  });
+
+  it("shows no Watch out line when there is no real risk", async () => {
+    vi.mocked(api.requestCoach).mockResolvedValue({
+      ...coach,
+      watch_out: [],
+      summary: { ...coach.summary, risk_flags: [], has_risk: false },
+    });
+    renderCard();
+    await screen.findByText(coach.headline);
+    expect(screen.queryByText(/Watch out/)).toBeNull();
+  });
+
+  it("keeps the full story behind a Read the full story toggle", async () => {
+    const user = userEvent.setup();
+    const { container } = renderCard();
+    await screen.findByText(coach.headline);
+    const details = container.querySelector("details.coach-story") as HTMLDetailsElement;
+    expect(details.open).toBe(false);
+    await user.click(screen.getByText("Read the full story"));
+    expect(details.open).toBe(true);
+    expect(screen.getByText("You could make about 4,200 USD more.")).toBeTruthy();
+    expect(screen.getByText("Each sale brings in more.")).toBeTruthy();
+  });
+
+  it("uses no emoji anywhere on the card", async () => {
+    const { container } = renderCard();
+    await screen.findByText(coach.headline);
+    expect(container.textContent).not.toMatch(/\p{Extended_Pictographic}/u);
   });
 
   it("hides which coach is active unless the server allows it", async () => {
@@ -125,11 +207,11 @@ describe("CoachCard", () => {
     expect(await screen.findByText(coach.headline)).toBeTruthy();
   });
 
-  it("Try this idea opens the scenario builder with unconfirmed decisions", async () => {
+  it("Try it opens the scenario builder with unconfirmed decisions", async () => {
     const user = userEvent.setup();
     vi.mocked(api.getScenario).mockResolvedValue(parent);
     renderCard();
-    await user.click(await screen.findByRole("button", { name: "Try this idea" }));
+    await user.click(await screen.findByRole("button", { name: "Try it: Add one more barista" }));
     expect(api.getScenario).toHaveBeenCalledWith(4);
     expect(
       await screen.findByText("builder: Raise prices + Add one more barista (2 decisions, confirmed: false)"),

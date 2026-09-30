@@ -389,6 +389,36 @@ export interface CoachIdea {
   result: IdeaResult;
 }
 
+export type VerdictKey = "good" | "try" | "risky" | "no";
+
+export interface CoachBar {
+  key: string;
+  label: string; // plain words, e.g. "Higher prices"
+  amount: number; // money: positive helps, negative hurts
+}
+
+/** The skimmable part of the card. Decided by rules from the engine's facts -- never by the AI. */
+export interface CoachSummaryTile {
+  key: "profit" | "cash" | "customers";
+  now: number;
+  later: number;
+}
+
+export interface CoachSummary {
+  tiles: CoachSummaryTile[];
+  customers_word: string;
+  scenario: string;
+  verdict: { key: VerdictKey; label: string };
+  months: number;
+  profit_change: number;
+  better_of_10: number | null;
+  regulars_change_count: number;
+  regulars_change_percent: number;
+  bars: CoachBar[];
+  risk_flags: string[];
+  has_risk: boolean;
+}
+
 export interface CoachOut {
   mode: string;
   model: string | null;
@@ -397,6 +427,7 @@ export interface CoachOut {
   what_happens: string;
   why: string;
   watch_out: string[];
+  summary: CoachSummary;
   ideas: CoachIdea[];
   generated_at: string;
   /** none = no AI in use; pending = this is the rule-based version and the AI is still writing;

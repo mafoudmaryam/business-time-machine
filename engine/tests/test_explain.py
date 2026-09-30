@@ -209,3 +209,14 @@ def test_format_money():
     assert format_money(4_500, "CHF") == "CHF 4,500"
     assert format_money(0.2, "USD") == "$0"
     assert describe_decision(Decision("investment", 3, 5000, "amount"), "USD") == "Invest $5,000 from month 3"
+
+
+def test_moments_give_the_now_and_later_numbers_for_the_card():
+    tpl = list_industries()[0]
+    base = tpl.default_baseline
+    price = [Decision("price", 3, 10, "percent")]
+    m, nothing = key_moments(base, tpl, price, 24), key_moments(base, tpl, [], 24)
+    assert m["monthly_profit_now"] == pytest.approx(nothing["monthly_profit_now"])   # "now" ignores the decision
+    assert m["monthly_profit_end"] > m["monthly_profit_now"]
+    assert m["cash_end"] > m["cash_end_baseline"]
+    assert nothing["cash_end"] == pytest.approx(nothing["cash_end_baseline"])

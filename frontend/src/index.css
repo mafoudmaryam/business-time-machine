@@ -686,3 +686,201 @@ table.run-history-table td {
     animation: none;
   }
 }
+
+/* ---------- Coach card, skimmable layout ---------- */
+
+.coach-card {
+  --good: #17704f;
+  --good-bg: #e0f2e9;
+  --bad: #a5301f;
+  --bad-bg: #fbe6e2;
+  --warn: #7a5200;
+  --warn-bg: #fff1d0;
+}
+
+.coach-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.coach-top .coach-headline {
+  margin: 0;
+  flex: 1 1 220px;
+}
+
+.verdict-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.verdict-good { background: var(--good-bg); color: var(--good); }
+.verdict-try { background: var(--warn-bg); color: var(--warn); }
+.verdict-risky { background: var(--warn-bg); color: var(--warn); }
+.verdict-no { background: var(--bad-bg); color: var(--bad); }
+
+.coach-tiles {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.coach-tile {
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.coach-tile-title {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.coach-tile-values {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.coach-tile-now { color: var(--text-muted); }
+.coach-tile-later { font-weight: 700; }
+
+.coach-tile-when {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.coach-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  padding: 2px 10px 2px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--band);
+  color: var(--ink);
+}
+
+.trend-up .coach-trend { background: var(--good-bg); color: var(--good); }
+.trend-down .coach-trend { background: var(--bad-bg); color: var(--bad); }
+
+.coach-why h3 { margin: 4px 0 8px; }
+
+.coach-bars {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.coach-bars li {
+  display: grid;
+  grid-template-columns: minmax(96px, 1fr) minmax(80px, 2fr) auto;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 0.9rem;
+}
+
+.bar-track {
+  background: var(--band);
+  border-radius: 999px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.bar-helps .bar-fill { background: var(--success); }
+.bar-hurts .bar-fill { background: var(--danger); }
+.bar-helps .bar-amount { color: var(--good); }
+.bar-hurts .bar-amount { color: var(--bad); }
+.bar-amount { font-weight: 700; white-space: nowrap; text-align: right; }
+
+.coach-card p.coach-watch {
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin: 12px 0;
+}
+
+.coach-story {
+  margin: 12px 0;
+}
+
+.coach-story summary,
+.idea-more summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--button);
+}
+
+.coach-story summary:focus-visible,
+.idea-more summary:focus-visible {
+  outline: 3px solid var(--button);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.idea-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0;
+}
+
+.idea-chip {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--band);
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.idea-chip.chip-good { background: var(--good-bg); color: var(--good); }
+.idea-chip.chip-bad { background: var(--bad-bg); color: var(--bad); }
+
+.idea-more { font-size: 0.9rem; }
+.idea-more p { margin: 6px 0; }
+
+.idea-card button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 480px) {
+  .coach-card { padding: 14px 12px; }
+  .coach-bars li { grid-template-columns: 1fr auto; }
+  .coach-bars .bar-track { grid-column: 1 / -1; grid-row: 2; }
+  .idea-grid { grid-template-columns: 1fr; }
+}

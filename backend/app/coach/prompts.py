@@ -57,20 +57,22 @@ HARD RULES
 - Plain, friendly words. Never use these words: FTE, COGS, churn, baseline, percentile, p10, p50, p90,
   Monte Carlo, elasticity. Say "if you change nothing" instead of "baseline".
 - Use the business's own words: call customers "{customers_word}" and staff "{staff_word}".
-- Be concrete and very brief: the whole note must stay under 250 words. No bullet-point jargon, no headings."""
+- Warm, encouraging and simple. Talk to the owner as "you" and "your". Short sentences: about 15 words at most.
+  The whole note must stay under 200 words. No jargon, no headings."""
 
 COACH_INSTRUCTIONS = """
 
 Write the coach note as JSON with these fields:
-- headline: one short verdict sentence WITHOUT numbers (for example: "Raising prices looks like a good move.").
+- headline: ONE friendly sentence of at most 12 words, WITHOUT numbers, that agrees with the "verdict" in the FACTS
+  (for example: "Nice! Raising prices looks like a good move.").
 - what_happens must not repeat the headline: start it with the numbers.
-- what_happens: 2 short sentences on WHAT happens over the {months} months (profit vs. if you change nothing,
+- what_happens: at most 2 short sentences on WHAT happens over the {months} months (profit vs. if you change nothing,
   {customers_word}, and the key months from the facts).
-- why: 1-2 short sentences on WHY, using the drivers (biggest help and biggest drag).
-- watch_out: a list of 1-2 short sentences about what to WATCH OUT for (cash running low, getting too full,
+- why: at most 2 short sentences on WHY, using the drivers (biggest help and biggest drag).
+- watch_out: a list with at most ONE short sentence about a REAL risk to WATCH OUT for (cash running low, getting too busy,
   {customers_word} leaving).
 - ideas: exactly 2 IDEAS TO TRY. Each has:
-    title: short and friendly, max 8 words
+    title: short and friendly, max 6 words
     why: one sentence on why it might help; no numbers except ones in its own decisions or in the FACTS
     builds_on: the exact name of one scenario from the FACTS to add this on top of, or "baseline" to start
                from "if you change nothing"

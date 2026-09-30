@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..engine_bridge import format_money
+from .summary import build_summary
 
 # Facts keys that hold an amount of money.
 MONEY_KEYS = {
@@ -31,4 +32,6 @@ def facts_for_prompt(facts: dict) -> dict:
 
     out = walk(facts)
     out["business"].pop("currency", None)     # amounts already carry their symbol; no code to copy
+    if facts.get("scenarios") and "if_you_change_nothing" in facts:
+        out["verdict"] = build_summary(facts)["verdict"]["label"]   # decided by rules; the headline must agree
     return out

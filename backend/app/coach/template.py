@@ -8,6 +8,7 @@ from typing import Any
 
 from ..engine_bridge import format_money
 from .ideas import drop_repeated_opening, is_repeat
+from .summary import build_summary, decide_verdict, driver_label
 
 
 def _money(x: float, currency: str) -> str:
@@ -29,87 +30,89 @@ def _drivers(s: dict) -> tuple[dict | None, dict | None]:
     return (best if best["amount"] > 0 else None), (worst if worst["amount"] < 0 else None)
 
 
-def _scenario_sentence(s: dict, b: dict) -> str:
-    cur = b["currency"]
-    ch = s["profit_change"]
-    span = f"{b['months']} months"
-    if abs(ch) < 1:
-        line = f"{_nice(s['name'])} ends up about the same as changing nothing over {span}."
-    else:
-        line = (f"With {_nice(s['name'])}, you could make about {_money(ch, cur)} "
-                f"{'more' if ch > 0 else 'less'} profit than if you change nothing over {span}.")
-    beats = s["futures"]["beats_change_nothing_of_10"]
-    if beats is not None:
-        line += f" It comes out ahead in {beats} of 10 futures."
-    return line
+def _span(months: int) -> str:
+    if months % 12 == 0:
+        years = months // 12
+        return f"{years} year" + ("" if years == 1 else "s")
+    return f"{months} months"
 
 
-def _verdict(s: dict) -> str:
-    ch, beats = s["profit_change"], s["futures"]["beats_change_nothing_of_10"]
-    if abs(ch) < 1:
-        return "would change very little"
-    if ch > 0:
-        return "looks like a good move" if beats is not None and beats >= 7 else "could pay off, but not in every future"
-    return "would probably cost you money"
+HEADLINES = {
+    "good": "Nice! This looks like a good move for you.",
+    "try": "This could pay off, so it is worth a try.",
+    "risky": "This could work, but it is a risky one.",
+    "no": "This one probably will not pay off for you.",
+}
 
 
 def _headline(facts: dict) -> str:
-    """A short verdict with no numbers, so it does not repeat the first sentence of the story."""
+    """A short, friendly verdict (12 words at most) with no numbers, so it never repeats the story."""
     best = _best(facts)
+    verdict = decide_verdict(best, facts["if_you_change_nothing"].get("cash_runs_out_of_10", 0))
     if len(facts["scenarios"]) == 1:
-        return f"{_nice(best['name'])} {_verdict(best)}."
-    if best["profit_change"] <= 0:
-        return "None of these choices beats changing nothing on profit."
-    return f"{_nice(best['name'])} looks like your strongest choice."
+        return HEADLINES[verdict]
+    if verdict == "no":
+        return "None of these looks worth it, sorry."
+    if len(best["name"].split()) <= 6:
+        return f"{_nice(best['name'])} is your best bet" + (", but risky." if verdict == "risky" else ".")
+    return "One of these is your best bet."
 
 
 def _what_happens(facts: dict) -> str:
-    b = facts["business"]
-    parts = [_scenario_sentence(s, b) for s in facts["scenarios"]]
-    s = _best(facts)
-    m, words = s["moments"], b["customers_word"]
-    count, pct = s["regulars_change_count"], s["regulars_change_percent"]
-    if abs(count) >= 1:
-        about_pct = f" (about {abs(pct)}%)" if abs(pct) >= 1 else ""
-        parts.append(f"You would end with about {abs(count):,} {'more' if count > 0 else 'fewer'} {words} "
-                     f"than if you change nothing{about_pct}.")
-    if m["crossover_month"]:
-        verb = "pulls ahead of" if m["crossover_direction"] == "overtakes" else "falls behind"
-        parts.append(f"{_nice(s['name'])} {verb} changing nothing around month {m['crossover_month']}.")
-    return " ".join(parts)
+    """Two short sentences about the scenario that matters most."""
+    b, s = facts["business"], _best(facts)
+    cur, words = b["currency"], b["customers_word"]
+    ch, span = s["profit_change"], _span(b["months"])
+    if abs(ch) < 1:
+        first = f"Over {span}, you would end up about where you are now."
+    else:
+        first = (f"Over {span}, you could earn about {_money(ch, cur)} "
+                 f"{'more' if ch > 0 else 'less'} than if you change nothing.")
+    beats, count = s["futures"]["beats_change_nothing_of_10"], s["regulars_change_count"]
+    people = f"about {abs(count):,} {'more' if count > 0 else 'fewer'} {words}" if abs(count) >= 1 else None
+    if beats is not None and people:
+        second = f"It comes out ahead in {beats} of 10 futures, with {people}."
+    elif beats is not None:
+        second = f"It comes out ahead in {beats} of 10 futures."
+    elif people:
+        second = f"You would end with {people}."
+    else:
+        return first
+    return f"{first} {second}"
 
 
 def _why(facts: dict) -> str:
+    """Up to two short sentences: your biggest boost and your biggest drag."""
     cur, s = facts["business"]["currency"], _best(facts)
     help_, drag = _drivers(s)
     out = []
     if help_:
-        out.append(f"The biggest help is {help_['label']}, worth about {_money(help_['amount'], cur)}.")
+        out.append(f"Your biggest boost is {driver_label(help_['key'], help_['amount']).lower()}, "
+                   f"worth about {_money(help_['amount'], cur)}.")
     if drag:
-        out.append(f"The biggest drag is {drag['label']}, costing about {_money(drag['amount'], cur)}.")
+        out.append(f"Your biggest drag is {driver_label(drag['key'], drag['amount']).lower()}, "
+                   f"costing about {_money(drag['amount'], cur)}.")
     if not out:
-        out.append("Nothing moves much, so the result stays close to what you have today.")
+        out.append("Nothing moves much, so you stay close to where you are today.")
     return " ".join(out)
 
 
 def _watch_out(facts: dict) -> list[str]:
-    b, notes = facts["business"], []
-    words, staff = b["customers_word"], b["staff_word"]
-    for s in facts["scenarios"]:
-        m, f, n = s["moments"], s["futures"], _nice(s["name"])
+    """One short warning line, and only when there is a real risk. Otherwise nothing."""
+    summary = build_summary(facts)
+    if not summary["has_risk"]:
+        return []
+    s, b = _best(facts), facts["business"]
+    m, f, flag = s["moments"], s["futures"], summary["risk_flags"][0]
+    if flag == "cash":
         if f["cash_runs_out_of_10"] >= 1:
-            notes.append(f"With {n}, your cash runs out in {f['cash_runs_out_of_10']} of 10 futures, "
-                         "so keep a close eye on the bank balance.")
-        elif m["lowest_cash_amount"] < 0:
-            notes.append(f"With {n}, cash dips below zero around month {m['lowest_cash_month']}.")
-        if m["full_month"]:
-            notes.append(f"With {n}, you get too busy for your {staff} team around month {m['full_month']}, "
-                         "and service could slip.")
-        if m["regulars_drop_month"] and m["regulars_drop_amount"] >= 5:
-            notes.append(f"With {n}, the biggest drop in {words} comes around month {m['regulars_drop_month']}.")
-    if not notes:
-        notes.append(f"Nothing alarming shows up, but check in on your {words} and your cash every few months.")
-    return notes[:3]
+            return [f"Your cash could run out in {f['cash_runs_out_of_10']} of 10 futures, so watch it closely."]
+        return [f"Your cash could dip below zero around month {m['lowest_cash_month']}."]
+    if flag == "busy":
+        return [f"You may get too busy around month {m['full_month']}, so service could slip."]
+    if flag == "regulars":
+        return [f"You could lose about {abs(s['regulars_change_count']):,} {b['customers_word']}, so keep them happy."]
+    return ["This one could swing either way, so start small."]
 
 
 def _idea(title: str, why: str, builds_on: str, decisions: list[dict]) -> dict:
@@ -127,14 +130,14 @@ def _ideas(facts: dict, raw: dict[str, list[dict]]) -> list[dict]:
     if m["full_month"] and not any(d["type"] == "hiring" for d in mine):
         ideas.append(_idea(
             f"Add one more {staff}",
-            f"You get too busy around month {m['full_month']}, so an extra {staff} could keep service quick.",
+            f"You get busy around month {m['full_month']}. An extra {staff} keeps service quick.",
             best["name"], [{"type": "hiring", "start_month": max(1, m["full_month"] - 1), "value": 1, "unit": "fte"}]))
     for d in mine:
         if d["type"] == "price" and d["unit"] == "percent" and d["value"] >= 4:
             half = round(d["value"] / 2, 1)
             ideas.append(_idea(
-                f"Try a gentler price rise of {half:g}%",
-                "A smaller step may keep more of your regulars coming back.",
+                f"Try a gentler {half:g}% price rise",
+                "A smaller step may keep more regulars coming.",
                 "baseline", [{"type": "price", "start_month": d["start_month"], "value": half, "unit": "percent"}]))
         if d["type"] == "investment" and not d.get("loan_months") and d["value"] > 0:
             loan = {"type": "investment", "start_month": d["start_month"], "value": d["value"], "unit": "amount",
@@ -142,15 +145,15 @@ def _ideas(facts: dict, raw: dict[str, list[dict]]) -> list[dict]:
             if d.get("capacity_pct"):
                 loan["capacity_pct"] = d["capacity_pct"]
             ideas.append(_idea(
-                "Spread the cost over a loan",
-                "Paying over time keeps more cash in the bank while the investment gets going.",
+                "Spread the cost with a loan",
+                "Paying over time keeps more cash in your bank.",
                 "baseline", [loan]))
     fillers = [
-        _idea("Make a small price rise", "A small step in prices is easy to try and easy to undo.",
+        _idea("Nudge your prices up", "A small step is easy to try and easy to undo.",
               "baseline", [{"type": "price", "start_month": 2, "value": 3, "unit": "percent"}]),
-        _idea("Add a tempting extra to the menu", "Offering one extra item can lift what each guest spends.",
+        _idea("Add a tempting menu extra", "One extra item can lift what each guest spends.",
               "baseline", [{"type": "menu", "start_month": 3, "value": 4, "unit": "percent"}]),
-        _idea(f"Add one more {staff}", f"An extra {staff} may help you serve more people at busy times.",
+        _idea(f"Add one more {staff}", f"An extra {staff} helps you serve more people.",
               "baseline", [{"type": "hiring", "start_month": 3, "value": 1, "unit": "fte"}]),
     ]
     for f in fillers:

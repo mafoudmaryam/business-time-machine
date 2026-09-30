@@ -131,6 +131,12 @@ def key_moments(base: BusinessBaseline, tpl: IndustryTemplate, decisions: list[D
         "customers_start": float(s["customers"][0]),
         "customers_end": float(s["customers"][-1]),
         "customers_end_baseline": float(b["customers"][-1]),
+        # "Now -> later" for the coach card's tiles: a typical month today (month 1, nothing changed)
+        # against the last month with this plan, and the cash pile at the end of the period.
+        "monthly_profit_now": float(b["net_profit"][0]),
+        "monthly_profit_end": float(s["net_profit"][-1]),
+        "cash_end": float(s["cash"][-1]),
+        "cash_end_baseline": float(b["cash"][-1]),
     }
 
 
@@ -227,6 +233,10 @@ def build_facts(base: BusinessBaseline, tpl: IndustryTemplate, scenarios: dict[s
                 "crossover_direction": mo["crossover"]["direction"] if mo["crossover"] else None,
                 "ahead_at_end": mo["ahead_at_end"],
             },
+            "monthly_profit_now": r(mo["monthly_profit_now"]),
+            "monthly_profit_end": r(mo["monthly_profit_end"]),
+            "cash_end": r(mo["cash_end"]),
+            "cash_end_if_nothing_changes": r(mo["cash_end_baseline"]),
             "regulars_end": r(mo["customers_end"]),
             "regulars_end_if_nothing_changes": r(mo["customers_end_baseline"]),
             # A count ("about 27 fewer regulars") and a whole percent, never "3.01%".
