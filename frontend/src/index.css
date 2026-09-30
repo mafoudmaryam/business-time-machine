@@ -1223,3 +1223,149 @@ table.run-history-table td {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Ask the coach: chat bubbles ---------- */
+
+.chat {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 640px;
+}
+
+.chat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chat-bubble {
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 16px;
+  max-width: 92%;
+  overflow-wrap: anywhere;
+}
+
+.chat-bubble p {
+  margin: 0 0 6px;
+}
+
+.chat-q {
+  align-self: flex-end;
+  background: var(--button);
+  color: var(--button-text);
+  border-bottom-right-radius: 4px;
+}
+
+.chat-a {
+  align-self: flex-start;
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+.chat-wait {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.chat-a .coach-writing {
+  margin: 4px 0 0;
+}
+
+.chat-a .coach-examples {
+  margin: 4px 0 6px;
+}
+
+.chat-error {
+  align-self: flex-start;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .chat-bubble {
+    max-width: 100%;
+  }
+}
+
+/* ---------- Confirm all ---------- */
+
+.confirm-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 8px 12px;
+  margin: 0 0 8px;
+  background: var(--band);
+  border-radius: 8px;
+}
+
+.confirm-bar-count {
+  font-weight: 600;
+}
+
+.confirm-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+}
+
+.confirm-all:disabled {
+  opacity: 1;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  cursor: default;
+}
+
+.confirm-prompt {
+  margin: 12px 0;
+  padding: 10px 14px;
+  max-width: 420px;
+  background: var(--card);
+  border: 2px solid var(--button);
+  border-radius: 10px;
+}
+
+.confirm-prompt p {
+  margin: 4px 0;
+}
+
+.confirm-prompt-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+@media (max-width: 480px) {
+  .confirm-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .confirm-all {
+    justify-content: center;
+  }
+
+  .confirm-prompt {
+    max-width: none;
+  }
+
+  .confirm-prompt-actions button:first-child {
+    flex: 1 1 100%;
+  }
+}

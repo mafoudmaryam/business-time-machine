@@ -7,7 +7,7 @@ import { CoachCard } from "./CoachCard";
 
 vi.mock("../api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../api")>();
-  return { ...actual, getCoachStatus: vi.fn(), requestCoach: vi.fn(), getCoach: vi.fn(), askCoach: vi.fn(), getScenario: vi.fn() };
+  return { ...actual, getCoachStatus: vi.fn(), requestCoach: vi.fn(), getCoach: vi.fn(), askCoach: vi.fn(), getAsk: vi.fn(), getScenario: vi.fn() };
 });
 
 const coach: api.CoachOut = {
@@ -244,12 +244,11 @@ describe("CoachCard", () => {
     ).toBeTruthy();
   });
 
-  it("answers a typed question", async () => {
+  it("answers a typed question at once, as a chat bubble, and the box stays usable", async () => {
     const user = userEvent.setup();
     vi.mocked(api.askCoach).mockResolvedValue({
-      answer: "Cash runs out in 2 of 10 futures.",
-      mode: "template",
-      fallback: false,
+      id: 1, question: "Will my cash run out?", answer: "Cash runs out in 2 of 10 futures.", mode: "template",
+      fallback: false, ai_status: "none", answered: true, suggestions: [],
     });
     renderCard();
     await screen.findByText(coach.headline);
@@ -257,16 +256,19 @@ describe("CoachCard", () => {
     await user.click(screen.getByRole("button", { name: "Ask" }));
     expect(api.askCoach).toHaveBeenCalledWith(9, "Will my cash run out?");
     expect(await screen.findByText("Cash runs out in 2 of 10 futures.")).toBeTruthy();
+    expect((screen.getByLabelText("Your question") as HTMLInputElement).disabled).toBe(false);
+    expect(screen.queryByText("Thinking…")).toBeNull();
   });
 
-  it("shows a friendly message when a question fails", async () => {
+  it("shows a friendly one-line message with a retry link when a question fails", async () => {
     const user = userEvent.setup();
     vi.mocked(api.askCoach).mockRejectedValue(new api.ApiError(500, "boom"));
     renderCard();
     await screen.findByText(coach.headline);
     await user.click(screen.getByRole("button", { name: "Will my cash run out?" }));
-    const alert = await screen.findByRole("alert");
-    expect(alert.textContent).not.toMatch(/boom/);
+    const alert = await screen.findByText(/We couldn't get an answer just now/);
+    expect(alert.textContent).not.toMatch(/boom|500/);
+    expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy();
   });
 });
 

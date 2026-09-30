@@ -560,7 +560,7 @@ def test_what_the_owner_finally_did_is_logged_unchanged_edited_removed_added(cli
     resp = client.post(f"/interpretations/{body['id']}/outcome", json=final(keep, edited, added))
     assert resp.status_code == 200
     assert resp.json() == {"ai_decisions": 3, "unchanged": 1, "edited": 1, "removed": 1, "added_by_hand": 1,
-                           "final_decisions": 3, "confirmed": 3, "scenario_id": None}
+                           "final_decisions": 3, "confirmed": 3, "confirmed_via": {"unrecorded": 3}, "scenario_id": None}
     (row,) = rows("interpret_outcome")
     saved = json.loads(row.response)
     assert row.interpretation_id == body["id"] and row.input_text == body["text"]
@@ -629,3 +629,18 @@ def test_a_whole_sentence_quote_that_cannot_be_narrowed_is_not_shown(client, bus
 def test_a_single_decision_may_quote_the_whole_sentence(client, business, use_ai):
     use_ai(reply(item("price", 5, "percent", "next month", "raise prices 5% next month")))
     assert interpret(client, business, "raise prices 5% next month")["decisions"][0]["source_quote"] == "raise prices 5% next month"
+
+
+def test_the_outcome_counts_how_the_confirmed_decisions_were_confirmed(client, business):
+    body = interpret(client, business, "Raise prices 10% in March and open 6 days a week next month")
+    d1, d2 = body["decisions"]
+    keep1 = {k: d1[k] for k in ("type", "start_month", "value", "unit")}
+    keep2 = {k: d2[k] for k in ("type", "start_month", "value", "unit")}
+    payload = {"decisions": [dict(keep1, confirmed=True, confirmed_via="confirm_all"),
+                             dict(keep2, confirmed=True, confirmed_via="edited")]}
+    out = client.post(f"/interpretations/{body['id']}/outcome", json=payload).json()
+    assert out["confirmed_via"] == {"confirm_all": 1, "edited": 1}
+    (row,) = rows("interpret_outcome")
+    saved = json.loads(row.response)
+    assert saved["summary"]["confirmed_via"] == {"confirm_all": 1, "edited": 1}
+    assert [f["confirmed_via"] for f in saved["final"]] == ["confirm_all", "edited"]

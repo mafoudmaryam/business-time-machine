@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { DecisionFormValues } from "../../api";
+import type { ConfirmVia, DecisionFormValues } from "../../api";
 import { NumberField } from "../../components/NumberField";
 import { groupSteps, pairSentence, reverseOf, stepSentence, type StepItem } from "../../lib/interpretView";
 import { DecisionForm } from "./DecisionForm";
@@ -10,9 +10,15 @@ interface Props {
   staffNoun: string;
   currency: string;
   /** Ticks or un-ticks one or more steps (a temporary change is two steps that are ticked together). */
-  onSetConfirmed: (indexes: number[], confirmed: boolean) => void;
+  onSetConfirmed: (indexes: number[], confirmed: boolean, via: ConfirmVia) => void;
+  /** Confirms every step at once (the owner can still read each sentence above and below the button). */
+  onConfirmAll: () => void;
   onRemove: (indexes: number[]) => void;
   onEdit: (item: StepItem, edited: DecisionFormValues, endMonth: number | null) => void;
+}
+
+function isConfirmed(item: StepItem): boolean {
+  return item.kind === "pair" ? item.start.confirmed && item.end.confirmed : item.step.confirmed;
 }
 
 function indexesOf(item: StepItem): number[] {
@@ -22,7 +28,7 @@ function indexesOf(item: StepItem): number[] {
 /** Each step's plain-language sentence plus its own "I confirm these parameters" checkbox -- the
  * human-in-the-loop step (golden rule 2). Steps that came from the owner's own words show those words softly
  * underneath, and every step can be edited with the same sentence-style form before it is ticked. */
-export function DecisionList({ decisions, industryId, staffNoun, currency, onSetConfirmed, onRemove, onEdit }: Props) {
+export function DecisionList({ decisions, industryId, staffNoun, currency, onSetConfirmed, onConfirmAll, onRemove, onEdit }: Props) {
   const [editing, setEditing] = useState<number | null>(null);
   const [endMonth, setEndMonth] = useState<number>(NaN);
 
@@ -35,11 +41,33 @@ export function DecisionList({ decisions, industryId, staffNoun, currency, onSet
     setEndMonth(item.kind === "pair" ? item.end.start_month : NaN);
   }
 
+  const items = groupSteps(decisions);
+  const confirmedCount = items.filter((item) => isConfirmed(item)).length;
+  const allConfirmed = confirmedCount === items.length;
+
   return (
+    <>
+      <div className="confirm-bar">
+        <span className="confirm-bar-count" role="status" aria-live="polite">
+          {items.length} {items.length === 1 ? "step" : "steps"} · {confirmedCount} confirmed
+        </span>
+        <button type="button" className="confirm-all" onClick={onConfirmAll} disabled={allConfirmed}>
+          {allConfirmed ? (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+                <path d="M5 12.5l4.5 4.5L19 7.5" />
+              </svg>
+              All confirmed
+            </>
+          ) : (
+            "Confirm all"
+          )}
+        </button>
+      </div>
     <ul className="decision-list">
-      {groupSteps(decisions).map((item) => {
+      {items.map((item) => {
         const first = item.kind === "pair" ? item.start : item.step;
-        const confirmed = first.confirmed && (item.kind === "single" || item.end.confirmed);
+        const confirmed = isConfirmed(item);
         const sentence =
           item.kind === "pair" ? pairSentence(item.start, item.end, staffNoun, currency) : stepSentence(item.step, staffNoun, currency);
         const quote = first.origin?.quote;
@@ -93,7 +121,7 @@ export function DecisionList({ decisions, industryId, staffNoun, currency, onSet
                 type="checkbox"
                 aria-describedby={sentenceId}
                 checked={confirmed}
-                onChange={() => onSetConfirmed(indexesOf(item), !confirmed)}
+                onChange={() => onSetConfirmed(indexesOf(item), !confirmed, "one_by_one")}
               />
               I confirm these parameters
             </label>
@@ -107,5 +135,6 @@ export function DecisionList({ decisions, industryId, staffNoun, currency, onSet
         );
       })}
     </ul>
+    </>
   );
 }

@@ -240,6 +240,16 @@ def _key(d: dict) -> tuple:
     return (d["type"], int(d["start_month"]), round(float(d["value"]), 4), d.get("unit", ""), extras)
 
 
+def _via_counts(final: list[dict]) -> dict[str, int]:
+    """How the confirmed decisions were confirmed: one by one, Confirm all, edited... ("unrecorded" if unknown)."""
+    counts: dict[str, int] = {}
+    for f in final:
+        if f.get("confirmed"):
+            key = f.get("confirmed_via") or "unrecorded"
+            counts[key] = counts.get(key, 0) + 1
+    return counts
+
+
 def log_outcome(db: Session, row: models.Interpretation, final: list[dict], scenario_id: Optional[int]) -> dict:
     """Compare the AI's decisions with the ones the owner ended up with: unchanged, edited, removed, or
     added by hand. Stored as an ai_interactions row of kind "interpret_outcome"."""
@@ -267,7 +277,8 @@ def log_outcome(db: Session, row: models.Interpretation, final: list[dict], scen
     added = len(left)
     summary = {"ai_decisions": len(shown), "unchanged": unchanged, "edited": edited, "removed": removed,
                "added_by_hand": added, "final_decisions": len(final),
-               "confirmed": sum(1 for f in final if f.get("confirmed")), "scenario_id": scenario_id}
+               "confirmed": sum(1 for f in final if f.get("confirmed")), "scenario_id": scenario_id,
+               "confirmed_via": _via_counts(final)}
     db.add(models.AiInteraction(
         kind="interpret_outcome", business_id=row.business_id, interpretation_id=row.id, input_text=row.text,
         provider=row.provider, model=row.model, attempt=1, prompt="",

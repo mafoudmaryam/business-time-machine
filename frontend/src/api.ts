@@ -167,6 +167,10 @@ export function listIndustries(): Promise<IndustryOut[]> {
 
 // ---------- scenarios / decisions ----------
 
+/** How the owner confirmed a step (thesis data): ticked one by one, "Confirm all", "Confirm all and save",
+ * or by editing it (saving an edit counts as reviewing it). */
+export type ConfirmVia = "one_by_one" | "confirm_all" | "confirm_all_on_save" | "edited";
+
 /** Where a step came from when the owner described it in their own words (UI only, never sent to the API). */
 export interface StepOrigin {
   interpretationId: number;
@@ -192,6 +196,7 @@ export interface DecisionFormValues {
   confirmed: boolean;
   origin?: StepOrigin; // set on steps that came from "describe it in your own words"
   edited?: boolean; // the owner changed an interpreted step
+  confirmedVia?: ConfirmVia; // how it was confirmed (only meaningful while confirmed)
 }
 
 interface DecisionIn {
@@ -206,6 +211,7 @@ interface DecisionIn {
   investment?: number;
   source: string;
   confirmed: boolean;
+  confirmed_via?: string;
 }
 
 export interface DecisionOut {
@@ -238,6 +244,7 @@ function decisionFormToApi(form: DecisionFormValues): DecisionIn {
     source: form.source,
     confirmed: form.confirmed,
   };
+  if (form.confirmed && form.confirmedVia) out.confirmed_via = form.confirmedVia;
   if (form.loan_months !== undefined) out.loan_months = form.loan_months;
   if (form.annual_rate !== undefined) out.annual_rate = percentToRatio(form.annual_rate);
   if (form.capacity_pct !== undefined) out.capacity_pct = form.capacity_pct;
@@ -449,9 +456,14 @@ export interface CoachOut {
 }
 
 export interface AskOut {
+  id: number;
+  question: string;
   answer: string;
-  mode: string;
+  mode: string; // "template" until an AI answer has replaced the instant one
   fallback: boolean;
+  ai_status: "none" | "pending" | "done" | "failed";
+  answered: boolean; // false: the rules could not tell, so `suggestions` are offered
+  suggestions: string[];
 }
 
 export function getCoachStatus(): Promise<CoachStatus> {
@@ -467,8 +479,20 @@ export function getCoach(runId: number): Promise<CoachOut> {
   return request(`/simulation_runs/${runId}/coach`);
 }
 
+/** Returns at once with an instant rule-based answer; poll getAsk for the AI's better one. The 15 s limit only
+ * guards against a dead server: the request itself is quick. */
 export function askCoach(runId: number, question: string): Promise<AskOut> {
-  return request(`/simulation_runs/${runId}/ask`, { method: "POST", body: JSON.stringify({ question }) });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15_000);
+  return request<AskOut>(`/simulation_runs/${runId}/ask`, {
+    method: "POST",
+    body: JSON.stringify({ question }),
+    signal: controller.signal,
+  }).finally(() => clearTimeout(timer));
+}
+
+export function getAsk(askId: number): Promise<AskOut> {
+  return request(`/asks/${askId}`);
 }
 
 // ---------- starting-month preview (setup wizard) ----------

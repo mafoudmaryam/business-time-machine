@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ApiError,
-  askCoach,
   getCoach,
   getCoachStatus,
   getScenario,
@@ -16,6 +15,7 @@ import {
 import { buildIdeaPrefill } from "../lib/coachIdea";
 import { barWidths, buildTiles, signedMoney, VERDICT_CLASS, yearsText } from "../lib/coachView";
 import { displayScenarioName } from "../lib/scenarioLabel";
+import { AskCoach } from "./AskCoach";
 import { ArrowRight, TrendIcon, VerdictIcon } from "./CoachIcons";
 import { InfoTip } from "./InfoTip";
 import { Spinner } from "./Spinner";
@@ -28,8 +28,6 @@ const MODE_LABELS: Record<string, string> = {
 
 const POLL_EVERY_MS = 3000;
 const POLL_LIMIT_MS = 15 * 60 * 1000;
-
-const EXAMPLE_QUESTIONS = ["Will my cash run out?", "Why does this happen?", "What should I watch for?"];
 
 function friendlyCoachError(err: unknown): string {
   if (err instanceof ApiError && err.status === 0) return "Your coach can't be reached right now. Is the app running?";
@@ -154,10 +152,6 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
   const [tryingIdx, setTryingIdx] = useState<number | null>(null);
   const [tryError, setTryError] = useState<string | null>(null);
 
-  const [question, setQuestion] = useState("");
-  const [asking, setAsking] = useState(false);
-  const [answers, setAnswers] = useState<{ question: string; answer: string }[]>([]);
-  const [askError, setAskError] = useState<string | null>(null);
 
   // While the AI adds more detail, the rule-based coach is already on screen. When the AI version
   // arrives it fades in and gets a small "Updated with more detail" tag.
@@ -220,22 +214,6 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
     } catch {
       setTryError("We couldn't open that idea. Please try again.");
       setTryingIdx(null);
-    }
-  }
-
-  async function ask(q: string) {
-    const text = q.trim();
-    if (!text || asking) return;
-    setAsking(true);
-    setAskError(null);
-    try {
-      const res = await askCoach(runId, text);
-      setAnswers((a) => [...a, { question: text, answer: res.answer }]);
-      setQuestion("");
-    } catch (err) {
-      setAskError(friendlyCoachError(err));
-    } finally {
-      setAsking(false);
     }
   }
 
@@ -310,45 +288,7 @@ export function CoachCard({ runId, businessId, currency }: { runId: number; busi
 
           </div>
 
-          <div className="coach-ask">
-            <h3>Ask the coach</h3>
-            <div className="coach-examples">
-              {EXAMPLE_QUESTIONS.map((q) => (
-                <button key={q} type="button" className="chip-button" onClick={() => ask(q)} disabled={asking}>
-                  {q}
-                </button>
-              ))}
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                ask(question);
-              }}
-            >
-              <label htmlFor={`coach-question-${runId}`} className="visually-hidden">
-                Your question
-              </label>
-              <input
-                id={`coach-question-${runId}`}
-                type="text"
-                value={question}
-                maxLength={500}
-                placeholder="Ask about these results…"
-                onChange={(e) => setQuestion(e.target.value)}
-              />
-              <button type="submit" disabled={asking || question.trim() === ""}>
-                {asking ? "Thinking…" : "Ask"}
-              </button>
-            </form>
-            {asking && <Spinner label="Your coach is reading the results…" />}
-            {askError && <div className="error-banner" role="alert">{askError}</div>}
-            {answers.map((a, i) => (
-              <div key={i} className="coach-answer">
-                <p className="coach-question">{a.question}</p>
-                <p>{a.answer}</p>
-              </div>
-            ))}
-          </div>
+          <AskCoach runId={runId} />
 
           <p className="coach-footer">
             {modeLabel && <span className="coach-mode">{modeLabel} · </span>}

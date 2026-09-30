@@ -50,6 +50,6 @@ def interpretation_progress(interpretation_id: int, db: Session = Depends(get_db
 @router.post("/interpretations/{interpretation_id}/outcome", response_model=schemas.InterpretOutcomeOut)
 def interpretation_outcome(interpretation_id: int, payload: schemas.InterpretOutcomeIn, db: Session = Depends(get_db)):
     row = _get(db, interpretation_id)
-    final = [{**d.to_schema_dict(), "confirmed": d.confirmed} for d in payload.decisions]
+    final = [{**d.to_schema_dict(), "confirmed": d.confirmed, "confirmed_via": d.confirmed_via} for d in payload.decisions]
     summary = service.log_outcome(db, row, final, payload.scenario_id)
     return {k: v for k, v in summary.items()}

@@ -95,6 +95,8 @@ class Decision(Base):
     extra = Column(JSON, nullable=False, default=dict)
     source = Column(String, nullable=False, default="user")  # "user" | "ai"
     confirmed = Column(Boolean, nullable=False, default=False)
+    # How the owner confirmed it (thesis data): one_by_one | confirm_all | confirm_all_on_save | edited | looks_right
+    confirmed_via = Column(String, nullable=True)
 
     scenario = relationship("Scenario", back_populates="decisions")
 
@@ -172,6 +174,23 @@ class Interpretation(Base):
     model = Column(String, nullable=True)
     fallback = Column(Boolean, nullable=False, default=False)  # an AI provider was chosen but the rules answered
     result = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
+
+
+class CoachAnswer(Base):
+    """One "Ask the coach" question. The instant rule-based answer is saved at once; a background job may replace
+    it with a grounded AI answer (ai_status: none | pending | done | failed)."""
+
+    __tablename__ = "coach_answers"
+
+    id = Column(Integer, primary_key=True)
+    simulation_run_id = Column(Integer, ForeignKey("simulation_runs.id"), nullable=False)
+    question = Column(Text, nullable=False)
+    answer = Column(Text, nullable=False)
+    mode = Column(String, nullable=False, default="template")      # what wrote the current answer
+    answered = Column(Boolean, nullable=False, default=True)       # False: the rules could not tell
+    fallback = Column(Boolean, nullable=False, default=False)      # the AI was tried and failed
+    ai_status = Column(String, nullable=False, default="none")
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
 
 

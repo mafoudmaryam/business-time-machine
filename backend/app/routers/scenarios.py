@@ -54,6 +54,7 @@ def create_scenario(business_id: int, payload: schemas.ScenarioCreate, db: Sessi
             db.add(models.Decision(
                 scenario_id=scenario.id, type=d.type, start_month=d.start_month, value=d.value,
                 unit=d.unit, extra=d.extra_dict(), source=d.source, confirmed=d.confirmed,
+                confirmed_via=d.confirmed_via if d.confirmed else None,
             ))
 
         db.commit()
@@ -81,6 +82,8 @@ def confirm_scenario(scenario_id: int, db: Session = Depends(get_db)):
     if scenario is None:
         raise HTTPException(status_code=404, detail="scenario not found")
     for decision in scenario.decisions:
+        if not decision.confirmed:
+            decision.confirmed_via = "looks_right"
         decision.confirmed = True
     db.commit()
     db.refresh(scenario)

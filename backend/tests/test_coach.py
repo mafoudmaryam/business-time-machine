@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+import re
+import threading
 import time
 
 import pytest
@@ -30,6 +32,7 @@ def inline_jobs(request, monkeypatch):
     `real_threads` use the real worker thread instead."""
     if "real_threads" not in request.fixturenames:
         monkeypatch.setattr(service, "_submit", lambda fn, *a: fn(*a))
+        monkeypatch.setattr(service, "_submit_ask", lambda fn, *a: fn(*a))
 
 
 @pytest.fixture()
@@ -310,38 +313,196 @@ def test_unknown_provider_name_means_template(client, monkeypatch):
 
 # ---------- ask ----------
 
-def test_ask_template_answers_from_facts_and_logs(client, run):
-    resp = client.post(f"/simulation_runs/{run['id']}/ask", json={"question": "Will my cash run out?"})
+CHIPS = ["Will my cash run out?", "Why does this happen?", "What should I watch for?"]
+
+
+def ask(client, run, question):
+    resp = client.post(f"/simulation_runs/{run['id']}/ask", json={"question": question})
+    assert resp.status_code == 200, resp.text
+    return resp.json()
+
+
+def polled(client, body):
+    resp = client.get(f"/asks/{body['id']}")
     assert resp.status_code == 200
-    body = resp.json()
-    assert body["mode"] == "template" and "of 10 futures" in body["answer"]
+    return resp.json()
+
+
+def numbers_are_grounded(run, text):
+    """The same check every AI answer must pass: each number in the text is in the run's facts."""
+    from app import engine_bridge
+    from app.coach import grounding
+    db = next(app.dependency_overrides[get_db]())
+    try:
+        facts, _ = engine_bridge.build_run_facts(db, db.get(models.SimulationRun, run["id"]))
+    finally:
+        db.close()
+    return grounding.unmatched_numbers([text], grounding.allowed_numbers(facts, [])) == []
+
+
+@pytest.mark.parametrize("chip", CHIPS)
+def test_chip_questions_always_get_an_instant_good_answer_without_the_ai(client, run, use_provider, chip):
+    fake = use_provider()                      # an AI is configured, but must never be called for a chip
+    body = ask(client, run, chip)
+    assert body["answered"] is True and body["suggestions"] == []
+    assert (body["mode"], body["ai_status"], body["fallback"]) == ("template", "none", False)
+    assert len(body["answer"].split()) >= 8 and "can't" not in body["answer"]
+    assert numbers_are_grounded(run, body["answer"])
+    assert fake.calls == []
+
+
+def test_cash_chip_says_when_cash_is_lowest_and_in_how_many_futures(client, run):
+    answer = ask(client, run, "Will my cash run out?")["answer"]
+    assert "lowest around month" in answer and "of 10 futures" in answer
+
+
+def test_watch_chip_is_calm_when_nothing_is_wrong_and_warns_when_something_is(client, run, business):
+    calm = ask(client, run, "What should I watch for?")["answer"]
+    assert "Nothing worrying stands out" in calm
+    made = client.post(f"/businesses/{business['id']}/scenarios", json={"name": "Big spend", "decisions": [
+        {"type": "investment", "start_month": 2, "value": 60000, "unit": "amount", "confirmed": True}]}).json()
+    risky_run = client.post(f"/businesses/{business['id']}/simulate", json={
+        "scenario_ids": [made["id"]], "horizon": 24, "iterations": 300, "seed": 3}).json()
+    warned = ask(client, risky_run, "What should I watch for?")["answer"]
+    assert "Nothing worrying" not in warned and "cash" in warned.lower()
+
+
+def test_chips_match_however_they_are_typed(client, run):
+    assert ask(client, run, "why does this happen")["ai_status"] == "none"
+    assert ask(client, run, "  WILL MY CASH RUN OUT ?  ")["answered"] is True
+
+
+@pytest.mark.parametrize("question,expect", [
+    ("How is my cash?", "cash is lowest"),
+    ("What about my regulars?", "regulars"),
+    ("Will I get too busy?", "team"),
+    ("How much do my prices add?", "prices"),
+    ("What does marketing do?", "marketing"),
+    ("Is it risky?", "of 10 futures"),
+    ("Why is it better?", "Over"),
+    ("How much profit will I make?", "Over"),
+])
+def test_simple_topics_are_answered_from_the_facts(client, run, question, expect):
+    body = ask(client, run, question)
+    assert body["answered"] is True and expect in body["answer"]
+    assert numbers_are_grounded(run, body["answer"])
+
+
+def test_a_question_it_cannot_answer_gets_a_kind_reply_and_the_chips_and_no_numbers(client, run):
+    body = ask(client, run, "Who won the football?")
+    assert body["answered"] is False
+    assert body["answer"] == "I can't answer that one yet. Try one of these:"
+    assert body["suggestions"] == CHIPS
+    assert not re.search(r"\d", body["answer"])
+
+
+def test_instant_answers_are_logged(client, run):
+    ask(client, run, "Will my cash run out?")
     (row,) = interactions()
-    assert row.kind == "ask" and "Will my cash run out?" in row.prompt
+    assert row.kind == "ask" and row.provider == "template" and "Will my cash run out?" in row.prompt
 
 
-def test_ask_template_is_honest_when_it_cannot_tell(client, run):
-    resp = client.post(f"/simulation_runs/{run['id']}/ask", json={"question": "Who won the football?"})
-    assert "can't tell" in resp.json()["answer"]
+def test_free_text_returns_at_once_then_the_ai_answer_replaces_it(client, run, use_provider):
+    use_provider(json.dumps({"answer": "Cash runs out in 0 of 10 futures, so you look safe."}))
+    body = ask(client, run, "Any thoughts on my money situation?")
+    assert body["ai_status"] == "done" or body["ai_status"] == "pending"      # inline jobs finish at once in tests
+    final_ = polled(client, body)
+    assert final_["ai_status"] == "done" and final_["mode"] == "ollama"
+    assert final_["answer"] == "Cash runs out in 0 of 10 futures, so you look safe." and final_["fallback"] is False
+    assert {r.kind for r in interactions()} == {"ask"}
 
 
-def test_ask_uses_provider_and_grounding(client, run, use_provider):
+def test_an_ai_answer_must_pass_the_grounding_check_or_the_instant_answer_stays(client, run, use_provider):
+    fake = use_provider(json.dumps({"answer": "You would end with 5,000,000 regulars."}),
+                        json.dumps({"answer": "You would end with 7,777,777 regulars."}))
+    body = ask(client, run, "How is my cash?")
+    instant = body["answer"]
+    final_ = polled(client, body)
+    assert len(fake.calls) == 2                                              # one retry, then give up
+    assert final_["ai_status"] == "failed" and final_["fallback"] is True
+    assert final_["answer"] == instant and final_["mode"] == "template"      # the instant answer stays
+
+
+def test_one_ungrounded_reply_is_retried_and_the_grounded_one_is_used(client, run, use_provider):
     fake = use_provider(json.dumps({"answer": "You would end with 5,000,000 regulars."}),
                         json.dumps({"answer": "Cash runs out in 0 of 10 futures."}))
-    body = client.post(f"/simulation_runs/{run['id']}/ask", json={"question": "Cash?"}).json()
-    assert body == {"answer": "Cash runs out in 0 of 10 futures.", "mode": "ollama", "fallback": False}
-    assert len(fake.calls) == 2
-    assert all(r.kind == "ask" for r in interactions())
+    final_ = polled(client, ask(client, run, "Any thoughts on my money situation?"))
+    assert final_["answer"] == "Cash runs out in 0 of 10 futures." and len(fake.calls) == 2
 
 
-def test_ask_falls_back_when_provider_fails(client, run, use_provider):
-    use_provider(ProviderError("down"))
-    body = client.post(f"/simulation_runs/{run['id']}/ask", json={"question": "How is my cash?"}).json()
-    assert body["mode"] == "template" and body["fallback"] is True
+def test_a_failing_ai_leaves_the_instant_answer_in_place_with_no_error(client, run, use_provider):
+    use_provider(ProviderError("the local model took too long to answer"))
+    body = ask(client, run, "Any thoughts on my money situation?")
+    final_ = polled(client, body)
+    assert final_["ai_status"] == "failed" and final_["fallback"] is True
+    assert final_["answer"] == body["answer"] and final_["mode"] == "template"
 
 
-def test_ask_rejects_empty_question(client, run):
+def test_invalid_ai_json_twice_keeps_the_instant_answer(client, run, use_provider):
+    use_provider("not json", "still not json")
+    body = ask(client, run, "How is my cash?")
+    assert polled(client, body)["answer"] == body["answer"]
+
+
+def test_an_unanswerable_question_may_still_be_answered_by_the_ai(client, run, use_provider):
+    use_provider(json.dumps({"answer": "Cash runs out in 0 of 10 futures."}))
+    body = ask(client, run, "Should I sleep on it?")
+    assert body["answered"] is False and body["suggestions"] == CHIPS
+    final_ = polled(client, body)
+    assert final_["answered"] is True and final_["suggestions"] == [] and final_["mode"] == "ollama"
+
+
+def test_the_request_returns_at_once_while_the_ai_is_slow(client, run, monkeypatch, real_threads):
+    gate = threading.Event()
+
+    class Slow(FakeProvider):
+        def complete(self, system, user, schema, max_tokens=None):
+            gate.wait(10)
+            return super().complete(system, user, schema)
+
+    fake = Slow([json.dumps({"answer": "Cash runs out in 0 of 10 futures."})])
+    monkeypatch.setenv("COACH_PROVIDER", "ollama")
+    monkeypatch.setattr(service, "make_provider", lambda name: fake)
+    try:
+        started = time.monotonic()
+        body = ask(client, run, "Any thoughts on my money situation?")
+        assert time.monotonic() - started < 3                                # nowhere near the AI's 10 s
+        assert body["ai_status"] == "pending" and body["mode"] == "template" and body["answer"]
+        assert polled(client, body)["ai_status"] == "pending"               # still working; instant answer shown
+        gate.set()
+        final_ = body
+        for _ in range(100):
+            final_ = polled(client, body)
+            if final_["ai_status"] != "pending":
+                break
+            time.sleep(0.05)
+        assert final_["ai_status"] == "done" and final_["mode"] == "ollama"
+    finally:
+        gate.set()
+
+
+def test_a_question_lost_to_a_restart_keeps_its_instant_answer(client, run):
+    db = next(app.dependency_overrides[get_db]())
+    row = models.CoachAnswer(simulation_run_id=run["id"], question="q", answer="instant", mode="template",
+                             answered=True, fallback=False, ai_status="pending")
+    db.add(row)
+    db.commit()
+    ask_id = row.id
+    db.close()
+    body = client.get(f"/asks/{ask_id}").json()
+    assert (body["ai_status"], body["answer"], body["fallback"]) == ("failed", "instant", True)
+
+
+def test_unknown_ask_is_404_and_empty_question_is_422(client, run):
+    assert client.get("/asks/999").status_code == 404
     assert client.post(f"/simulation_runs/{run['id']}/ask", json={"question": "   "}).status_code == 422
     assert client.post(f"/simulation_runs/{run['id']}/ask", json={"question": ""}).status_code == 422
+
+
+def test_ask_is_switched_off_with_the_coach(client, run, monkeypatch):
+    monkeypatch.setenv("COACH_ENABLED", "false")
+    assert client.post(f"/simulation_runs/{run['id']}/ask", json={"question": "hi"}).status_code == 404
+    assert client.get("/asks/1").status_code == 404
 
 
 # ---------- the Ollama provider itself (HTTP mocked) ----------

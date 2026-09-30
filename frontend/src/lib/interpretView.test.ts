@@ -116,19 +116,20 @@ describe("applyEdit", () => {
   const steps = stepsFromInterpretation(result);
   const pair = groupSteps(steps)[1];
 
-  it("editing a single step replaces it, marks it edited and un-ticks it", () => {
-    const ticked = steps.map((s) => ({ ...s, confirmed: true }));
-    const item = groupSteps(ticked)[0];
-    const next = applyEdit(ticked, item, { ...ticked[0], value: 15 }, null);
-    expect(next[0]).toMatchObject({ value: 15, edited: true, confirmed: false });
-    expect(next[1].confirmed).toBe(true); // other steps are untouched
+  it("editing a single step replaces it and, because saving an edit means reviewing it, confirms it as 'edited'", () => {
+    const unticked = steps.map((s) => ({ ...s, confirmed: false }));
+    const item = groupSteps(unticked)[0];
+    const next = applyEdit(unticked, item, { ...unticked[0], value: 15 }, null);
+    expect(next[0]).toMatchObject({ value: 15, edited: true, confirmed: true, confirmedVia: "edited" });
+    expect(next[1].confirmed).toBe(false); // other steps are untouched
   });
 
   it("editing a temporary change rebuilds its end from the new start and end month", () => {
     const next = applyEdit(steps, pair, { ...steps[1], value: 2 }, 11);
     expect(next).toHaveLength(3);
     expect(next[1]).toMatchObject({ value: 2, edited: true });
-    expect(next[2]).toMatchObject({ start_month: 11, value: -2, unit: "fte", confirmed: false });
+    expect(next[1]).toMatchObject({ confirmed: true, confirmedVia: "edited" });
+    expect(next[2]).toMatchObject({ start_month: 11, value: -2, unit: "fte", confirmed: true, confirmedVia: "edited" });
     expect(next[2].origin?.group).toBe("g1");
   });
 

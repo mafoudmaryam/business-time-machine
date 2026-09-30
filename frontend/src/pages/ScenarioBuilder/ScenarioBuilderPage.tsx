@@ -7,6 +7,7 @@ import {
   listIndustries,
   listScenarios,
   logInterpretOutcome,
+  type ConfirmVia,
   type DecisionFormValues,
   type Interpretation,
   type ScenarioOut,
@@ -16,7 +17,7 @@ import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
 import type { ScenarioPrefill } from "../../lib/coachIdea";
 import { DEFAULT_CURRENCY } from "../../lib/format";
-import { applyEdit, stepsFromInterpretation, suggestName, type StepItem } from "../../lib/interpretView";
+import { applyEdit, groupSteps, stepsFromInterpretation, suggestName, type StepItem } from "../../lib/interpretView";
 import { nextVersionName } from "../../lib/scenarioLabel";
 import { DecisionForm } from "./DecisionForm";
 import { DecisionList } from "./DecisionList";
@@ -95,8 +96,15 @@ export function ScenarioBuilderPage() {
     setDecisions((d) => [...d, decision]);
   }
 
-  function setConfirmed(indexes: number[], confirmed: boolean) {
-    setDecisions((d) => d.map((dec, i) => (indexes.includes(i) ? { ...dec, confirmed } : dec)));
+  function setConfirmed(indexes: number[], confirmed: boolean, via: ConfirmVia) {
+    setDecisions((d) =>
+      d.map((dec, i) => (indexes.includes(i) ? { ...dec, confirmed, confirmedVia: confirmed ? via : undefined } : dec)),
+    );
+  }
+
+  /** "Confirm all": every step ticked at once, and remembered as confirmed that way. */
+  function confirmedAll(list: DecisionFormValues[], via: ConfirmVia): DecisionFormValues[] {
+    return list.map((dec) => (dec.confirmed ? dec : { ...dec, confirmed: true, confirmedVia: via }));
   }
 
   function removeDecisions(indexes: number[]) {
@@ -104,6 +112,7 @@ export function ScenarioBuilderPage() {
   }
 
   function editStep(item: StepItem, edited: DecisionFormValues, endMonth: number | null) {
+    setAskConfirm(false);
     setDecisions((d) => applyEdit(d, item, edited, endMonth));
   }
 
@@ -116,16 +125,38 @@ export function ScenarioBuilderPage() {
     setName((n) => (n.trim() ? n : suggestName(result.text)));
   }
 
-  async function save() {
+  const saveButton = useRef<HTMLButtonElement>(null);
+  const [askConfirm, setAskConfirm] = useState(false);
+  const stepCount = groupSteps(decisions).length;
+
+  /** Pressing Save with unconfirmed steps does not just block: it offers to confirm them all and save. */
+  function pressSave() {
+    if (decisions.some((d) => !d.confirmed)) setAskConfirm(true);
+    else void save(decisions);
+  }
+
+  function goBack() {
+    setAskConfirm(false);
+    setTimeout(() => saveButton.current?.focus(), 0);
+  }
+
+  async function confirmAllAndSave() {
+    const all = confirmedAll(decisions, "confirm_all_on_save");
+    setDecisions(all);
+    setAskConfirm(false);
+    await save(all);
+  }
+
+  async function save(list: DecisionFormValues[]) {
     if (!businessId) return;
     setSubmitting(true);
     setSubmitError(null);
     setSavedMessage(null);
     try {
-      const created = await createScenario(businessId, name.trim(), decisions, parentScenarioId);
+      const created = await createScenario(businessId, name.trim(), list, parentScenarioId);
       if (interpretationId !== null) {
         // What the owner kept, edited or added after the AI's steps. Fire and forget: never blocks saving.
-        logInterpretOutcome(interpretationId, decisions, created.id).catch(() => undefined);
+        logInterpretOutcome(interpretationId, list, created.id).catch(() => undefined);
       }
       setSavedMessage(`Saved "${created.name}".`);
       resetFormKeepBusiness();
@@ -239,6 +270,7 @@ export function ScenarioBuilderPage() {
                   staffNoun={industry.staff_noun}
                   currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
                   onSetConfirmed={setConfirmed}
+                  onConfirmAll={() => setDecisions((d) => confirmedAll(d, "confirm_all"))}
                   onRemove={removeDecisions}
                   onEdit={editStep}
                 />
@@ -254,9 +286,33 @@ export function ScenarioBuilderPage() {
             <ErrorBanner message={submitError} />
             {savedMessage && <p className="success-message">{savedMessage}</p>}
 
-            <button type="button" onClick={save} disabled={!canSave}>
+            <button type="button" ref={saveButton} onClick={pressSave} disabled={!canSave}>
               {submitting ? "Saving…" : "Save scenario"}
             </button>
+
+            {askConfirm && (
+              <div
+                className="confirm-prompt"
+                role="alertdialog"
+                aria-labelledby="confirm-prompt-title"
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") goBack();
+                }}
+              >
+                <p id="confirm-prompt-title">
+                  <strong>Confirm all {stepCount} {stepCount === 1 ? "step" : "steps"} and save?</strong>
+                </p>
+                <p className="field-help">Nothing is simulated until every step is confirmed.</p>
+                <div className="confirm-prompt-actions">
+                  <button type="button" autoFocus onClick={() => void confirmAllAndSave()}>
+                    Confirm all and save
+                  </button>
+                  <button type="button" className="link-button" onClick={goBack}>
+                    Go back
+                  </button>
+                </div>
+              </div>
+            )}
           </section>
         </>
       )}

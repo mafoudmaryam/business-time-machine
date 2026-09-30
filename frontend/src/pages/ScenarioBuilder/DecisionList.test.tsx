@@ -22,7 +22,7 @@ const reading: Interpretation = {
 };
 
 function setup(decisions: DecisionFormValues[] = stepsFromInterpretation(reading)) {
-  const handlers = { onSetConfirmed: vi.fn(), onRemove: vi.fn(), onEdit: vi.fn() };
+  const handlers = { onSetConfirmed: vi.fn(), onConfirmAll: vi.fn(), onRemove: vi.fn(), onEdit: vi.fn() };
   render(<DecisionList decisions={decisions} industryId="bakery" staffNoun="baker" currency="USD" {...handlers} />);
   return handlers;
 }
@@ -48,7 +48,7 @@ describe("DecisionList with steps from the owner's own words", () => {
     const user = userEvent.setup();
     const { onSetConfirmed } = setup();
     await user.click(screen.getAllByRole("checkbox")[1]);
-    expect(onSetConfirmed).toHaveBeenCalledWith([1, 2], true);
+    expect(onSetConfirmed).toHaveBeenCalledWith([1, 2], true, "one_by_one");
   });
 
   it("a grouped step is only ticked when both decisions are", () => {
@@ -144,5 +144,58 @@ describe("DecisionList with steps from the owner's own words", () => {
   it("shows the empty hint when there are no steps", () => {
     setup([]);
     expect(screen.getByText("No decisions added yet.")).toBeTruthy();
+  });
+
+  describe("the Confirm all bar", () => {
+    it("counts steps and confirmed steps, with a temporary change counting as ONE step", () => {
+      setup();
+      expect(screen.getByRole("status").textContent).toBe("2 steps · 0 confirmed");
+    });
+
+    it("counts a step as confirmed only when every decision of it is", () => {
+      const steps = stepsFromInterpretation(reading).map((x, i) => ({ ...x, confirmed: i !== 2 }));
+      setup(steps);
+      expect(screen.getByRole("status").textContent).toBe("2 steps · 1 confirmed");
+    });
+
+    it("keeps every step's sentence visible right under the bar, and Confirm all changes nothing by itself", async () => {
+      const user = userEvent.setup();
+      const { onConfirmAll } = setup();
+      const bar = document.querySelector(".confirm-bar") as HTMLElement;
+      const list = document.querySelector(".decision-list") as HTMLElement;
+      expect(bar.nextElementSibling).toBe(list);
+      await user.click(screen.getByRole("button", { name: "Confirm all" }));
+      expect(onConfirmAll).toHaveBeenCalledTimes(1);
+      expect(screen.getByText("Raise prices 10%, from March 2027 (month 6)")).toBeTruthy();
+      expect(screen.getByText("Hire 1 baker, June → August 2027 (months 9–11)")).toBeTruthy();
+    });
+
+    it("turns into a disabled 'All confirmed' with a check when everything is confirmed", () => {
+      setup(stepsFromInterpretation(reading).map((x) => ({ ...x, confirmed: true })));
+      const done = screen.getByRole("button", { name: "All confirmed" }) as HTMLButtonElement;
+      expect(done.disabled).toBe(true);
+      expect(done.querySelector("svg")).not.toBeNull();
+      expect(screen.getByRole("status").textContent).toBe("2 steps · 2 confirmed");
+      expect(screen.queryByRole("button", { name: "Confirm all" })).toBeNull();
+    });
+
+    it("says '1 step' for one step", () => {
+      setup([stepsFromInterpretation(reading)[0]]);
+      expect(screen.getByRole("status").textContent).toBe("1 step · 0 confirmed");
+    });
+
+    it("works from the keyboard: Tab to the button and press Enter", async () => {
+      const user = userEvent.setup();
+      const { onConfirmAll } = setup();
+      await user.tab();
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "Confirm all" }));
+      await user.keyboard("{Enter}");
+      expect(onConfirmAll).toHaveBeenCalledTimes(1);
+    });
+
+    it("is not shown when there are no steps", () => {
+      setup([]);
+      expect(document.querySelector(".confirm-bar")).toBeNull();
+    });
   });
 });

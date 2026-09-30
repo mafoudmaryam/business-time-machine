@@ -367,23 +367,87 @@ def _ai_job(bind: Any, run_id: int) -> None:
             _active.discard(run_id)
 
 
-def ask(db: Session, run: models.SimulationRun, question: str) -> dict:
+# ---------- "Ask the coach": instant answer first, AI improvement in the background ----------
+
+# A separate worker from the coach card's, so a question never waits behind the coach's own AI job in our queue.
+_ask_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="ask")
+_ask_active: set[int] = set()
+
+
+def _submit_ask(fn: Callable, *args: Any) -> None:
+    _ask_executor.submit(fn, *args)
+
+
+def _ask_out(row: models.CoachAnswer) -> dict:
+    return {"id": row.id, "question": row.question, "answer": row.answer, "mode": row.mode,
+            "fallback": row.fallback, "ai_status": row.ai_status, "answered": row.answered,
+            "suggestions": [] if row.answered else list(template.CHIP_QUESTIONS)}
+
+
+def start_ask(db: Session, run: models.SimulationRun, question: str) -> dict:
+    """Return at once with the rule-based answer (built only from the run's facts). With an AI provider, a
+    background job then tries to replace it (poll read_ask). The three chip questions never need the AI."""
     if not settings.coach_enabled():
         raise CoachDisabled()
     facts, _raw = engine_bridge.build_run_facts(db, run)
-    name = settings.coach_provider()
-    provider = make_provider(name)
-    answer: Optional[str] = None
-    mode = "template"
-    if provider is not None:
-        system, user = prompts.ask_prompt(facts, question)
-        parsed = _generate(db, run, "ask", provider, facts, system, user, prompts.ASK_SCHEMA,
-                           lambda p: [p["answer"]])
-        if parsed is not None:
-            answer, mode = str(parsed["answer"]).strip(), provider.name
-    fallback = name != "template" and answer is None
-    if answer is None:
-        answer = template.answer(facts, question)
-        _log(db, run.id, "ask", "template", None, 1, "QUESTION: " + question, response=answer,
-             grounding_result={"passed": True, "unmatched": []})
-    return {"answer": answer, "mode": mode, "fallback": fallback}
+    instant, understood = template.answer_with_match(facts, question)
+    provider = make_provider(settings.coach_provider())
+    wants_ai = provider is not None and not template.is_chip(question)
+    row = models.CoachAnswer(simulation_run_id=run.id, question=question, answer=instant, mode="template",
+                             answered=understood, fallback=False, ai_status="pending" if wants_ai else "none")
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    _log(db, run.id, "ask", "template", None, 1, "QUESTION: " + question, response=instant,
+         grounding_result={"passed": True, "unmatched": []})
+    if wants_ai:
+        with _lock:
+            _ask_active.add(row.id)
+        _submit_ask(_ask_job, db.get_bind(), row.id)
+    return _ask_out(row)
+
+
+def _ask_job(bind: Any, ask_id: int) -> None:
+    """Background: ask the AI (same grounding check as everything else); on any failure keep the instant answer."""
+    try:
+        with Session(bind) as db:
+            row = db.get(models.CoachAnswer, ask_id)
+            run = db.get(models.SimulationRun, row.simulation_run_id)
+            facts, _raw = engine_bridge.build_run_facts(db, run)
+            provider = make_provider(settings.coach_provider())
+            parsed = None
+            if provider is not None:
+                system, user = prompts.ask_prompt(facts, row.question)
+                parsed = _generate(db, run, "ask", provider, facts, system, user, prompts.ASK_SCHEMA,
+                                   lambda p: [p["answer"]])
+            if parsed is not None and str(parsed.get("answer", "")).strip():
+                row.answer, row.mode, row.answered, row.ai_status = str(parsed["answer"]).strip(), provider.name, True, "done"
+            else:
+                row.ai_status, row.fallback = "failed", True
+            db.commit()
+    except Exception:  # never leave a question stuck on "pending"
+        logging.getLogger(__name__).exception("ask job failed for %s", ask_id)
+        try:
+            with Session(bind) as db:
+                row = db.get(models.CoachAnswer, ask_id)
+                if row is not None and row.ai_status == "pending":
+                    row.ai_status, row.fallback = "failed", True
+                    db.commit()
+        except Exception:
+            logging.getLogger(__name__).exception("could not mark ask %s failed", ask_id)
+    finally:
+        with _lock:
+            _ask_active.discard(ask_id)
+
+
+def read_ask(db: Session, ask_id: int) -> Optional[dict]:
+    """Current state of one question (for polling). A job lost to a server restart keeps the instant answer."""
+    if not settings.coach_enabled():
+        raise CoachDisabled()
+    row = db.get(models.CoachAnswer, ask_id)
+    if row is None:
+        return None
+    if row.ai_status == "pending" and ask_id not in _ask_active:
+        row.ai_status, row.fallback = "failed", True
+        db.commit()
+    return _ask_out(row)

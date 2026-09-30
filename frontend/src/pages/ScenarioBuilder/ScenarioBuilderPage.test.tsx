@@ -117,16 +117,16 @@ describe("ScenarioBuilderPage: describe it in your own words", () => {
     vi.mocked(api.logInterpretOutcome).mockRejectedValue(new Error("offline"));
     renderPage();
     await describeIt(user);
+    await user.click(screen.getByRole("button", { name: "Confirm all" }));
     await user.click(screen.getByRole("button", { name: "Save scenario" }));
     expect(await screen.findByText(/Saved "/)).toBeTruthy();
   });
 
-  it("editing a step un-ticks it, and reading again replaces the earlier steps but keeps hand-added ones", async () => {
+  it("editing a step and saving it confirms it, and reading again replaces the earlier steps but keeps hand-added ones", async () => {
     const user = userEvent.setup();
     renderPage();
     await describeIt(user);
 
-    await user.click(screen.getAllByRole("checkbox")[0]);
     await user.click(screen.getAllByRole("button", { name: "Edit" })[0]);
     const amount = screen.getByLabelText(/Price change/);
     await user.clear(amount);
@@ -134,7 +134,7 @@ describe("ScenarioBuilderPage: describe it in your own words", () => {
     await user.click(screen.getByRole("button", { name: "Save changes" }));
 
     expect(screen.getByText("Raise prices 8% from month 6")).toBeTruthy();
-    expect((screen.getAllByRole("checkbox")[0] as HTMLInputElement).checked).toBe(false); // editing un-ticks
+    expect((screen.getAllByRole("checkbox")[0] as HTMLInputElement).checked).toBe(true); // saving an edit confirms it
 
     // add one by hand, then read again: only the AI's steps are replaced
     const form = screen.getByText("Add decision").closest(".decision-form") as HTMLElement;
@@ -163,5 +163,119 @@ describe("ScenarioBuilderPage: describe it in your own words", () => {
     expect(await screen.findByText("Hire 1 baker from month 6")).toBeTruthy();
     expect((screen.getByLabelText("Scenario name") as HTMLInputElement).value).toBe("Hire a baker v2");
     expect((screen.getAllByRole("checkbox")[0] as HTMLInputElement).checked).toBe(false);
+  });
+
+  describe("Confirm all", () => {
+    const created = { id: 21, business_id: 1, name: "n", parent_scenario_id: null, parent_scenario_name: null, created_at: "x", decisions: [] };
+
+    it("shows 'N steps · M confirmed' and confirms every step with one click", async () => {
+      const user = userEvent.setup();
+      renderPage();
+      await describeIt(user);
+      expect(screen.getByText("2 steps · 0 confirmed")).toBeTruthy(); // the summer hire is ONE step
+      await user.click(screen.getByRole("button", { name: "Confirm all" }));
+      expect(screen.getByText("2 steps · 2 confirmed")).toBeTruthy();
+      expect(screen.getByRole("button", { name: "All confirmed" })).toBeTruthy();
+      expect((screen.getAllByRole("checkbox") as HTMLInputElement[]).every((b) => b.checked)).toBe(true);
+    });
+
+    it("unticking one step afterwards brings the button back", async () => {
+      const user = userEvent.setup();
+      renderPage();
+      await describeIt(user);
+      await user.click(screen.getByRole("button", { name: "Confirm all" }));
+      await user.click(screen.getAllByRole("checkbox")[0]);
+      expect(screen.getByText("2 steps · 1 confirmed")).toBeTruthy();
+      expect(screen.getByRole("button", { name: "Confirm all" })).toBeTruthy();
+    });
+
+    it("saving with unconfirmed steps asks 'Confirm all N steps and save?' instead of just blocking", async () => {
+      const user = userEvent.setup();
+      renderPage();
+      await describeIt(user);
+      await user.click(screen.getByRole("button", { name: "Save scenario" }));
+      const dialog = screen.getByRole("alertdialog");
+      expect(within(dialog).getByText("Confirm all 2 steps and save?")).toBeTruthy();
+      expect(document.activeElement).toBe(within(dialog).getByRole("button", { name: "Confirm all and save" }));
+      expect(api.createScenario).not.toHaveBeenCalled();
+    });
+
+    it("'Go back' saves nothing, confirms nothing and returns focus to Save", async () => {
+      const user = userEvent.setup();
+      renderPage();
+      await describeIt(user);
+      await user.click(screen.getByRole("button", { name: "Save scenario" }));
+      await user.click(screen.getByRole("button", { name: "Go back" }));
+      expect(screen.queryByRole("alertdialog")).toBeNull();
+      expect(api.createScenario).not.toHaveBeenCalled();
+      expect(screen.getByText("2 steps · 0 confirmed")).toBeTruthy();
+      await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Save scenario" })));
+    });
+
+    it("Escape closes the question like Go back", async () => {
+      const user = userEvent.setup();
+      renderPage();
+      await describeIt(user);
+      await user.click(screen.getByRole("button", { name: "Save scenario" }));
+      await user.keyboard("{Escape}");
+      expect(screen.queryByRole("alertdialog")).toBeNull();
+      expect(api.createScenario).not.toHaveBeenCalled();
+    });
+
+    it("'Confirm all and save' saves every decision confirmed and remembers how", async () => {
+      const user = userEvent.setup();
+      vi.mocked(api.createScenario).mockResolvedValue(created);
+      renderPage();
+      await describeIt(user);
+      await user.click(screen.getByRole("button", { name: "Save scenario" }));
+      await user.click(screen.getByRole("button", { name: "Confirm all and save" }));
+
+      await waitFor(() => expect(api.createScenario).toHaveBeenCalledTimes(1));
+      const saved = vi.mocked(api.createScenario).mock.calls[0][2];
+      expect(saved).toHaveLength(3);
+      expect(saved.every((d) => d.confirmed && d.confirmedVia === "confirm_all_on_save")).toBe(true);
+      await waitFor(() => expect(api.logInterpretOutcome).toHaveBeenCalledWith(7, saved, 21));
+      expect(screen.queryByRole("alertdialog")).toBeNull();
+    });
+
+    it("when everything is already confirmed, Save just saves", async () => {
+      const user = userEvent.setup();
+      vi.mocked(api.createScenario).mockResolvedValue(created);
+      renderPage();
+      await describeIt(user);
+      await user.click(screen.getByRole("button", { name: "Confirm all" }));
+      await user.click(screen.getByRole("button", { name: "Save scenario" }));
+      expect(screen.queryByRole("alertdialog")).toBeNull();
+      await waitFor(() => expect(api.createScenario).toHaveBeenCalledTimes(1));
+      const saved = vi.mocked(api.createScenario).mock.calls[0][2];
+      expect(saved.every((d) => d.confirmedVia === "confirm_all")).toBe(true);
+    });
+
+    it("records how each step was confirmed: one by one, Confirm all, or edited", async () => {
+      const user = userEvent.setup();
+      vi.mocked(api.createScenario).mockResolvedValue(created);
+      renderPage();
+      await describeIt(user);
+
+      await user.click(screen.getAllByRole("checkbox")[0]); // one by one
+      await user.click(screen.getAllByRole("button", { name: "Edit" })[1]); // edit the summer hire (a pair)
+      await user.click(screen.getByRole("button", { name: "Save changes" })); // edited -> confirmed
+      await user.click(screen.getByRole("button", { name: "Save scenario" }));
+
+      await waitFor(() => expect(api.createScenario).toHaveBeenCalledTimes(1));
+      const saved = vi.mocked(api.createScenario).mock.calls[0][2];
+      expect(saved.map((d) => [d.type, d.confirmed, d.confirmedVia])).toEqual([
+        ["price", true, "one_by_one"], ["hiring", true, "edited"], ["hiring", true, "edited"],
+      ]);
+    });
+
+    it("works without a mouse: Tab to Confirm all, Enter, then Save", async () => {
+      const user = userEvent.setup();
+      renderPage();
+      await describeIt(user);
+      screen.getByRole("button", { name: "Confirm all" }).focus();
+      await user.keyboard("{Enter}");
+      expect(screen.getByText("2 steps · 2 confirmed")).toBeTruthy();
+    });
   });
 });

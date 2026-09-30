@@ -110,7 +110,7 @@ export function pairSentence(start: DecisionFormValues, end: DecisionFormValues,
   return `${decisionSummary(start, staffNoun, currency)}, then back to normal from month ${end.start_month}`;
 }
 
-/** Replaces one step (or a start + end pair) after the owner edited it. Editing always un-ticks it.
+/** Replaces one step (or a start + end pair) after the owner edited it. Saving an edit confirms it.
  * `endMonth` is the "back to normal" month for a pair; null makes the change permanent. */
 export function applyEdit(
   steps: DecisionFormValues[],
@@ -119,13 +119,14 @@ export function applyEdit(
   endMonth: number | null,
 ): DecisionFormValues[] {
   const next = [...steps];
-  const start: DecisionFormValues = { ...edited, source: item.kind === "pair" ? item.start.source : edited.source, edited: true, confirmed: false, origin: item.kind === "pair" ? item.start.origin : steps[item.index].origin };
+  // Saving an edit counts as reviewing the step, so it is confirmed (and logged as confirmed by editing).
+  const start: DecisionFormValues = { ...edited, source: item.kind === "pair" ? item.start.source : edited.source, edited: true, confirmed: true, confirmedVia: "edited", origin: item.kind === "pair" ? item.start.origin : steps[item.index].origin };
   next[item.index] = start;
   if (item.kind === "single") return next;
 
   const end = endMonth !== null && endMonth > start.start_month ? reverseOf(start, endMonth) : null;
   if (end) {
-    next[item.endIndex] = end;
+    next[item.endIndex] = { ...end, confirmed: true, confirmedVia: "edited" };
     return next;
   }
   // No way to undo it (or no end month): it becomes an ordinary permanent step.

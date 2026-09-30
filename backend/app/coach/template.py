@@ -183,26 +183,111 @@ def _find(facts: dict, question: str) -> dict:
     return _best(facts)
 
 
+# The three suggestion chips. Each one ALWAYS gets a good answer from the facts, with no AI.
+CHIP_QUESTIONS = ["Will my cash run out?", "Why does this happen?", "What should I watch for?"]
+CANT_ANSWER = "I can't answer that one yet. Try one of these:"
+
+
+def _norm(question: str) -> str:
+    return " ".join(question.lower().replace("?", " ").split())
+
+
+def is_chip(question: str) -> bool:
+    return _norm(question) in {_norm(c) for c in CHIP_QUESTIONS}
+
+
+def _driver_amount(s: dict, *keys: str) -> float:
+    return sum(d["amount"] for d in s["drivers"] if d["key"] in keys)
+
+
+def _say_cash(facts: dict, s: dict) -> str:
+    m, f, cur = s["moments"], s["futures"], facts["business"]["currency"]
+    below = " below zero" if m["lowest_cash_amount"] < 0 else ""
+    return (f"With {_nice(s['name'])}, your cash is lowest around month {m['lowest_cash_month']}, at about "
+            f"{_money(m['lowest_cash_amount'], cur)}{below}. It runs out in {f['cash_runs_out_of_10']} of 10 futures.")
+
+
+def _say_watch(facts: dict, s: dict) -> str:
+    f = s["futures"]
+    lines = _watch_out(facts)
+    ahead = (f" It comes out ahead of changing nothing in {f['beats_change_nothing_of_10']} of 10 futures."
+             if f["beats_change_nothing_of_10"] is not None else "")
+    if lines:
+        return lines[0] + ahead
+    return (f"Nothing worrying stands out with {_nice(s['name'])}. "
+            f"Cash runs out in {f['cash_runs_out_of_10']} of 10 futures." + ahead)
+
+
+def _say_customers(facts: dict, s: dict) -> str:
+    words = facts["business"]["customers_word"]
+    return (f"With {_nice(s['name'])}, you would end with about {s['regulars_end']:,.0f} {words}, compared with "
+            f"{s['regulars_end_if_nothing_changes']:,.0f} if you change nothing.")
+
+
+def _say_staff(facts: dict, s: dict) -> str:
+    b, cur, m = facts["business"], facts["business"]["currency"], s["moments"]
+    busy = (f"You get too busy for your team around month {m['full_month']}." if m["full_month"]
+            else f"Your team keeps up with demand for the whole {_span(b['months'])}.")
+    amount = _driver_amount(s, "staff")
+    if round(amount) == 0:
+        return f"With {_nice(s['name'])}: {busy} Your staff costs stay about the same."
+    return (f"With {_nice(s['name'])}: {busy} Staff costs "
+            f"{'save' if amount > 0 else 'take'} about {_money(amount, cur)} "
+            f"{'on' if amount > 0 else 'off'} your profit over {_span(b['months'])}.")
+
+
+def _say_price(facts: dict, s: dict) -> str:
+    b, cur = facts["business"], facts["business"]["currency"]
+    amount = _driver_amount(s, "price")
+    if round(amount) == 0:
+        return f"With {_nice(s['name'])}, your prices do not change, so they add nothing to your profit."
+    return (f"With {_nice(s['name'])}, prices {'add' if amount > 0 else 'take'} about {_money(amount, cur)} "
+            f"{'to' if amount > 0 else 'from'} your profit over {_span(b['months'])}.")
+
+
+def _say_marketing(facts: dict, s: dict) -> str:
+    b, cur = facts["business"], facts["business"]["currency"]
+    amount = _driver_amount(s, "fixed")
+    if round(amount) == 0:
+        return f"With {_nice(s['name'])}, your marketing and running costs stay about the same."
+    return (f"With {_nice(s['name'])}, marketing and running costs {'save' if amount > 0 else 'cost'} about "
+            f"{_money(amount, cur)} over {_span(b['months'])}.")
+
+
+def answer_with_match(facts: dict, question: str) -> tuple[str, bool]:
+    """(answer, understood). Rule-based, from the facts only: it never invents a number. When it cannot tell,
+    it says so kindly and the caller offers the suggestion chips."""
+    q, b = _norm(question), facts["business"]
+    s = _find(facts, question)
+    words = b["customers_word"].lower()
+    if q == _norm(CHIP_QUESTIONS[0]):
+        return _say_cash(facts, s), True
+    if q == _norm(CHIP_QUESTIONS[1]):
+        return _what_happens(facts) + " " + _why(facts), True
+    if q == _norm(CHIP_QUESTIONS[2]):
+        return _say_watch(facts, s), True
+
+    def has(*keys: str) -> bool:
+        return any(k in q for k in keys)
+
+    if has("cash", "bank", "money left", "run out", "broke", "afford"):
+        return _say_cash(facts, s), True
+    if has("watch", "careful", "worry", "warning", "danger", "problem", "risk", "safe", "chance", "likely"):
+        return _say_watch(facts, s), True
+    if has(words, "customer", "regular", "guest", "visit", "diner"):
+        return _say_customers(facts, s), True
+    if has("staff", "hire", "hiring", "team", "busy", "full", "capacity", b["staff_word"].lower()):
+        return _say_staff(facts, s), True
+    if has("price", "pricing", "charge"):
+        return _say_price(facts, s), True
+    if has("marketing", "advert", " ads", "promot"):
+        return _say_marketing(facts, s), True
+    if has("why", "reason", "explain", "happen", "how come"):
+        return _what_happens(facts) + " " + _why(facts), True
+    if has("profit", "earn", "make", "worth", "better", "best", "gain", "result"):
+        return _what_happens(facts), True
+    return CANT_ANSWER, False
+
+
 def answer(facts: dict, question: str) -> str:
-    """Keyword-based answers from the facts. Honest when it cannot tell."""
-    q, b = question.lower(), facts["business"]
-    s, cur, words = _find(facts, question), b["currency"], b["customers_word"]
-    m, f = s["moments"], s["futures"]
-    if any(w in q for w in ("cash", "bank", "money left", "run out", "broke")):
-        below = " below zero" if m["lowest_cash_amount"] < 0 else ""
-        return (f"With {_nice(s['name'])}, your cash is lowest around month {m['lowest_cash_month']}, at about "
-                f"{_money(m['lowest_cash_amount'], cur)}{below}. It runs out in {f['cash_runs_out_of_10']} of 10 futures.")
-    if any(w in q for w in (words, "customer", "regular", "guest", "visit")):
-        return (f"With {_nice(s['name'])}, you would end with about {s['regulars_end']:,.0f} {words}, compared with "
-                f"{s['regulars_end_if_nothing_changes']:,.0f} if you change nothing.")
-    if any(w in q for w in ("busy", "full", "capacity", "staff", "hire")):
-        if m["full_month"]:
-            return f"With {_nice(s['name'])}, you get too busy for your team around month {m['full_month']}."
-        return f"With {_nice(s['name'])}, your team keeps up with demand for the whole {b['months']} months."
-    if any(w in q for w in ("risk", "safe", "worry", "chance", "likely", "future")):
-        return (f"With {_nice(s['name'])}, it comes out ahead of changing nothing in "
-                f"{f['beats_change_nothing_of_10']} of 10 futures, and cash runs out in {f['cash_runs_out_of_10']} of 10.")
-    if any(w in q for w in ("profit", "earn", "make", "worth", "better", "best", "why")):
-        return _what_happens(facts) + " " + _why(facts)
-    return ("I can only answer from the results of this simulation, and I can't tell from these results. "
-            "You could run a new simulation to find out.")
+    return answer_with_match(facts, question)[0]

@@ -102,6 +102,7 @@ class DecisionIn(BaseModel):
     investment: Optional[float] = None
     source: str = "user"  # "user" | "ai"
     confirmed: bool = False
+    confirmed_via: Optional[str] = Field(None, pattern=r"^[a-z_]{1,30}$")   # how it was confirmed (thesis data)
 
     _EXTRA_FIELDS = ("loan_months", "annual_rate", "capacity_pct", "cogs_ratio", "investment")
 
@@ -290,9 +291,14 @@ class AskIn(BaseModel):
 
 
 class AskOut(BaseModel):
+    id: int
+    question: str
     answer: str
-    mode: str
-    fallback: bool
+    mode: str                     # "template" until an AI answer has replaced the instant one
+    fallback: bool                # the AI was tried and failed, so the rule-based answer stays
+    ai_status: str                # none | pending | done | failed
+    answered: bool                # False: the rules could not tell (the frontend then offers `suggestions`)
+    suggestions: list[str] = []
 
 
 # ---------- plain-language decision input ("interpret") ----------
@@ -371,4 +377,5 @@ class InterpretOutcomeOut(BaseModel):
     added_by_hand: int
     final_decisions: int
     confirmed: int
+    confirmed_via: dict[str, int] = {}    # how the confirmed decisions were confirmed
     scenario_id: Optional[int] = None
