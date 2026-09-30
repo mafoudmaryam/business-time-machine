@@ -3,21 +3,61 @@
     Stops the backend and frontend dev servers started by start.ps1.
 
 .DESCRIPTION
-    Closes the two PowerShell windows recorded in .dev-pids.json (killing
-    their process tree, so uvicorn's reload worker and Vite's node process go
-    down too), then frees ports 8000 and 5173 directly as a fallback, in case
-    a window was closed manually or the pid file is missing or stale.
+    1. Closes the two PowerShell windows recorded in .dev-pids.json (killing their
+       process tree, so uvicorn and Vite's node process go down too).
+    2. Frees ports 8000 and 5173. uvicorn --reload starts a child worker that inherits
+       the listening socket: if only its parent is killed, the port stays "listening"
+       under a dead PID and nothing new can start. So this script also kills every
+       child of a listener, any uvicorn of this app, and any Vite of this project,
+       then checks the ports again and repeats until they are really free.
 #>
 
 $root = $PSScriptRoot
 $pidFile = "$root\.dev-pids.json"
+$ports = @(8000, 5173)
 
-function Stop-PortListener {
+function Stop-Tree {
+    param([int]$ProcessId)
+    taskkill /PID $ProcessId /F /T 2>$null | Out-Null
+}
+
+function Get-ListenerPids {
     param([int]$Port)
-    $conns = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
-    foreach ($conn in $conns) {
-        Write-Host "Stopping process on port $Port (PID $($conn.OwningProcess))."
-        taskkill /PID $conn.OwningProcess /F /T 2>$null | Out-Null
+    # netstat also shows listeners whose owner is already dead, which Get-NetTCPConnection can miss.
+    $found = @()
+    foreach ($line in (netstat -ano | Select-String ":$Port\s+\S+\s+LISTENING")) {
+        $found += [int]($line.ToString().Trim() -split "\s+")[-1]
+    }
+    return $found | Where-Object { $_ -gt 0 } | Sort-Object -Unique
+}
+
+function Stop-DevProcesses {
+    $all = Get-CimInstance Win32_Process
+    $listeners = @()
+    foreach ($port in $ports) { $listeners += Get-ListenerPids -Port $port }
+
+    # Children of a listener (the uvicorn reload worker), even when the listener itself is already dead.
+    foreach ($listener in ($listeners | Sort-Object -Unique)) {
+        foreach ($child in ($all | Where-Object { $_.ParentProcessId -eq $listener })) {
+            Write-Host "Stopping child process $($child.ProcessId) of listener $listener."
+            Stop-Tree -ProcessId $child.ProcessId
+        }
+        if (Get-Process -Id $listener -ErrorAction SilentlyContinue) {
+            Write-Host "Stopping listener process $listener."
+            Stop-Tree -ProcessId $listener
+        }
+    }
+
+    # uvicorn of this app / Vite of this project, wherever they are hiding.
+    foreach ($p in $all) {
+        $cmd = $p.CommandLine
+        if (-not $cmd) { continue }
+        $isUvicorn = ($cmd -match "uvicorn") -and ($cmd -match "app\.main:app")
+        $isVite = ($cmd -match "vite") -and ($cmd -like "*$($root -replace '\\','\\')*" -or $cmd -like "*business-time-machine*")
+        if ($isUvicorn -or $isVite) {
+            Write-Host "Stopping $($p.Name) $($p.ProcessId) ($(if ($isUvicorn) {'uvicorn'} else {'vite'}))."
+            Stop-Tree -ProcessId $p.ProcessId
+        }
     }
 }
 
@@ -27,7 +67,7 @@ if (Test-Path $pidFile) {
         $windowPid = $savedPids.$name
         if ($windowPid -and (Get-Process -Id $windowPid -ErrorAction SilentlyContinue)) {
             Write-Host "Stopping $name window (PID $windowPid)."
-            taskkill /PID $windowPid /F /T 2>$null | Out-Null
+            Stop-Tree -ProcessId $windowPid
         }
     }
     Remove-Item $pidFile -Force
@@ -35,8 +75,17 @@ if (Test-Path $pidFile) {
     Write-Host "No .dev-pids.json found -- freeing known ports directly."
 }
 
-# Belt and braces, in case a window was closed by hand or the pid file was stale.
-Stop-PortListener -Port 8000
-Stop-PortListener -Port 5173
+# Repeat until nothing listens on the dev ports any more (max 5 rounds).
+for ($round = 1; $round -le 5; $round++) {
+    Stop-DevProcesses
+    Start-Sleep -Milliseconds 700
+    $still = @()
+    foreach ($port in $ports) { if (Get-ListenerPids -Port $port) { $still += $port } }
+    if ($still.Count -eq 0) { break }
+}
 
-Write-Host "Done."
+if ($still.Count -gt 0) {
+    Write-Host "WARNING: still something listening on port(s) $($still -join ', '). Close the terminal windows by hand." -ForegroundColor Yellow
+    exit 1
+}
+Write-Host "Done. Ports $($ports -join ' and ') are free."
