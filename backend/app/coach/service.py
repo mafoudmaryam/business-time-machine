@@ -20,7 +20,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .. import engine_bridge, models, settings
-from . import grounding, prompts, template
+from . import consistency, grounding, prompts, template
 from .ideas import areas_of, choose_diverse, drop_repeated_opening, is_repeat, limit_sentences
 from .summary import build_summary
 from .providers import Provider, ProviderError, make_provider
@@ -142,7 +142,15 @@ def _generate(db: Session, run: models.SimulationRun, kind: str, provider: Provi
         row.grounding = {"passed": not unmatched, "unmatched": unmatched}
         db.commit()
         if not unmatched:
-            return parsed
+            # Numbers exist in the facts; now check the risk CLAIMS agree with them. A contradiction rejects the AI
+            # text (no retry): the caller keeps the rule-based version, and the reason is logged.
+            reason = consistency.check(texts_of(parsed), facts)
+            if reason is None:
+                return parsed
+            row.error = "claim check: " + reason
+            row.grounding = {"passed": True, "unmatched": [], "claims_ok": False, "claims_reason": reason}
+            db.commit()
+            return None
         note = prompts.retry_note(unmatched)
     return None
 
