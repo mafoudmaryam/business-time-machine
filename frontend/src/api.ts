@@ -167,6 +167,17 @@ export function listIndustries(): Promise<IndustryOut[]> {
 
 // ---------- scenarios / decisions ----------
 
+/** Where a step came from when the owner described it in their own words (UI only, never sent to the API). */
+export interface StepOrigin {
+  interpretationId: number;
+  quote: string; // the owner's exact words this step came from ("" when unknown)
+  sentence: string; // the plain sentence the app wrote, in the business's own words
+  whenLabel: string; // "March 2027 (month 6)"
+  group: string | null; // a temporary change is a start step and an end step that share a group
+  role: "start" | "end" | null;
+  groupSentence: string | null;
+}
+
 export interface DecisionFormValues {
   type: DecisionType;
   start_month: number;
@@ -179,6 +190,8 @@ export interface DecisionFormValues {
   investment?: number;
   source: "user" | "ai";
   confirmed: boolean;
+  origin?: StepOrigin; // set on steps that came from "describe it in your own words"
+  edited?: boolean; // the owner changed an interpreted step
 }
 
 interface DecisionIn {
@@ -475,5 +488,72 @@ export function previewStartingMonth(industryId: string, baseline: BaselineFormV
   return request(`/industries/${industryId}/preview`, {
     method: "POST",
     body: JSON.stringify(baselineFormToApi(baseline)),
+  });
+}
+
+
+// ---------- describe it in your own words ----------
+
+export interface InterpretedDecision extends IdeaDecision {
+  source_quote: string;
+  sentence: string;
+  when_label: string;
+  group: string | null;
+  role: "start" | "end" | null;
+  group_sentence: string | null;
+}
+
+export interface InterpretQuestion {
+  id: string; // "0:when" -- which step, which missing piece
+  slot: string;
+  text: string;
+  about: string; // the owner's words this question is about
+  options: string[] | null; // quick answers
+  hint: string;
+}
+
+export interface OutOfScope {
+  message: string;
+  can_do: string[];
+  quotes: string[];
+}
+
+export interface Interpretation {
+  id: number;
+  business_id: number;
+  text: string;
+  status: "pending" | "done";
+  provider: string | null;
+  fallback: boolean | null;
+  decisions: InterpretedDecision[];
+  questions: InterpretQuestion[];
+  out_of_scope: OutOfScope | null;
+  notes: string[];
+  month_one: string;
+}
+
+export interface InterpretAnswer {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+export function interpretText(businessId: number, text: string, answers: InterpretAnswer[] = []): Promise<Interpretation> {
+  return request(`/businesses/${businessId}/interpret`, { method: "POST", body: JSON.stringify({ text, answers }) });
+}
+
+export function getInterpretation(interpretationId: number): Promise<Interpretation> {
+  return request(`/interpretations/${interpretationId}`);
+}
+
+/** Tells the server what the owner finally kept, edited or added after the AI's steps (a thesis measure). */
+export function logInterpretOutcome(
+  interpretationId: number,
+  decisions: DecisionFormValues[],
+  scenarioId?: number,
+): Promise<unknown> {
+  return request(`/interpretations/${interpretationId}/outcome`, {
+    method: "POST",
+    body: JSON.stringify({ decisions: decisions.map(decisionFormToApi), scenario_id: scenarioId ?? null }),
   });
 }

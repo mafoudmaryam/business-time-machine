@@ -920,3 +920,163 @@ table.run-history-table td {
   opacity: 0.6;
   cursor: default;
 }
+
+/* ---------- Describe it in your own words ---------- */
+
+.chip-button {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--page);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.chip-button:hover:not(:disabled) {
+  background: var(--band);
+}
+
+.chip-button:focus-visible {
+  outline: 3px solid var(--button);
+  outline-offset: 2px;
+}
+
+.chip-button[aria-pressed="true"] {
+  background: var(--button);
+  color: var(--button-text);
+  border-color: var(--button);
+}
+
+.describe-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 6px solid var(--button);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  max-width: 720px;
+}
+
+.describe-box h3 {
+  margin-top: 0;
+}
+
+.describe-box textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+
+.describe-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.describe-status:empty {
+  display: none;
+}
+
+.describe-result {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+.describe-result:focus-visible {
+  outline: 3px solid var(--button);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.describe-summary {
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.describe-notes {
+  margin: 4px 0 8px;
+  padding-left: 18px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.describe-scope {
+  background: var(--band);
+  border-radius: 6px;
+  padding: 4px 14px;
+  margin: 8px 0;
+}
+
+.describe-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.describe-question {
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.describe-question label {
+  display: block;
+  font-weight: 600;
+}
+
+.describe-question input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.decision-quote {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.decision-main {
+  flex: 1;
+  min-width: 220px;
+}
+
+.decision-main .decision-summary {
+  min-width: 0;
+}
+
+.decision-row-ai {
+  border-left: 4px solid var(--button);
+}
+
+.decision-row-editing {
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .describe-box {
+    padding: 10px 12px;
+  }
+
+  .decision-row {
+    gap: 8px;
+  }
+}

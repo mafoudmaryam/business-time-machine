@@ -293,3 +293,82 @@ class AskOut(BaseModel):
     answer: str
     mode: str
     fallback: bool
+
+
+# ---------- plain-language decision input ("interpret") ----------
+
+
+class InterpretAnswerIn(BaseModel):
+    id: str = ""            # the question's id, e.g. "0:when"
+    question: str = ""
+    answer: str = Field(..., max_length=300)
+
+
+class InterpretIn(BaseModel):
+    text: str = Field(..., max_length=2000)
+    answers: list[InterpretAnswerIn] = []
+
+
+class InterpretedDecisionOut(BaseModel):
+    """A decision in the flat DECISIONS_JSON_SCHEMA shape (ratios, not percentages), plus how it was read."""
+
+    type: str
+    start_month: int
+    value: float
+    unit: str
+    loan_months: Optional[int] = None
+    annual_rate: Optional[float] = None
+    capacity_pct: Optional[float] = None
+    cogs_ratio: Optional[float] = None
+    investment: Optional[float] = None
+    source_quote: str                  # the owner's exact words ("" when it cannot be shown)
+    sentence: str                      # plain words, industry vocabulary and currency
+    when_label: str                    # "March 2027 (month 6)"
+    group: Optional[str] = None        # a temporary change is a start + an end sharing one group id
+    role: Optional[str] = None         # "start" | "end"
+    group_sentence: Optional[str] = None
+
+
+class InterpretQuestionOut(BaseModel):
+    id: str
+    slot: str
+    text: str
+    about: str = ""
+    options: Optional[list[str]] = None
+    hint: str = ""
+
+
+class OutOfScopeOut(BaseModel):
+    message: str
+    can_do: list[str]
+    quotes: list[str] = []
+
+
+class InterpretationOut(BaseModel):
+    id: int
+    business_id: int
+    text: str
+    status: str                        # "pending" (the AI is reading) | "done"
+    provider: Optional[str] = None     # hidden unless COACH_SHOW_MODE is on
+    fallback: Optional[bool] = None
+    decisions: list[InterpretedDecisionOut]
+    questions: list[InterpretQuestionOut]
+    out_of_scope: Optional[OutOfScopeOut] = None
+    notes: list[str]
+    month_one: str
+
+
+class InterpretOutcomeIn(BaseModel):
+    decisions: list[DecisionIn]
+    scenario_id: Optional[int] = None
+
+
+class InterpretOutcomeOut(BaseModel):
+    ai_decisions: int
+    unchanged: int
+    edited: int
+    removed: int
+    added_by_hand: int
+    final_decisions: int
+    confirmed: int
+    scenario_id: Optional[int] = None

@@ -56,14 +56,19 @@ interface Props {
   staffNoun: string;
   currency: string;
   onAdd: (decision: DecisionFormValues) => void;
+  /** Editing an existing step: start from its values, keep them after saving, and offer a way out. */
+  initial?: DecisionFormValues;
+  submitLabel?: string;
+  onCancel?: () => void;
 }
 
-export function DecisionForm({ industryId, staffNoun, currency, onAdd }: Props) {
-  const [draft, setDraft] = useState<DecisionFormValues>(defaultsFor("price"));
+export function DecisionForm({ industryId, staffNoun, currency, onAdd, initial, submitLabel, onCancel }: Props) {
+  const [draft, setDraft] = useState<DecisionFormValues>(initial ?? defaultsFor("price"));
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   function changeType(type: DecisionType) {
-    setDraft(defaultsFor(type));
+    // keep the "where it came from" details when editing a step and only the kind of decision changes
+    setDraft({ ...defaultsFor(type), ...(initial ? { source: initial.source, origin: initial.origin } : {}) });
     setErrors({});
   }
 
@@ -76,7 +81,7 @@ export function DecisionForm({ industryId, staffNoun, currency, onAdd }: Props) 
     setErrors(draftErrors);
     if (Object.keys(draftErrors).length > 0) return;
     onAdd(draft);
-    setDraft(defaultsFor(draft.type));
+    if (!initial) setDraft(defaultsFor(draft.type));
     setErrors({});
   }
 
@@ -271,8 +276,13 @@ export function DecisionForm({ industryId, staffNoun, currency, onAdd }: Props) 
       )}
 
       <button type="button" onClick={add}>
-        Add decision
+        {submitLabel ?? "Add decision"}
       </button>
+      {onCancel && (
+        <button type="button" className="link-button" onClick={onCancel}>
+          Cancel
+        </button>
+      )}
     </div>
   );
 }

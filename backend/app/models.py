@@ -140,8 +140,11 @@ class AiInteraction(Base):
     __tablename__ = "ai_interactions"
 
     id = Column(Integer, primary_key=True)
-    simulation_run_id = Column(Integer, ForeignKey("simulation_runs.id"), nullable=False)
-    kind = Column(String, nullable=False)              # "coach" | "ask"
+    simulation_run_id = Column(Integer, ForeignKey("simulation_runs.id"), nullable=True)   # null for "interpret"
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=True)               # set for "interpret"
+    interpretation_id = Column(Integer, ForeignKey("interpretations.id"), nullable=True)
+    input_text = Column(Text, nullable=True)           # the owner's own words ("interpret")
+    kind = Column(String, nullable=False)              # "coach" | "ask" | "interpret" | "interpret_outcome"
     provider = Column(String, nullable=False)          # "template" | "ollama" | "anthropic"
     model = Column(String, nullable=True)
     attempt = Column(Integer, nullable=False, default=1)
@@ -152,6 +155,23 @@ class AiInteraction(Base):
     duration_ms = Column(Integer, nullable=True)
     grounding = Column(JSON, nullable=True)            # {"passed": bool, "unmatched": [numbers]}
     error = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
+
+
+class Interpretation(Base):
+    """One "describe it in your own words" request and what came back (thesis data, and the polling row)."""
+
+    __tablename__ = "interpretations"
+
+    id = Column(Integer, primary_key=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False)
+    text = Column(Text, nullable=False)
+    answers = Column(JSON, nullable=False, default=list)      # [{"id", "question", "answer"}]
+    status = Column(String, nullable=False, default="pending")   # "pending" | "done"
+    provider = Column(String, nullable=False, default="template")  # what actually produced the result
+    model = Column(String, nullable=True)
+    fallback = Column(Boolean, nullable=False, default=False)  # an AI provider was chosen but the rules answered
+    result = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
 
 

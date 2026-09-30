@@ -6,7 +6,9 @@ import {
   listBusinesses,
   listIndustries,
   listScenarios,
+  logInterpretOutcome,
   type DecisionFormValues,
+  type Interpretation,
   type ScenarioOut,
 } from "../../api";
 import { ErrorBanner } from "../../components/ErrorBanner";
@@ -14,9 +16,11 @@ import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
 import type { ScenarioPrefill } from "../../lib/coachIdea";
 import { DEFAULT_CURRENCY } from "../../lib/format";
+import { applyEdit, stepsFromInterpretation, suggestName, type StepItem } from "../../lib/interpretView";
 import { nextVersionName } from "../../lib/scenarioLabel";
 import { DecisionForm } from "./DecisionForm";
 import { DecisionList } from "./DecisionList";
+import { DescribeBox } from "./DescribeBox";
 
 function scenarioLabel(s: ScenarioOut): string {
   return s.parent_scenario_name ? `${s.name} (v. of ${s.parent_scenario_name})` : s.name;
@@ -47,6 +51,8 @@ export function ScenarioBuilderPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fromCoach, setFromCoach] = useState(prefill !== undefined);
+  // The reading of the owner's own words that the current steps came from (for the thesis measure).
+  const [interpretationId, setInterpretationId] = useState<number | null>(null);
 
   function selectBusiness(id: number) {
     setParams({ business: String(id) });
@@ -60,6 +66,7 @@ export function ScenarioBuilderPage() {
     setSubmitError(null);
     setSavedMessage(null);
     setFromCoach(false);
+    setInterpretationId(null);
   }
 
   function duplicateAsNewVersion(scenario: ScenarioOut) {
@@ -69,18 +76,32 @@ export function ScenarioBuilderPage() {
     setSubmitError(null);
     setSavedMessage(null);
     setFromCoach(false);
+    setInterpretationId(null);
   }
 
   function addDecision(decision: DecisionFormValues) {
     setDecisions((d) => [...d, decision]);
   }
 
-  function toggleConfirmed(index: number) {
-    setDecisions((d) => d.map((dec, i) => (i === index ? { ...dec, confirmed: !dec.confirmed } : dec)));
+  function setConfirmed(indexes: number[], confirmed: boolean) {
+    setDecisions((d) => d.map((dec, i) => (indexes.includes(i) ? { ...dec, confirmed } : dec)));
   }
 
-  function removeDecision(index: number) {
-    setDecisions((d) => d.filter((_, i) => i !== index));
+  function removeDecisions(indexes: number[]) {
+    setDecisions((d) => d.filter((_, i) => !indexes.includes(i)));
+  }
+
+  function editStep(item: StepItem, edited: DecisionFormValues, endMonth: number | null) {
+    setDecisions((d) => applyEdit(d, item, edited, endMonth));
+  }
+
+  /** The steps from the owner's own words arrive UNCONFIRMED. Reading again (after answering a question)
+   * replaces the earlier reading's steps; steps added by hand stay. */
+  function takeInterpretation(result: Interpretation) {
+    setDecisions((d) => [...d.filter((x) => !x.origin), ...stepsFromInterpretation(result)]);
+    setInterpretationId(result.id);
+    setSavedMessage(null);
+    setName((n) => (n.trim() ? n : suggestName(result.text)));
   }
 
   async function save() {
@@ -90,6 +111,10 @@ export function ScenarioBuilderPage() {
     setSavedMessage(null);
     try {
       const created = await createScenario(businessId, name.trim(), decisions, parentScenarioId);
+      if (interpretationId !== null) {
+        // What the owner kept, edited or added after the AI's steps. Fire and forget: never blocks saving.
+        logInterpretOutcome(interpretationId, decisions, created.id).catch(() => undefined);
+      }
       setSavedMessage(`Saved "${created.name}".`);
       resetFormKeepBusiness();
       setFromCoach(false);
@@ -105,6 +130,7 @@ export function ScenarioBuilderPage() {
     setName("");
     setParentScenarioId(undefined);
     setDecisions([]);
+    setInterpretationId(null);
   }
 
   const canSave = businessId !== null && name.trim().length > 0 && decisions.length > 0 && !submitting;
@@ -182,16 +208,27 @@ export function ScenarioBuilderPage() {
               />
             </div>
 
-            <h3>Decisions</h3>
             {!industry && <Spinner label="Loading business details…" />}
+            {industry && (
+              <DescribeBox
+                businessId={businessId}
+                staffNoun={industry.staff_noun}
+                currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
+                onInterpreted={takeInterpretation}
+              />
+            )}
+
+            <h3>Decisions</h3>
             {industry && (
               <>
                 <DecisionList
                   decisions={decisions}
+                  industryId={industry.id}
                   staffNoun={industry.staff_noun}
                   currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
-                  onToggleConfirmed={toggleConfirmed}
-                  onRemove={removeDecision}
+                  onSetConfirmed={setConfirmed}
+                  onRemove={removeDecisions}
+                  onEdit={editStep}
                 />
                 <DecisionForm
                   industryId={industry.id}

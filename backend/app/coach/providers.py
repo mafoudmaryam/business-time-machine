@@ -37,7 +37,7 @@ class Provider:
     def model(self) -> str:
         return ""
 
-    def complete(self, system: str, user: str, schema: dict) -> ProviderResult:
+    def complete(self, system: str, user: str, schema: dict, max_tokens: Optional[int] = None) -> ProviderResult:
         raise NotImplementedError
 
 
@@ -48,7 +48,7 @@ class OllamaProvider(Provider):
     def model(self) -> str:
         return settings.ollama_model()
 
-    def complete(self, system: str, user: str, schema: dict) -> ProviderResult:
+    def complete(self, system: str, user: str, schema: dict, max_tokens: Optional[int] = None) -> ProviderResult:
         started = time.monotonic()
         body = {
             "model": self.model,
@@ -57,7 +57,7 @@ class OllamaProvider(Provider):
             "keep_alive": settings.ollama_keep_alive(),   # keep the model in memory between calls
             "options": {
                 "temperature": 0.3,
-                "num_predict": settings.ollama_num_predict(),  # cap the length of the answer
+                "num_predict": max_tokens or settings.ollama_num_predict(),  # cap the length of the answer
                 "num_ctx": settings.ollama_num_ctx(),          # a smaller memory window is faster
             },
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
@@ -82,7 +82,7 @@ class AnthropicProvider(Provider):
     def model(self) -> str:
         return settings.anthropic_model()
 
-    def complete(self, system: str, user: str, schema: dict) -> ProviderResult:
+    def complete(self, system: str, user: str, schema: dict, max_tokens: Optional[int] = None) -> ProviderResult:
         import anthropic
 
         key = settings.anthropic_api_key()
@@ -93,7 +93,7 @@ class AnthropicProvider(Provider):
             client = anthropic.Anthropic(api_key=key, timeout=settings.anthropic_timeout(), max_retries=1)
             response = client.messages.create(
                 model=self.model,
-                max_tokens=4000,
+                max_tokens=max(max_tokens or 0, 4000),
                 system=system + "\n\nReply with a single JSON object only, no other text.",
                 messages=[{"role": "user", "content": user}],
                 output_config={"effort": "low"},
