@@ -105,9 +105,16 @@ export interface BaselineIn {
   open_days: number;
 }
 
+/** A number the app filled in for the owner, and the plain-words rule it came from. */
+export interface AssumedField {
+  field: string;
+  rule: string;
+}
+
 export interface BaselineOut extends BaselineIn {
   id: number;
   created_at: string;
+  assumed_fields: AssumedField[] | null;
 }
 
 export interface BusinessOut {
@@ -116,6 +123,8 @@ export interface BusinessOut {
   industry: string;
   currency: string;
   created_at: string;
+  setup_source: string; // full | quick | sample | seed
+  is_sample: boolean;
   baseline: BaselineOut | null;
 }
 
@@ -585,4 +594,136 @@ export function logInterpretOutcome(
 /** "Looks right": the owner reviewed the scenario's decisions, so mark them all confirmed. */
 export function confirmScenario(scenarioId: number): Promise<ScenarioOut> {
   return request(`/scenarios/${scenarioId}/confirm`, { method: "POST" });
+}
+
+
+// ---------- beginner journey: config, quick start, sample, Today ----------
+
+export interface AppConfig {
+  coach_enabled: boolean;
+  coach_mode: string | null;
+  study_mode: boolean;
+}
+
+export function getConfig(): Promise<AppConfig> {
+  return request("/config");
+}
+
+export interface QuickAnswers {
+  customers_per_day: number;
+  avg_spend: number;
+  monthly_rent: number;
+  staff: number;
+}
+
+export interface QuickStartOut {
+  baseline: BaselineIn;
+  assumed: AssumedField[];
+  warnings: string[];
+  preview: StartingMonth;
+}
+
+/** Four easy answers -> all the model's numbers. The conversion is the engine's; nothing is saved. */
+export function quickBaseline(industryId: string, answers: QuickAnswers): Promise<QuickStartOut> {
+  return request(`/industries/${industryId}/quick_baseline`, { method: "POST", body: JSON.stringify(answers) });
+}
+
+export function createQuickBusiness(
+  name: string,
+  industry: string,
+  currency: string,
+  quick: QuickStartOut,
+): Promise<BusinessOut> {
+  return request("/businesses", {
+    method: "POST",
+    body: JSON.stringify({
+      name, industry, currency, baseline: quick.baseline, setup_source: "quick", assumed_fields: quick.assumed,
+    }),
+  });
+}
+
+export function createSampleBusiness(industry: string, currency: string): Promise<BusinessOut> {
+  return request("/sample_business", { method: "POST", body: JSON.stringify({ industry, currency }) });
+}
+
+export type Unit = "money" | "count" | "percent" | "days" | "number";
+
+export interface Assumption {
+  field: string;
+  label: string;
+  value: number; // percent fields arrive as a 0-1 ratio
+  unit: Unit;
+  rule: string;
+  important: boolean;
+}
+
+export interface TodayNote {
+  text: string;
+  mode: string;
+  model: string | null;
+  fallback: boolean;
+  generated_at: string;
+  ai_status: string; // none | pending | done | failed
+  ai_started_at: string | null;
+}
+
+export interface Band {
+  p10: number[];
+  p50: number[];
+  p90: number[];
+}
+
+export interface TodayTiles {
+  profit_a_month: number;
+  profit_a_month_bad_case: number;
+  profit_a_month_good_case: number;
+  cash_now: number;
+  months_of_bills_covered: number;
+  cash_runs_out_of_10: number;
+  lowest_cash_amount: number;
+  lowest_cash_month: number;
+  lowest_cash_month_label: string;
+}
+
+export interface TodayOut {
+  business_id: number;
+  name: string;
+  industry: string;
+  currency: string;
+  is_sample: boolean;
+  run_id: number;
+  horizon: number;
+  engine_version: string;
+  seed: number;
+  iterations: number;
+  month_labels: string[];
+  tiles: TodayTiles;
+  profit: Band;
+  cash: Band;
+  note: TodayNote | null; // null: the coach is switched off
+  assumptions: Assumption[];
+  assumed_by_app: boolean;
+}
+
+export function getToday(businessId: number): Promise<TodayOut> {
+  return request(`/businesses/${businessId}/today`);
+}
+
+export function getTodayNote(businessId: number): Promise<TodayNote> {
+  return request(`/businesses/${businessId}/today/note`);
+}
+
+/** Change some of the owner's numbers (percent fields as 0-1 ratios, like everything the API stores). */
+export function changeNumbers(businessId: number, changes: Partial<BaselineIn>): Promise<BusinessOut> {
+  return request(`/businesses/${businessId}/baseline`, { method: "PATCH", body: JSON.stringify(changes) });
+}
+
+export interface UiEventIn {
+  name: string;
+  screen?: string;
+  payload?: Record<string, unknown>;
+}
+
+export function logEvents(sessionId: string, businessId: number | null, events: UiEventIn[]): Promise<{ stored: number }> {
+  return request("/events", { method: "POST", body: JSON.stringify({ session_id: sessionId, business_id: businessId, events }) });
 }

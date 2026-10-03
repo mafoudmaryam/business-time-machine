@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -27,11 +27,37 @@ class BaselineIn(BaseModel):
     open_days: float = Field(28.0, gt=0, le=31)
 
 
+class AssumedFieldIn(BaseModel):
+    """A number the app filled in for the owner, and the plain-words rule it came from."""
+
+    field: str
+    rule: str = Field(max_length=300)
+
+
 class BaselineOut(BaselineIn):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     created_at: dt.datetime
+    assumed_fields: Optional[list[AssumedFieldIn]] = None
+
+
+class BaselinePatch(BaseModel):
+    """PATCH /businesses/{id}/baseline -- change some of the owner's numbers (makes a new snapshot)."""
+
+    customers: Optional[float] = Field(None, ge=0)
+    cash: Optional[float] = None
+    staff_fte: Optional[float] = Field(None, ge=0)
+    avg_ticket: Optional[float] = Field(None, gt=0)
+    visits_per_regular: Optional[float] = Field(None, gt=0)
+    walk_in_visits: Optional[float] = Field(None, ge=0)
+    cogs_ratio: Optional[float] = Field(None, ge=0, lt=1)
+    wage_per_fte: Optional[float] = Field(None, ge=0)
+    fixed_costs: Optional[float] = Field(None, ge=0)
+    marketing: Optional[float] = Field(None, ge=0)
+    churn_rate: Optional[float] = Field(None, ge=0, le=1)
+    seats: Optional[int] = Field(None, ge=0)
+    open_days: Optional[float] = Field(None, gt=0, le=31)
 
 
 class BusinessCreate(BaseModel):
@@ -40,6 +66,9 @@ class BusinessCreate(BaseModel):
     currency: str = Field("USD", pattern=r"^[A-Za-z]{3}$", description="ISO 4217 currency code, e.g. USD, EUR, JPY.")
     # None means "use this industry's default baseline" -- see routers/businesses.py.
     baseline: Optional[BaselineIn] = None
+    # How the numbers were gathered, and which of them the app filled in (quick start only).
+    setup_source: Literal["full", "quick"] = "full"
+    assumed_fields: Optional[list[AssumedFieldIn]] = None
 
     @field_validator("currency")
     @classmethod
@@ -55,6 +84,8 @@ class BusinessOut(BaseModel):
     industry: str
     currency: str
     created_at: dt.datetime
+    setup_source: str = "full"
+    is_sample: bool = False
     baseline: Optional[BaselineOut]
 
 
@@ -379,3 +410,115 @@ class InterpretOutcomeOut(BaseModel):
     confirmed: int
     confirmed_via: dict[str, int] = {}    # how the confirmed decisions were confirmed
     scenario_id: Optional[int] = None
+
+
+# ---------- beginner journey: quick start, sample, today, events, config ----------
+
+
+class QuickStartIn(BaseModel):
+    """POST /industries/{id}/quick_baseline -- the four easy answers."""
+
+    customers_per_day: float = Field(gt=0, le=20_000)
+    avg_spend: float = Field(gt=0, le=100_000)
+    monthly_rent: float = Field(ge=0, le=100_000_000)
+    staff: float = Field(gt=0, le=500)
+
+
+class QuickStartOut(BaseModel):
+    baseline: BaselineIn
+    assumed: list[AssumedFieldIn]
+    warnings: list[str]
+    preview: StartingMonthOut
+
+
+class SampleBusinessIn(BaseModel):
+    industry: str = "cafe"
+    currency: str = Field("USD", pattern=r"^[A-Za-z]{3}$")
+
+    @field_validator("currency")
+    @classmethod
+    def _uppercase(cls, v: str) -> str:
+        return v.upper()
+
+
+class AssumptionOut(BaseModel):
+    """One row of the "what we assumed" note."""
+
+    field: str
+    label: str
+    value: float
+    unit: Literal["money", "count", "percent", "days", "number"]
+    rule: str
+    important: bool
+
+
+class TodayNoteOut(BaseModel):
+    text: str
+    mode: str
+    model: Optional[str] = None
+    fallback: bool = False
+    generated_at: str
+    ai_status: str = "none"            # none | pending | done | failed
+    ai_started_at: Optional[str] = None
+
+
+class Band(BaseModel):
+    p10: list[float]
+    p50: list[float]
+    p90: list[float]
+
+
+class TodayTilesOut(BaseModel):
+    profit_a_month: float
+    profit_a_month_bad_case: float
+    profit_a_month_good_case: float
+    cash_now: float
+    months_of_bills_covered: int
+    cash_runs_out_of_10: int
+    lowest_cash_amount: float
+    lowest_cash_month: int
+    lowest_cash_month_label: str
+
+
+class TodayOut(BaseModel):
+    business_id: int
+    name: str
+    industry: str
+    currency: str
+    is_sample: bool
+    run_id: int
+    horizon: int
+    engine_version: str
+    seed: int
+    iterations: int
+    month_labels: list[str]
+    tiles: TodayTilesOut
+    profit: Band
+    cash: Band
+    note: Optional[TodayNoteOut] = None       # None when the coach is switched off
+    assumptions: list[AssumptionOut]
+    assumed_by_app: bool                       # False: the owner typed every number
+
+
+class EventIn(BaseModel):
+    name: str = Field(pattern=r"^[a-z0-9_]{1,40}$")
+    screen: Optional[str] = Field(None, pattern=r"^[a-z0-9_/\-]{1,60}$")
+    payload: Optional[dict[str, Any]] = None
+
+
+class EventsIn(BaseModel):
+    session_id: str = Field(min_length=8, max_length=64, pattern=r"^[A-Za-z0-9_-]+$")
+    business_id: Optional[int] = None
+    events: list[EventIn] = Field(min_length=1, max_length=50)
+
+
+class EventsOut(BaseModel):
+    stored: int
+
+
+class ConfigOut(BaseModel):
+    """GET /config -- what the frontend needs to know once, at start."""
+
+    coach_enabled: bool
+    coach_mode: Optional[str] = None          # only when COACH_SHOW_MODE=true
+    study_mode: bool = False                  # reserved for the study release

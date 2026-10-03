@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 
-from .. import schemas
+from .. import engine_bridge, schemas
 from ..engine_bridge import list_industries, preview_starting_month, to_baseline
 
 router = APIRouter(tags=["industries"])
@@ -43,3 +43,21 @@ def preview_starting_month_for(industry_id: str, baseline: schemas.BaselineIn):
     if industry_id not in {t.id for t in list_industries()}:
         raise HTTPException(status_code=404, detail="unknown industry")
     return preview_starting_month(industry_id, to_baseline(baseline))
+
+
+@router.post("/industries/{industry_id}/quick_baseline", response_model=schemas.QuickStartOut)
+def quick_baseline_for(industry_id: str, answers: schemas.QuickStartIn):
+    """Four easy answers -> all the model's numbers, what was assumed, and what month 1 would look like.
+    The conversion is the engine's (btm_engine.quickstart), so the frontend never does the math. Nothing is saved."""
+    if industry_id not in {t.id for t in list_industries()}:
+        raise HTTPException(status_code=404, detail="unknown industry")
+    try:
+        result = engine_bridge.quick_start(industry_id, answers.customers_per_day, answers.avg_spend,
+                                           answers.monthly_rent, answers.staff)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return schemas.QuickStartOut(
+        baseline=schemas.BaselineIn(**result["baseline"]),
+        assumed=[schemas.AssumedFieldIn(**a) for a in result["assumed"]],
+        warnings=result["warnings"], preview=schemas.StartingMonthOut(**result["preview"]),
+    )

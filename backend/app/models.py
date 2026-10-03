@@ -21,6 +21,12 @@ class Business(Base):
     industry = Column(String, nullable=False, default="cafe", server_default="cafe")
     currency = Column(String, nullable=False, default="USD", server_default="USD")
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
+    # How the numbers came to be: full (the long setup form) | quick (four questions) | sample | seed (demo data)
+    setup_source = Column(String, nullable=False, default="full", server_default="full")
+    is_sample = Column(Boolean, nullable=False, default=False, server_default="0")
+    # Study mode (not built yet; the columns are ready so it needs no rewrite later).
+    participant_code = Column(String, nullable=True, index=True)
+    study_condition = Column(String, nullable=True)
 
     snapshots = relationship(
         "BusinessSnapshot", back_populates="business", cascade="all, delete-orphan",
@@ -57,6 +63,9 @@ class BusinessSnapshot(Base):
     churn_rate = Column(Float, nullable=False, default=0.05)
     seats = Column(Integer, nullable=False, default=35)
     open_days = Column(Float, nullable=False, default=28.0)
+    # Numbers we filled in for the owner: [{"field": "cash", "rule": "two months of your monthly costs"}, ...].
+    # None means the owner entered everything themselves.
+    assumed_fields = Column(JSON, nullable=True)
 
     business = relationship("Business", back_populates="snapshots")
 
@@ -114,6 +123,8 @@ class SimulationRun(Base):
     iterations = Column(Integer, nullable=False)
     horizon = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
+    # compare (a normal comparison run) | today (the baseline-only run behind the Today page)
+    kind = Column(String, nullable=False, default="compare", server_default="compare")
 
     business = relationship("Business", back_populates="simulation_runs")
     results = relationship("SimulationResult", back_populates="run", cascade="all, delete-orphan")
@@ -204,3 +215,30 @@ class CoachResult(Base):
     simulation_run_id = Column(Integer, ForeignKey("simulation_runs.id"), nullable=False)
     payload = Column(JSON, nullable=False)
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
+
+
+class TodayNote(Base):
+    """The coach's opening words on the Today page for one 'today' run: rule-based first, AI version later."""
+
+    __tablename__ = "today_notes"
+    __table_args__ = (UniqueConstraint("simulation_run_id", name="uq_today_note_run"),)
+
+    id = Column(Integer, primary_key=True)
+    simulation_run_id = Column(Integer, ForeignKey("simulation_runs.id"), nullable=False)
+    payload = Column(JSON, nullable=False)
+    created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
+
+
+class UiEvent(Base):
+    """One thing the person did in the app (screen opened, tour skipped, ...), for the study. No free text."""
+
+    __tablename__ = "ui_events"
+
+    id = Column(Integer, primary_key=True)
+    created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False, index=True)
+    session_id = Column(String, nullable=False, index=True)       # random id made by the browser tab
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=True, index=True)
+    participant_code = Column(String, nullable=True)
+    screen = Column(String, nullable=True)
+    name = Column(String, nullable=False, index=True)
+    payload = Column(JSON, nullable=True)

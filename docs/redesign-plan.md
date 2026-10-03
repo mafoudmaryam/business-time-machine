@@ -1,4 +1,6 @@
-# Frontend redesign plan (on hold)
+# Frontend redesign plan (on hold, SUPERSEDED)
+
+> **Superseded 2026-10-03** by `docs/beginner-journey-plan.md`. The new top navigation (`AppNav`) replaces the header/nav described here. The hero bands, scenario cards, "recipe" sidebar and 3-column setup are dropped (the setup is replaced by the four-question start screen; the old form stays under Advanced). Kept only for the design tokens and history.
 
 Status: **approved, on hold** pending the multi-industry task (café / restaurant /
 bakery). Do not implement until that task lands and this doc has been revisited for

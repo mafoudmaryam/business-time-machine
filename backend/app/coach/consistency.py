@@ -65,11 +65,27 @@ class Facts:
                                                   or self.loss_in_plans)
 
 
+class TodayFacts:
+    """The same questions asked of the Today page's facts: the business as it is, with no plan."""
+
+    def __init__(self, facts: dict):
+        t = facts["today"]
+        self.cash_out_counts = [t["cash_runs_out_of_10"]]
+        self.cash_risk_in_plans = t["cash_runs_out_of_10"] >= 1 or t["lowest_cash_amount"] < 0
+        self.cash_risk_anywhere = self.cash_risk_in_plans
+        self.loss_in_plans = t["profit_a_month"] < 0 or t["profit_year_most_likely"] < 0
+        self.loss_anywhere = self.loss_in_plans or t["profit_a_month_bad_case"] < 0 or t["profit_bad_case_year"] < 0
+        self.has_risk = self.cash_risk_in_plans or self.loss_in_plans
+
+
 def check(texts: list[str], facts: dict) -> Optional[str]:
     """None when the AI's risk claims agree with the facts, otherwise a short plain reason for rejecting the text."""
-    if not facts.get("scenarios"):
+    if facts.get("scenarios"):
+        f = Facts(facts)
+    elif "today" in facts:
+        f = TodayFacts(facts)
+    else:
         return None
-    f = Facts(facts)
     for text in texts:
         for sentence in _sentences(str(text)):
             for m in _CASH.finditer(sentence):

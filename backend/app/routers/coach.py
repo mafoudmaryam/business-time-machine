@@ -27,6 +27,12 @@ def _get_run(db: Session, run_id: int) -> models.SimulationRun:
     return run
 
 
+def _not_today(run: models.SimulationRun) -> None:
+    """The coach card explains plans. The Today page has its own note (GET /businesses/{id}/today/note)."""
+    if run.kind == "today":
+        raise HTTPException(status_code=422, detail="this run belongs to the Today page, which has its own note")
+
+
 @router.get("/coach/status", response_model=schemas.CoachStatusOut)
 def coach_status():
     return service.status()
@@ -35,6 +41,7 @@ def coach_status():
 @router.post("/simulation_runs/{run_id}/coach", response_model=schemas.CoachOut)
 def coach(run_id: int, regenerate: bool = False, db: Session = Depends(get_db)):
     run = _get_run(db, run_id)
+    _not_today(run)
     try:
         return service.start_coach(db, run, regenerate=regenerate)
     except service.CoachDisabled:
@@ -44,6 +51,7 @@ def coach(run_id: int, regenerate: bool = False, db: Session = Depends(get_db)):
 @router.get("/simulation_runs/{run_id}/coach", response_model=schemas.CoachOut)
 def coach_progress(run_id: int, db: Session = Depends(get_db)):
     run = _get_run(db, run_id)
+    _not_today(run)
     try:
         result = service.read_coach(db, run)
     except service.CoachDisabled:

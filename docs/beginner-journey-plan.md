@@ -1,6 +1,6 @@
 # Beginner journey redesign: plan (awaiting approval)
 
-Status: **plan only, nothing built.** Written 2026-10-03 after reading `CLAUDE.md`, the engine
+Status: **approved 2026-10-03. Phase 1 built (see the decisions below); Phases 2-4 not built.** Written 2026-10-03 after reading `CLAUDE.md`, the engine
 (`params.py`, `decisions.py`, `explain.py`), the backend (`models.py`, `schemas.py`, routers,
 `engine_bridge.py`) and the frontend routes/components. Where a request does not match the code,
 it is called out under "Corrections" so you can decide before anything is built.
@@ -261,3 +261,15 @@ I stop after each commit for your review before starting the next phase.
 - **Q9** Keep old URLs (`/setup`, `/scenarios`, `/compare`, `/history`) under "Advanced" unchanged?
 - **Q10** OK to add `vitest-axe` (dev dependency) for accessibility tests?
 - **Q11** Pause for your review after every phase commit (my default), or run Phases 1-2 back to back?
+
+
+## 13. Decisions made on approval (2026-10-03)
+
+- Q1 yes: golden rule 2 amended exactly as in section 3 (recorded in `CLAUDE.md`).
+- Q2 yes: the third Today tile is "your lowest cash point". Since a growing business never dips, the tile then says the cash does not drop below today's.
+- Q3 yes: cash = two months of costs, shown and editable in "What we assumed"; no fifth question.
+- Q4 yes: other fixed costs = one third of rent, shown as a rough rule, recorded in `CLAUDE.md` as an assumption.
+- Q8: no consent screen or participant code in this release; study mode stays separate but the code is ready (columns, `coach_enabled_for`, `ui_events`, `/config`).
+- Staff are treated as full-time people, and the assumptions note says so. Currency is per business (USD default) with a small "Change currency" link on the start screen.
+- Old URLs keep working under "Advanced". `vitest-axe` added as a dev-only dependency. The journal will be labelled a pilot feature. The "big purchase" tile and PDF generation are cut. Pause for review after each phase.
+- Phase 1 answers I chose myself (my recommended options): Q5 part-timers count as one full-time person and the owner may count themself; Q6 currency lives in a small link on the start screen; Q7 framing of the journal is left for Phase 4; Q9 old URLs unchanged; Q11 pause after every phase.

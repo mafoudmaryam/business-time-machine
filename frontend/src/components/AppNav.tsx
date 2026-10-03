@@ -1,0 +1,50 @@
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { ADVANCED_LINKS } from "../lib/navLinks";
+import { getRememberedBusinessId } from "../lib/session";
+
+const ADVANCED_PATHS = ["/compare", "/history", "/setup"];
+
+export function AppNav() {
+  const location = useLocation();
+  const businessId = getRememberedBusinessId();
+  const tryTo = businessId ? `/scenarios?business=${businessId}` : "/scenarios";
+  const inAdvanced = ADVANCED_PATHS.includes(location.pathname);
+
+  return (
+    <nav className="appnav" aria-label="Main">
+      <Link to="/today" className="appnav-title">
+        Business Time Machine
+      </Link>
+      <ul className="appnav-links">
+        <li>
+          <NavLink to="/today" className={({ isActive }) => (isActive ? "active" : "")}>
+            Today
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to={tryTo}
+            className={() => (location.pathname === "/scenarios" ? "active" : "")}
+          >
+            Try a change
+          </NavLink>
+        </li>
+        <li>
+          {/* keyed by address so the menu closes after you pick something */}
+          <details className={inAdvanced ? "appnav-more active" : "appnav-more"} key={location.pathname}>
+            <summary>Advanced</summary>
+            <ul>
+              {ADVANCED_LINKS.map((link) => (
+                <li key={link.to}>
+                  <NavLink to={link.to} className={({ isActive }) => (isActive ? "active" : "")}>
+                    {link.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </li>
+      </ul>
+    </nav>
+  );
+}

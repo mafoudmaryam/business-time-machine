@@ -10,7 +10,7 @@ Describe a change, check the plan, and watch what could happen to your profit, c
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-TypeScript-61DAFB?logo=react&logoColor=black)
-![Tests](https://img.shields.io/badge/tests-393%20backend%20%C2%B7%20175%20frontend%20%C2%B7%20128%20engine-2F6F4F)
+![Tests](https://img.shields.io/badge/tests-466%20backend%20%C2%B7%20275%20frontend%20%C2%B7%20171%20engine-2F6F4F)
 ![Status](https://img.shields.io/badge/status-master's%20thesis%20project-8A4B2F)
 
 </div>
@@ -30,6 +30,8 @@ Most small food businesses make big choices on instinct: raise prices, hire a ba
 
 | | |
 |---|---|
+| **A simple start** | Pick a business type and answer four questions (customers on a normal day, average spend, rent, people who work there), or try a one-click sample café, restaurant or bakery. Everything else is filled in with typical numbers, and a "What we assumed" note shows each guess so you can change it. |
+| **The coach speaks first** | The Today page opens with 2 to 4 friendly sentences about your business as it is, three tiles (what you keep each month, your safety net, your lowest cash point) and a 12-month chart. A short 3-step tour appears the first time. |
 | **Say it in your own words** | Type "raise prices 10% in March and hire a baker for the summer". The app turns it into editable steps with your own words shown beside each one, and asks a question when something is missing. |
 | **You stay in control** | Nothing is simulated until you have confirmed every step (one by one, or with "Confirm all"). |
 | **Honest about uncertainty** | Monte Carlo runs show a range (bad case, most likely, good case), not one magic number, plus "ahead in N of 10 futures". |
@@ -37,6 +39,10 @@ Most small food businesses make big choices on instinct: raise prices, hire a ba
 | **Instant first, smarter later** | A rule-based explanation appears right away. A local or cloud AI can then improve it in the background and swap in the better version. |
 | **Three industries** | Café, restaurant and bakery templates (the bakery includes waste). Currency is set per business. |
 | **Plain language everywhere** | No jargon: "if you change nothing", "bad case / most likely / good case", "in 3 of 10 futures", and a "?" tip next to every input and chart. |
+
+![The Today page: the coach speaks first, then three tiles](docs/images/today.jpg)
+
+*The Today page. The coach opens with a few plain sentences, then three tiles show what you keep each month, your safety net and your lowest cash point.*
 
 ![The comparison page: the coach's verdict, now-and-later tiles and a "Why?" breakdown for a +10% price rise](docs/images/compare-coach.jpg)
 
@@ -143,9 +149,9 @@ COACH_PROVIDER=ollama
 ## Running the tests
 
 ```powershell
-cd backend;  .\.venv\Scripts\python.exe -m pytest      # 393 tests
-cd engine;   .\.venv\Scripts\python.exe -m pytest      # 128 tests
-cd frontend; npm test                                  # 175 tests
+cd backend;  .\.venv\Scripts\python.exe -m pytest      # 466 tests
+cd engine;   .\.venv\Scripts\python.exe -m pytest      # 171 tests
+cd frontend; npm test                                  # 275 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser:
@@ -163,7 +169,7 @@ Use `--provider ollama` or `--provider anthropic` (with `--model`, `--sample N` 
 engine/      Simulation engine (pure Python and NumPy)
 backend/     FastAPI app, database, coach, plain-language parser, tests, eval scripts
 frontend/    React and TypeScript app
-docs/        Redesign plan and README images
+docs/        Beginner journey plan, the older redesign plan, and README images
 start.ps1    Starts both dev servers
 stop.ps1     Stops both dev servers
 CLAUDE.md    Project rules and current state
@@ -192,6 +198,10 @@ The coach can be switched off (`COACH_ENABLED=false`) for a no-coach comparison 
 - [x] Non-blocking AI coach with grounding and claim checks
 - [x] Plain-language decision input
 - [x] Scenario picker and "Confirm all"
+- [x] Beginner journey, phase 1: four-question start, sample business, Today page with the coach speaking first, tour, simpler navigation
+- [ ] Beginner journey, phase 2: "Try a change" with live sketches and a 12-month timeline
+- [ ] Beginner journey, phase 3: "How did we work this out?" and a printable plan
+- [ ] Beginner journey, phase 4: a journal that compares predictions with real months (pilot feature)
 - [ ] The rest of the visual redesign (see `docs/redesign-plan.md`)
 - [ ] Streaming explanations
 - [ ] PostgreSQL, user accounts and Docker, as sketched in `CLAUDE.md`

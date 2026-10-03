@@ -48,6 +48,7 @@ def list_simulation_runs(business_id: int, db: Session = Depends(get_db)):
     runs = (
         db.query(models.SimulationRun)
         .filter(models.SimulationRun.business_id == business_id)
+        .filter(models.SimulationRun.kind != "today")      # the Today page's own run is not a comparison
         .order_by(models.SimulationRun.id.desc())
         .all()
     )

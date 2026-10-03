@@ -300,7 +300,7 @@ def _upgrade_old_payload(db: Session, run: models.SimulationRun, payload: dict) 
 
 def read_coach(db: Session, run: models.SimulationRun) -> Optional[dict]:
     """Current state of the coach for this run (used for polling). None if it was never started."""
-    if not settings.coach_enabled():
+    if not settings.coach_enabled_for(run.business):
         raise CoachDisabled()
     row = db.query(models.CoachResult).filter_by(simulation_run_id=run.id).one_or_none()
     if row is None:
@@ -319,7 +319,7 @@ def read_coach(db: Session, run: models.SimulationRun) -> Optional[dict]:
 def start_coach(db: Session, run: models.SimulationRun, regenerate: bool = False) -> dict:
     """Return the coach at once. With an AI provider this is the rule-based version, and a background
     job then replaces it with the AI version (poll read_coach). Never waits for the AI."""
-    if not settings.coach_enabled():
+    if not settings.coach_enabled_for(run.business):
         raise CoachDisabled()
     existing = read_coach(db, run)
     if existing is not None and (not regenerate or run.id in _active):
@@ -395,7 +395,7 @@ def _ask_out(row: models.CoachAnswer) -> dict:
 def start_ask(db: Session, run: models.SimulationRun, question: str) -> dict:
     """Return at once with the rule-based answer (built only from the run's facts). With an AI provider, a
     background job then tries to replace it (poll read_ask). The three chip questions never need the AI."""
-    if not settings.coach_enabled():
+    if not settings.coach_enabled_for(run.business):
         raise CoachDisabled()
     facts, _raw = engine_bridge.build_run_facts(db, run)
     instant, understood = template.answer_with_match(facts, question)
@@ -450,11 +450,12 @@ def _ask_job(bind: Any, ask_id: int) -> None:
 
 def read_ask(db: Session, ask_id: int) -> Optional[dict]:
     """Current state of one question (for polling). A job lost to a server restart keeps the instant answer."""
-    if not settings.coach_enabled():
-        raise CoachDisabled()
     row = db.get(models.CoachAnswer, ask_id)
     if row is None:
         return None
+    run = db.get(models.SimulationRun, row.simulation_run_id)
+    if not settings.coach_enabled_for(run.business if run is not None else None):
+        raise CoachDisabled()
     if row.ai_status == "pending" and ask_id not in _ask_active:
         row.ai_status, row.fallback = "failed", True
         db.commit()

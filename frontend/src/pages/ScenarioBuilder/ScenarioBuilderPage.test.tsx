@@ -62,7 +62,7 @@ describe("ScenarioBuilderPage: describe it in your own words", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(api.listBusinesses).mockResolvedValue([
-      { id: 1, name: "Sunrise Bakery", industry: "bakery", currency: "USD", created_at: "2026-01-01", baseline: { id: 1, created_at: "2026-01-01", ...baseline } },
+      { id: 1, name: "Sunrise Bakery", industry: "bakery", currency: "USD", created_at: "2026-01-01", setup_source: "full", is_sample: false, baseline: { id: 1, created_at: "2026-01-01", assumed_fields: null, ...baseline } },
     ]);
     vi.mocked(api.listIndustries).mockResolvedValue([
       { id: "bakery", display_name: "Bakery", customer_noun: "regulars", staff_noun: "baker", capacity_label: "ovens", default_baseline: baseline, field_labels: {} },

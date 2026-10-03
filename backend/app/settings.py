@@ -25,6 +25,12 @@ def coach_enabled() -> bool:
     return _flag("COACH_ENABLED", True)
 
 
+def coach_enabled_for(business) -> bool:
+    """Whether the coach may speak to this business's owner. Today: the global switch. Study mode will
+    override it per participant (`business.study_condition`) here, and nowhere else."""
+    return coach_enabled()
+
+
 def coach_show_mode() -> bool:
     """Whether the frontend may show which coach is active (off for the user study)."""
     return _flag("COACH_SHOW_MODE", False)

@@ -22,7 +22,8 @@ def create_business(payload: schemas.BusinessCreate, db: Session = Depends(get_d
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
-    business = models.Business(name=payload.name, industry=payload.industry, currency=payload.currency)
+    business = models.Business(name=payload.name, industry=payload.industry, currency=payload.currency,
+                               setup_source=payload.setup_source)
     db.add(business)
     db.flush()
 
@@ -32,7 +33,8 @@ def create_business(payload: schemas.BusinessCreate, db: Session = Depends(get_d
     baseline_values = template.default_baseline.to_dict()
     if payload.baseline is not None:
         baseline_values.update(payload.baseline.model_dump(exclude_unset=True))
-    snapshot = models.BusinessSnapshot(business_id=business.id, **baseline_values)
+    assumed = [a.model_dump() for a in payload.assumed_fields] if payload.assumed_fields else None
+    snapshot = models.BusinessSnapshot(business_id=business.id, assumed_fields=assumed, **baseline_values)
     db.add(snapshot)
     db.commit()
     db.refresh(business)

@@ -12,8 +12,8 @@ from jsonschema import ValidationError, validate as jsonschema_validate
 from sqlalchemy.orm import Session
 
 from btm_engine import (BusinessBaseline, DECISIONS_JSON_SCHEMA, Decision as EngineDecision,
-                        build_facts, describe_decision, format_money, get_template, list_industries, month_one_summary,
-                        run_scenarios)
+                        build_facts, build_today_facts, describe_decision, format_money, get_template, list_industries,
+                        month_one_summary, quick_baseline, run_scenarios, sample_assumed)
 
 from . import models
 
@@ -66,6 +66,7 @@ def run_simulation(
     horizon: int,
     iterations: int,
     seed: Optional[int],
+    kind: str = "compare",
 ) -> models.SimulationRun:
     """Run baseline + the given scenarios in one engine call (shared random draws),
     then persist the results. Raises UnconfirmedDecisionsError (-> HTTP 409) if any
@@ -94,6 +95,7 @@ def run_simulation(
         seed=result.seed,
         iterations=result.iterations,
         horizon=result.horizon,
+        kind=kind,
     )
     db.add(run_row)
     db.flush()
@@ -157,7 +159,10 @@ def _run_decisions(db: Session, run: models.SimulationRun) -> dict[str, list[Eng
 
 
 def build_run_facts(db: Session, run: models.SimulationRun) -> tuple[dict, dict[str, list[dict]]]:
-    """The coach's facts for a stored run, plus each scenario's raw decisions (flat dicts)."""
+    """The coach's facts for a stored run, plus each scenario's raw decisions (flat dicts).
+    The Today page's own run has no plans: its facts are the 'today' facts."""
+    if run.kind == "today":
+        return build_today_run_facts(db, run), {}
     business = run.business
     base = to_baseline(_baseline_at_run_time(business, run))
     tpl = get_template(business.industry)
@@ -202,3 +207,39 @@ def describe_flat_decisions(decision_dicts: list[dict], currency: str) -> list[s
 def preview_starting_month(industry: str, baseline: BusinessBaseline) -> dict:
     """The engine's month 1 for numbers that have not been saved yet (the setup wizard)."""
     return month_one_summary(baseline, get_template(industry))
+
+
+# ---------- quick start, sample business, Today ----------
+
+def quick_start(industry: str, customers_per_day: float, avg_spend: float, monthly_rent: float, staff: float) -> dict:
+    """Four answers -> a full baseline, what was assumed, warnings, and the engine's month 1 for it.
+    Raises ValueError (plain reason) for answers that make no sense."""
+    tpl = get_template(industry)
+    q = quick_baseline(tpl, customers_per_day, avg_spend, monthly_rent, staff)
+    return {
+        "baseline": q.baseline.to_dict(), "assumed": q.assumed, "warnings": q.warnings,
+        "preview": month_one_summary(q.baseline, tpl),
+    }
+
+
+def sample_start(industry: str) -> tuple[dict, list[dict]]:
+    """The industry's typical numbers, and the 'assumed' list that says so."""
+    tpl = get_template(industry)
+    return tpl.default_baseline.to_dict(), sample_assumed(tpl)
+
+
+def build_today_run_facts(db: Session, run: models.SimulationRun) -> dict:
+    """The coach's facts for a 'today' run: how the business looks if nothing changes."""
+    business = run.business
+    base = to_baseline(_baseline_at_run_time(business, run))
+    tpl = get_template(business.industry)
+    baseline = next(r for r in run.results if r.scenario_name == "baseline")
+    return build_today_facts(base, tpl, baseline.summary, baseline.bands, run.horizon, business.currency)
+
+
+BASELINE_FIELDS = tuple(BusinessBaseline().to_dict())
+
+
+def check_baseline(values: dict) -> None:
+    """Raise ValueError (plain reason) if these numbers do not make a valid business."""
+    BusinessBaseline(**values).validate()

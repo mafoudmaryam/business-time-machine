@@ -83,6 +83,21 @@ Write the coach note as JSON with these fields:
                A decision looks like {{"type":"hiring","start_month":6,"value":1,"unit":"fte"}}.
 Only suggest ideas that are different from what the scenarios already do."""
 
+TODAY_SCHEMA = {
+    "type": "object",
+    "properties": {"note": {"type": "string"}},
+    "required": ["note"],
+}
+
+TODAY_INSTRUCTIONS = """
+
+You are opening the Today page. Nobody has asked anything: say hello by telling the owner how the business looks
+right now if they change nothing, using the "today" part of the FACTS (a typical month, the cash in the bank, how many
+months of bills it covers, the bad case and good case for a month).
+Write 2 to 4 short, friendly sentences. Do not use headings, lists or the words "baseline" or "scenario".
+Only mention cash running out or losing money if the FACTS show it (cash_runs_out_of_10 above 0, a negative profit).
+If the FACTS show no risk, do not warn. Reply as JSON: {{"note": "..."}}."""
+
 ASK_INSTRUCTIONS = """
 
 Answer the owner's QUESTION in at most 4 short sentences, using only the FACTS.
@@ -103,6 +118,12 @@ def _fill(text: str, facts: dict) -> str:
 
 def coach_prompt(facts: dict) -> tuple[str, str]:
     system = _fill(_STYLE, facts) + _fill(COACH_INSTRUCTIONS, facts)
+    user = "FACTS:\n" + _ascii(json.dumps(facts_for_prompt(facts), ensure_ascii=False))
+    return system, user
+
+
+def today_prompt(facts: dict) -> tuple[str, str]:
+    system = _fill(_STYLE, facts) + _fill(TODAY_INSTRUCTIONS, facts)
     user = "FACTS:\n" + _ascii(json.dumps(facts_for_prompt(facts), ensure_ascii=False))
     return system, user
 

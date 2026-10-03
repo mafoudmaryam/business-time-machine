@@ -254,9 +254,47 @@ def _say_marketing(facts: dict, s: dict) -> str:
             f"{_money(amount, cur)} over {_span(b['months'])}.")
 
 
+def _today_answer(facts: dict, question: str) -> tuple[str, bool]:
+    """Answers about the business as it is today (no plan), from facts["today"] only."""
+    q, t, cur = _norm(question), facts["today"], facts["business"]["currency"]
+
+    def has(*keys: str) -> bool:
+        return any(k in q for k in keys)
+
+    def cash() -> str:
+        n = t["cash_runs_out_of_10"]
+        below = " below zero" if t["lowest_cash_amount"] < 0 else ""
+        return (f"If you change nothing, your cash is lowest around month {t['lowest_cash_month']}, at about "
+                f"{_money(t['lowest_cash_amount'], cur)}{below}. It runs out in {n} of 10 futures.")
+
+    def profit() -> str:
+        verb = "keep" if t["profit_a_month"] >= 0 else "lose"
+        return (f"In a typical month you take in about {_money(t['sales_a_month'], cur)} and spend about "
+                f"{_money(t['costs_a_month'], cur)}, so you {verb} about {_money(t['profit_a_month'], cur)}.")
+
+    def watch() -> str:
+        if t["cash_runs_out_of_10"] >= 1:
+            return f"Keep an eye on your cash: it runs out in {t['cash_runs_out_of_10']} of 10 futures."
+        if t["profit_a_month"] < 0:
+            return f"You lose about {_money(t['profit_a_month'], cur)} in a typical month, so it is worth looking at your costs."
+        return f"Nothing worrying stands out. Your cash runs out in {t['cash_runs_out_of_10']} of 10 futures."
+
+    if q == _norm(CHIP_QUESTIONS[0]) or has("cash", "bank", "run out", "broke", "afford"):
+        return cash(), True
+    if q == _norm(CHIP_QUESTIONS[1]):
+        return profit() + " Try a change to see how it moves.", True
+    if q == _norm(CHIP_QUESTIONS[2]) or has("watch", "careful", "worry", "danger", "problem", "risk", "safe"):
+        return watch(), True
+    if has("profit", "earn", "make", "keep", "lose", "why", "happen", "explain"):
+        return profit(), True
+    return CANT_ANSWER, False
+
+
 def answer_with_match(facts: dict, question: str) -> tuple[str, bool]:
     """(answer, understood). Rule-based, from the facts only: it never invents a number. When it cannot tell,
     it says so kindly and the caller offers the suggestion chips."""
+    if not facts.get("scenarios") and "today" in facts:
+        return _today_answer(facts, question)
     q, b = _norm(question), facts["business"]
     s = _find(facts, question)
     words = b["customers_word"].lower()

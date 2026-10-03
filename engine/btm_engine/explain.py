@@ -272,3 +272,31 @@ def build_facts(base: BusinessBaseline, tpl: IndustryTemplate, scenarios: dict[s
         },
         "scenarios": scen_facts,
     }
+
+
+def build_today_facts(base: BusinessBaseline, tpl: IndustryTemplate, baseline_summary: dict, baseline_bands: dict,
+                      horizon: int, currency: str = "USD") -> dict[str, Any]:
+    """The facts for the Today page: how the business looks if nothing changes. Same shape as
+    `build_facts` with no scenarios, plus a "today" block. `baseline_summary` and `baseline_bands` are
+    the Monte Carlo summary and bands of the stored run's baseline. Numbers are rounded for display."""
+    r = round_display
+    facts = build_facts(base, tpl, {}, {"baseline": baseline_summary}, horizon, currency)
+    moments = key_moments(base, tpl, [], horizon)
+    month1 = month_one_summary(base, tpl)
+    profit = baseline_bands["profit"]
+    covered = base.cash / month1["costs"] if month1["costs"] > 0 else 0.0
+    facts["today"] = {
+        "sales_a_month": r(month1["sales"]),
+        "costs_a_month": r(month1["costs"]),
+        "profit_a_month": r(profit["p50"][0]),               # the coming month, most likely
+        "profit_a_month_bad_case": r(profit["p10"][0]),
+        "profit_a_month_good_case": r(profit["p90"][0]),
+        "profit_year_most_likely": r(baseline_summary.get("total_profit_p50", 0.0)),
+        "cash_now": r(base.cash),
+        "months_of_bills_covered": _whole(covered),          # how many months of costs the cash would pay
+        "lowest_cash_month": moments["lowest_cash"]["month"],
+        "lowest_cash_amount": r(moments["lowest_cash"]["amount"]),
+        "cash_runs_out_of_10": _tenths(baseline_summary.get("prob_cash_negative", 0.0)),
+        "profit_bad_case_year": r(baseline_summary.get("total_profit_p10", 0.0)),
+    }
+    return facts

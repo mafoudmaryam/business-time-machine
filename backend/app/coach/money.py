@@ -14,6 +14,9 @@ from .summary import build_summary
 MONEY_KEYS = {
     "profit_total", "profit_change", "amount", "lowest_cash_amount", "cash_today",
     "profit_bad_case", "profit_most_likely", "profit_good_case", "profit_change_most_likely",
+    # Today page
+    "sales_a_month", "costs_a_month", "profit_a_month", "profit_a_month_bad_case", "profit_a_month_good_case",
+    "profit_year_most_likely", "cash_now", "profit_bad_case_year",
 }
 
 
