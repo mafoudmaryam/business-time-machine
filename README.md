@@ -10,7 +10,7 @@ Describe a change, check the plan, and watch what could happen to your profit, c
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-TypeScript-61DAFB?logo=react&logoColor=black)
-![Tests](https://img.shields.io/badge/tests-501%20backend%20%C2%B7%20340%20frontend%20%C2%B7%20171%20engine-2F6F4F)
+![Tests](https://img.shields.io/badge/tests-501%20backend%20%C2%B7%20352%20frontend%20%C2%B7%20171%20engine-2F6F4F)
 ![Status](https://img.shields.io/badge/status-master's%20thesis%20project-8A4B2F)
 
 </div>
@@ -152,7 +152,7 @@ COACH_PROVIDER=ollama
 ```powershell
 cd backend;  .\.venv\Scripts\python.exe -m pytest      # 501 tests
 cd engine;   .\.venv\Scripts\python.exe -m pytest      # 171 tests
-cd frontend; npm test                                  # 340 tests
+cd frontend; npm test                                  # 352 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser:

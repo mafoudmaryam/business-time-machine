@@ -648,3 +648,24 @@ button.danger {
     padding-block: 12px;
   }
 }
+
+.continue-current {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 8px 0 20px;
+  padding: 14px 18px;
+  background: var(--card);
+  border: 2px solid var(--button);
+  border-radius: 12px;
+}
+
+.continue-current p {
+  margin: 0;
+  font-size: 16px;
+}
+
+.continue-current button {
+  min-height: 44px;
+}

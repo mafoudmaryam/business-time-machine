@@ -8,3 +8,7 @@ examples/output/
 node_modules/
 .dev-pids.json
 frontend/.photo-candidates/
+
+# database backups (they contain real data)
+*.db.backup
+*.db.bak

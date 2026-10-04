@@ -17,7 +17,7 @@ import { useAsync } from "../../hooks/useAsync";
 import { track } from "../../lib/events";
 import { DEFAULT_CURRENCY, formatMoney, formatUnit } from "../../lib/format";
 import { heroImage } from "../../lib/images";
-import { rememberBusiness } from "../../lib/session";
+import { getRememberedBusinessId, rememberBusiness } from "../../lib/session";
 import { describeStartingMonth } from "../../lib/startSummary";
 import { defaultBusinessName, toAnswers, validateAnswers, type AnswerDraft } from "../../lib/todayView";
 
@@ -62,6 +62,10 @@ export function StartPage() {
   const [failure, setFailure] = useState<string | null>(null);
   const [pickError, setPickError] = useState(false);
 
+  // The business that is open in this tab (if the server still has it) gets the big "Continue" button; the rest go in the list.
+  const openId = getRememberedBusinessId();
+  const current = existing.find((b) => b.id === openId) ?? null;
+  const others = existing.filter((b) => b.id !== current?.id);
   const industry = industries.data?.find((i) => i.id === industryId) ?? null;
   const noun = industry ? industry.display_name.toLowerCase() : "business";
   const who = industryId ? (WHO[industryId] ?? "customers") : "customers";
@@ -156,6 +160,16 @@ export function StartPage() {
 
       {step === 0 && (
         <>
+          {current && (
+            <section className="continue-current" aria-label="Carry on where you were">
+              <p>
+                <strong>{current.name}</strong> is open.
+              </p>
+              <button type="button" onClick={() => enter(current, "continue")}>
+                Continue with {current.name}
+              </button>
+            </section>
+          )}
           {industries.loading && <Spinner label="Loading business types…" />}
           <ErrorBanner message={industries.error} />
           {industries.data && (
@@ -306,12 +320,12 @@ export function StartPage() {
         )}
       </div>
 
-      {step === 0 && existing.length > 0 && (
+      {step === 0 && others.length > 0 && (
         <section className="continue-box" aria-labelledby="my-businesses">
           <h2 id="my-businesses">My businesses</h2>
           <p className="field-help">Already set one up? Pick it to carry on. Nothing is opened unless you choose it.</p>
           <ul>
-            {[...existing].reverse().map((b) => (
+            {[...others].reverse().map((b) => (
               <li key={b.id}>
                 <button type="button" className="secondary" onClick={() => enter(b, "continue")}>
                   Continue with {b.name}
