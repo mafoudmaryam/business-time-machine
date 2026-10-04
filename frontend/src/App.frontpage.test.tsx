@@ -164,3 +164,31 @@ describe("'New business' in the header menu", () => {
     expect(screen.queryByLabelText(/Customers on a normal day/)).toBeNull();
   });
 });
+
+describe("the Back button in the real app", () => {
+  it("from Today, Back returns to the start screen you came from", async () => {
+    const user = open("/");
+    await user.click(await screen.findByRole("button", { name: "Continue with noah" }));
+    await screen.findByRole("heading", { name: "Today at noah" });
+    await user.click(screen.getByRole("button", { name: "Go back" }));
+    expect(await screen.findByRole("heading", { name: FRONT_PAGE })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Go back" })).toBeNull(); // none on the start screen
+    expect(getRememberedBusinessId()).toBe(5); // going back changes nothing
+  });
+
+  it("with no earlier page (Today opened directly), Back goes to the start screen", async () => {
+    const user = open("/today");
+    await screen.findByRole("heading", { name: "Today at noah" });
+    await user.click(screen.getByRole("button", { name: "Go back" }));
+    expect(await screen.findByRole("heading", { name: FRONT_PAGE })).toBeTruthy();
+  });
+
+  it("the start screen has no Back button, but the form inside it keeps its own Back", async () => {
+    const user = open("/");
+    await user.click(await screen.findByRole("button", { name: "Café" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.queryByRole("button", { name: "Go back" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Back" })); // the form's own step Back
+    expect(await screen.findByRole("heading", { name: FRONT_PAGE })).toBeTruthy();
+  });
+});

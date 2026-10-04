@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { axe } from "vitest-axe";
@@ -96,14 +96,14 @@ describe("the menu", () => {
     const { user, panel } = await open();
     await user.click(panel.getByRole("button", { name: /^Noah's/ }));
     expect(getRememberedBusinessId()).toBe(2);
-    expect(screen.getByTestId("where").textContent).toBe("/today");
+    await waitFor(() => expect(screen.getByTestId("where").textContent).toBe("/today"));
     expect(screen.queryByRole("group", { name: "Your businesses" })).toBeNull();
   });
 
   it("New business goes to the start screen and changes nothing", async () => {
     const { user, panel } = await open();
     await user.click(panel.getByRole("button", { name: "New business" }));
-    expect(screen.getByTestId("where").textContent).toBe("/");
+    await waitFor(() => expect(screen.getByTestId("where").textContent).toBe("/"));
     expect(getRememberedBusinessId()).toBe(1); // still the same choice: the start screen only shows things
     expect(api.deleteBusiness).not.toHaveBeenCalled();
     expect(api.createSampleBusiness).not.toHaveBeenCalled();
@@ -114,8 +114,8 @@ describe("the menu", () => {
     const samples = panel.getByRole("group", { name: "Sample business" });
     await user.click(within(samples).getByRole("button", { name: "Bakery" }));
     expect(api.createSampleBusiness).toHaveBeenCalledWith("bakery", "USD");
-    expect(getRememberedBusinessId()).toBe(9);
-    expect(screen.getByTestId("where").textContent).toBe("/today");
+    await waitFor(() => expect(getRememberedBusinessId()).toBe(9));
+    await waitFor(() => expect(screen.getByTestId("where").textContent).toBe("/today"));
   });
 
   it("a sample that cannot be made says so and stays", async () => {
@@ -201,7 +201,7 @@ describe("deleting from the menu", () => {
     await user.click(await screen.findByRole("button", { name: "Delete" }));
     expect(api.deleteBusiness).toHaveBeenCalledWith(2);
     expect(getRememberedBusinessId()).toBe(1);
-    expect(screen.getByTestId("where").textContent).toBe("/compare");
+    await waitFor(() => expect(screen.getByTestId("where").textContent).toBe("/compare"));
     expect(screen.getByRole("status").textContent).toContain("Deleted “Noah's”.");
   });
 
@@ -212,8 +212,8 @@ describe("deleting from the menu", () => {
     await user.click(await screen.findByRole("button", { name: /Noah's/ }));
     await user.click(screen.getByRole("button", { name: "Delete Noah's" }));
     await user.click(await screen.findByRole("button", { name: "Delete" }));
-    expect(getRememberedBusinessId()).toBeNull();
-    expect(screen.getByTestId("where").textContent).toBe("/");
+    await waitFor(() => expect(getRememberedBusinessId()).toBeNull());
+    await waitFor(() => expect(screen.getByTestId("where").textContent).toBe("/"));
   });
 
   it("Undo after deleting the open business brings it back and opens it again", async () => {
@@ -224,7 +224,7 @@ describe("deleting from the menu", () => {
     await user.click(await screen.findByRole("button", { name: "Delete" }));
     await user.click(screen.getByRole("button", { name: "Undo" }));
     expect(api.restoreBusiness).toHaveBeenCalledWith(2);
-    expect(getRememberedBusinessId()).toBe(2);
-    expect(screen.getByTestId("where").textContent).toBe("/today");
+    await waitFor(() => expect(getRememberedBusinessId()).toBe(2));
+    await waitFor(() => expect(screen.getByTestId("where").textContent).toBe("/today"));
   });
 });

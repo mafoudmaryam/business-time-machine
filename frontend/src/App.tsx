@@ -1,5 +1,5 @@
 import { Route, Routes, useLocation } from "react-router-dom";
-import { AppNav } from "./components/AppNav";
+import { AppLayout } from "./components/AppLayout";
 import { BusinessSetupPage } from "./pages/BusinessSetup/BusinessSetupPage";
 import { ComparisonDashboardPage } from "./pages/Comparison/ComparisonDashboardPage";
 import { RunHistoryPage } from "./pages/RunHistory/RunHistoryPage";
@@ -13,26 +13,21 @@ function FrontPage() {
   return <StartPage key={useLocation().key} />;
 }
 
+/** Every page renders inside AppLayout, which adds the top bar and the "← Back" button. A new page only needs a Route here. */
 export function App() {
   return (
-    <>
-      <a href="#main" className="skip-link">
-        Skip to the page
-      </a>
-      <AppNav />
-      <main id="main" tabIndex={-1}>
-        <Routes>
-          {/* The front page is always the start screen. Opening it changes nothing. */}
-          <Route path="/" element={<FrontPage />} />
-          <Route path="/start" element={<FrontPage />} />
-          <Route path="/today" element={<TodayPage />} />
-          {/* The earlier pages keep their addresses; they now live under "Advanced" (and "Try a change"). */}
-          <Route path="/setup" element={<BusinessSetupPage />} />
-          <Route path="/scenarios" element={<ScenarioBuilderPage />} />
-          <Route path="/compare" element={<ComparisonDashboardPage />} />
-          <Route path="/history" element={<RunHistoryPage />} />
-        </Routes>
-      </main>
-    </>
+    <AppLayout>
+      <Routes>
+        {/* The front page is always the start screen. Opening it changes nothing. */}
+        <Route path="/" element={<FrontPage />} />
+        <Route path="/start" element={<FrontPage />} />
+        <Route path="/today" element={<TodayPage />} />
+        {/* The earlier pages keep their addresses; they now live under "Advanced" (and "Try a change"). */}
+        <Route path="/setup" element={<BusinessSetupPage />} />
+        <Route path="/scenarios" element={<ScenarioBuilderPage />} />
+        <Route path="/compare" element={<ComparisonDashboardPage />} />
+        <Route path="/history" element={<RunHistoryPage />} />
+      </Routes>
+    </AppLayout>
   );
 }

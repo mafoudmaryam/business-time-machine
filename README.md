@@ -10,7 +10,7 @@ Describe a change, check the plan, and watch what could happen to your profit, c
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-TypeScript-61DAFB?logo=react&logoColor=black)
-![Tests](https://img.shields.io/badge/tests-501%20backend%20%C2%B7%20352%20frontend%20%C2%B7%20171%20engine-2F6F4F)
+![Tests](https://img.shields.io/badge/tests-501%20backend%20%C2%B7%20385%20frontend%20%C2%B7%20171%20engine-2F6F4F)
 ![Status](https://img.shields.io/badge/status-master's%20thesis%20project-8A4B2F)
 
 </div>
@@ -32,6 +32,7 @@ Most small food businesses make big choices on instinct: raise prices, hire a ba
 |---|---|
 | **A simple start** | Pick a business type and answer four questions (customers on a normal day, average spend, rent, people who work there), or try a one-click sample café, restaurant or bakery. Everything else is filled in with typical numbers, and a "What we assumed" note shows each guess so you can change it. |
 | **The coach speaks first** | The Today page opens with 2 to 4 friendly sentences about your business as it is, three tiles (what you keep each month, your safety net, your lowest cash point) and a 12-month chart. A short 3-step tour appears the first time. |
+| **Always a way back** | Every page except the start screen has a "← Back" button under the top bar. It returns to the page you were just on, or to the page one level up if you opened a link directly. The browser's own Back button keeps working. |
 | **Switch, delete, undo** | A business menu in the header lets you switch between your businesses, start a new one or try a sample. You can delete a scenario, a run or a whole business; the box says what else goes with it, and an Undo message stays for 8 seconds. Nothing is erased for good (it is hidden), and the AI logs are always kept. |
 | **Say it in your own words** | Type "raise prices 10% in March and hire a baker for the summer". The app turns it into editable steps with your own words shown beside each one, and asks a question when something is missing. |
 | **You stay in control** | Nothing is simulated until you have confirmed every step (one by one, or with "Confirm all"). |
@@ -152,7 +153,7 @@ COACH_PROVIDER=ollama
 ```powershell
 cd backend;  .\.venv\Scripts\python.exe -m pytest      # 501 tests
 cd engine;   .\.venv\Scripts\python.exe -m pytest      # 171 tests
-cd frontend; npm test                                  # 352 tests
+cd frontend; npm test                                  # 385 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser:
