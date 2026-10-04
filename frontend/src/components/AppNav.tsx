@@ -1,6 +1,7 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { ADVANCED_LINKS } from "../lib/navLinks";
 import { getRememberedBusinessId } from "../lib/session";
+import { BusinessSwitcher } from "./BusinessSwitcher";
 
 const ADVANCED_PATHS = ["/compare", "/history", "/setup"];
 
@@ -12,7 +13,8 @@ export function AppNav() {
 
   return (
     <nav className="appnav" aria-label="Main">
-      <Link to="/today" className="appnav-title">
+      {/* The name always takes you to the start screen. Opening it never changes or deletes anything. */}
+      <Link to="/" className="appnav-title">
         Business Time Machine
       </Link>
       <ul className="appnav-links">
@@ -45,6 +47,7 @@ export function AppNav() {
           </details>
         </li>
       </ul>
+      <BusinessSwitcher />
     </nav>
   );
 }

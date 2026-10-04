@@ -70,6 +70,7 @@ async function fillAnswers(user: ReturnType<typeof userEvent.setup>) {
 beforeEach(() => {
   vi.resetAllMocks();
   window.localStorage.clear();
+  window.sessionStorage.clear();
   vi.mocked(api.listIndustries).mockResolvedValue([industry("cafe", "Café"), industry("restaurant", "Restaurant"), industry("bakery", "Bakery")]);
   vi.mocked(api.listBusinesses).mockResolvedValue([]);
   vi.mocked(api.quickBaseline).mockResolvedValue(QUICK);
@@ -227,12 +228,55 @@ describe("start screen: the four questions", () => {
   });
 });
 
-describe("start screen: coming back", () => {
-  it("offers to continue with a business that already exists", async () => {
-    vi.mocked(api.listBusinesses).mockResolvedValue([BUSINESS({ id: 3, name: "Noah's" })]);
+describe("start screen: businesses that already exist", () => {
+  const MANY = [
+    BUSINESS({ id: 1, name: "Demo Cafe" }),
+    BUSINESS({ id: 2, name: "Noah's" }),
+    BUSINESS({ id: 3, name: "Sample café", is_sample: true, setup_source: "sample" }),
+  ];
+
+  it("lists them all under \"My businesses\", but opens none of them by itself", async () => {
+    vi.mocked(api.listBusinesses).mockResolvedValue(MANY);
+    mount();
+    expect(await screen.findByRole("heading", { name: "My businesses" })).toBeTruthy();
+    for (const name of ["Demo Cafe", "Noah's", "Sample café"]) {
+      expect(screen.getByRole("button", { name: `Continue with ${name}` })).toBeTruthy();
+    }
+    expect(screen.getByRole("heading", { name: "What kind of business do you run?" })).toBeTruthy();
+    expect(screen.queryByText("Today page")).toBeNull();
+    expect(getRememberedBusinessId()).toBeNull();
+    expect(api.createSampleBusiness).not.toHaveBeenCalled();
+    expect(api.createQuickBusiness).not.toHaveBeenCalled();
+  });
+
+  it("puts the new-business choices first and the list underneath", async () => {
+    vi.mocked(api.listBusinesses).mockResolvedValue(MANY);
+    mount();
+    const list = await screen.findByRole("heading", { name: "My businesses" });
+    const cafe = screen.getByRole("button", { name: "Café" });
+    const next = screen.getByRole("button", { name: "Next" });
+    expect(cafe.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(next.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("marks a sample in the list", async () => {
+    vi.mocked(api.listBusinesses).mockResolvedValue(MANY);
+    mount();
+    await screen.findByRole("heading", { name: "My businesses" });
+    expect(screen.getAllByText("Sample business")).toHaveLength(1);
+  });
+
+  it("opens one only when it is picked, and remembers that choice", async () => {
+    vi.mocked(api.listBusinesses).mockResolvedValue(MANY);
     const { user } = mount();
     await user.click(await screen.findByRole("button", { name: "Continue with Noah's" }));
     expect(await screen.findByText("Today page")).toBeTruthy();
-    expect(getRememberedBusinessId()).toBe(3);
+    expect(getRememberedBusinessId()).toBe(2);
+  });
+
+  it("shows no list at all when there are none", async () => {
+    mount();
+    await screen.findByRole("button", { name: "Café" });
+    expect(screen.queryByRole("heading", { name: "My businesses" })).toBeNull();
   });
 });

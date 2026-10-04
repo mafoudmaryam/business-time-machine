@@ -727,3 +727,54 @@ export interface UiEventIn {
 export function logEvents(sessionId: string, businessId: number | null, events: UiEventIn[]): Promise<{ stored: number }> {
   return request("/events", { method: "POST", body: JSON.stringify({ session_id: sessionId, business_id: businessId, events }) });
 }
+
+// ---------- delete and undo (soft delete on the server) ----------
+
+export interface DeletedOut {
+  id: number;
+  kind: "business" | "scenario" | "run";
+  name: string;
+  deleted_at: string;
+}
+
+export interface ScenarioImpact {
+  decisions: number;
+  runs: number;
+}
+
+export interface BusinessImpact {
+  scenarios: number;
+  runs: number;
+}
+
+export function getScenarioImpact(id: number): Promise<ScenarioImpact> {
+  return request(`/scenarios/${id}/impact`);
+}
+
+export function getBusinessImpact(id: number): Promise<BusinessImpact> {
+  return request(`/businesses/${id}/impact`);
+}
+
+export function deleteScenario(id: number): Promise<DeletedOut> {
+  return request(`/scenarios/${id}`, { method: "DELETE" });
+}
+
+export function restoreScenario(id: number): Promise<ScenarioOut> {
+  return request(`/scenarios/${id}/restore`, { method: "POST" });
+}
+
+export function deleteRun(id: number): Promise<DeletedOut> {
+  return request(`/simulation_runs/${id}`, { method: "DELETE" });
+}
+
+export function restoreRun(id: number): Promise<SimulationRunSummaryOut> {
+  return request(`/simulation_runs/${id}/restore`, { method: "POST" });
+}
+
+export function deleteBusiness(id: number): Promise<DeletedOut> {
+  return request(`/businesses/${id}`, { method: "DELETE" });
+}
+
+export function restoreBusiness(id: number): Promise<BusinessOut> {
+  return request(`/businesses/${id}/restore`, { method: "POST" });
+}

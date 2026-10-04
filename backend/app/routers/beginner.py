@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from .. import engine_bridge, models, schemas, settings, today
+from .. import engine_bridge, lookup, models, schemas, settings, today
 from ..coach import today as today_note
 from ..database import get_db
 
@@ -23,7 +23,7 @@ def get_config():
 
 
 def _business(db: Session, business_id: int) -> models.Business:
-    business = db.get(models.Business, business_id)
+    business = lookup.business(db, business_id)
     if business is None:
         raise HTTPException(status_code=404, detail="business not found")
     if business.baseline is None:
@@ -93,7 +93,7 @@ def change_numbers(business_id: int, payload: schemas.BaselinePatch, db: Session
 @router.post("/events", response_model=schemas.EventsOut, status_code=201)
 def log_events(payload: schemas.EventsIn, db: Session = Depends(get_db)):
     """Things the person did in the app, for the study. Small, structured, no free text."""
-    business = db.get(models.Business, payload.business_id) if payload.business_id is not None else None
+    business = lookup.business(db, payload.business_id)
     participant = business.participant_code if business is not None else None
     for event in payload.events:
         if event.payload is not None and len(str(event.payload)) > MAX_EVENT_PAYLOAD_CHARS:

@@ -112,3 +112,35 @@ def test_the_real_development_database_survives_a_round_trip(tmp_path, monkeypat
     command.upgrade(cfg, "head")
     assert counts() == before
     assert os.path.getsize(real) > 0             # the original was never touched
+
+
+# ---------- soft delete (f1b7d3a9c2e4) ----------
+
+SOFT = "f1b7d3a9c2e4"
+
+
+def test_soft_delete_migration_adds_columns_keeps_data_and_goes_back(tmp_path, monkeypatch):
+    path = tmp_path / "old.db"
+    _seed_old_database(path, monkeypatch)
+    cfg = _config(f"sqlite:///{path}", monkeypatch)
+    command.upgrade(cfg, AFTER)
+    with sqlite3.connect(path) as con:
+        con.execute("INSERT INTO ai_interactions (simulation_run_id, kind, provider, attempt, prompt, created_at) "
+                    "VALUES (1, 'coach', 'template', 1, 'p', '2026-10-01 10:00:00')")
+        con.commit()
+
+    command.upgrade(cfg, SOFT)
+    for table in ("businesses", "scenarios", "simulation_runs"):
+        assert "deleted_at" in _columns(path, table)
+    assert {"former_run_id", "former_business_id", "former_interpretation_id"} <= _columns(path, "ai_interactions")
+    with sqlite3.connect(path) as con:
+        assert con.execute("SELECT name, deleted_at FROM businesses").fetchall() == [("Old cafe", None)]
+        assert con.execute("SELECT simulation_run_id, former_run_id FROM ai_interactions").fetchall() == [(1, None)]
+
+    command.downgrade(cfg, AFTER)
+    for table in ("businesses", "scenarios", "simulation_runs"):
+        assert "deleted_at" not in _columns(path, table)
+    assert "former_run_id" not in _columns(path, "ai_interactions")
+    with sqlite3.connect(path) as con:
+        assert con.execute("SELECT name FROM businesses").fetchall() == [("Old cafe",)]
+        assert con.execute("SELECT simulation_run_id FROM ai_interactions").fetchall() == [(1,)]

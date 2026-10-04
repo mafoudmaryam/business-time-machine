@@ -27,6 +27,8 @@ class Business(Base):
     # Study mode (not built yet; the columns are ready so it needs no rewrite later).
     participant_code = Column(String, nullable=True, index=True)
     study_condition = Column(String, nullable=True)
+    # Soft delete: a deleted business (and everything in it) is hidden everywhere but kept until purged on purpose.
+    deleted_at = Column(DateTime, nullable=True)
 
     snapshots = relationship(
         "BusinessSnapshot", back_populates="business", cascade="all, delete-orphan",
@@ -79,6 +81,7 @@ class Scenario(Base):
     parent_scenario_id = Column(Integer, ForeignKey("scenarios.id"), nullable=True)
     name = Column(String, nullable=False)
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
+    deleted_at = Column(DateTime, nullable=True)      # soft delete (see Business.deleted_at)
 
     business = relationship("Business", back_populates="scenarios")
     decisions = relationship("Decision", back_populates="scenario", cascade="all, delete-orphan")
@@ -125,6 +128,7 @@ class SimulationRun(Base):
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
     # compare (a normal comparison run) | today (the baseline-only run behind the Today page)
     kind = Column(String, nullable=False, default="compare", server_default="compare")
+    deleted_at = Column(DateTime, nullable=True)      # soft delete (see Business.deleted_at)
 
     business = relationship("Business", back_populates="simulation_runs")
     results = relationship("SimulationResult", back_populates="run", cascade="all, delete-orphan")
@@ -169,6 +173,11 @@ class AiInteraction(Base):
     grounding = Column(JSON, nullable=True)            # {"passed": bool, "unmatched": [numbers]}
     error = Column(Text, nullable=True)
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
+    # Thesis data outlives the things it was about. When a run, business or reading is purged for good, the link
+    # above is cleared and its old id is kept here as plain numbers (no foreign key, so nothing can block the purge).
+    former_run_id = Column(Integer, nullable=True)
+    former_business_id = Column(Integer, nullable=True)
+    former_interpretation_id = Column(Integer, nullable=True)
 
 
 class Interpretation(Base):

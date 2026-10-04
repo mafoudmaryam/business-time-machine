@@ -27,7 +27,7 @@ function mount(path = "/today") {
     <MemoryRouter initialEntries={[path]}>
       <Routes>
         <Route path="/today" element={<TodayPage />} />
-        <Route path="/start" element={<p>Start page</p>} />
+        <Route path="/" element={<p>Start page</p>} />
         <Route path="/scenarios" element={<p>Builder page</p>} />
       </Routes>
     </MemoryRouter>,
@@ -38,6 +38,7 @@ function mount(path = "/today") {
 beforeEach(() => {
   vi.resetAllMocks();
   window.localStorage.clear();
+  window.sessionStorage.clear();
   config.coachEnabled = true;
   markTourSeen(); // most tests are not about the tour
   rememberBusiness(1);
@@ -91,11 +92,21 @@ describe("Today: the coach speaks first", () => {
     expect(screen.queryByRole("button", { name: "Ask a question" })).toBeNull();
   });
 
-  it("says plainly when a sample business is shown", async () => {
+  it("labels a sample business with a tag and a way to start with your own numbers", async () => {
     vi.mocked(api.getToday).mockResolvedValue(makeToday({ is_sample: true, name: "Sample café" }));
+    const { user } = mount();
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(within(heading).getByText("Sample business")).toBeTruthy();
+    expect(screen.getByText(/sample café: example numbers, not a real business/)).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Start with my own numbers" }));
+    expect(await screen.findByText("Start page")).toBeTruthy();
+  });
+
+  it("shows no sample tag for a real business", async () => {
     mount();
-    expect(await screen.findByText(/sample café: example numbers, not a real business/)).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Use my own numbers" }).getAttribute("href")).toBe("/start");
+    await screen.findByRole("heading", { name: "Today at My café" });
+    expect(screen.queryByText("Sample business")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Start with my own numbers" })).toBeNull();
   });
 
   it("shows the disclaimer", async () => {
@@ -271,12 +282,19 @@ describe("Today: finding the business", () => {
     expect(api.getToday).not.toHaveBeenCalled();
   });
 
-  it("opens the business named in the address and remembers it", async () => {
+  it("does not open a business just because an address names one", async () => {
     forgetBusiness();
     mount("/today?business=7");
-    await screen.findByRole("heading", { name: "Today at My café" });
-    expect(api.getToday).toHaveBeenCalledWith(7);
-    expect(getRememberedBusinessId()).toBe(1); // remembers the one it actually showed (the fixture's id)
+    expect(await screen.findByText("Start page")).toBeTruthy();
+    expect(api.getToday).not.toHaveBeenCalled();
+  });
+
+  it("never opens numbers left over from an older visit (stored for good by an older version)", async () => {
+    forgetBusiness();
+    window.localStorage.setItem("btm.businessId", "6");
+    mount();
+    expect(await screen.findByText("Start page")).toBeTruthy();
+    expect(api.getToday).not.toHaveBeenCalled();
   });
 
   it("shows a friendly message, with Try again and Start fresh, when it cannot load", async () => {

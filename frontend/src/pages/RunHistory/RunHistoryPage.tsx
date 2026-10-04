@@ -4,6 +4,7 @@ import { getSimulationRun, listBusinesses, listIndustries, listSimulationRuns, t
 import { CoachCard } from "../../components/CoachCard";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
+import { useDeleteFlow } from "../../components/useDeleteFlow";
 import { useAsync } from "../../hooks/useAsync";
 import { DEFAULT_CURRENCY, capitalize } from "../../lib/format";
 import { displayScenarioName } from "../../lib/scenarioLabel";
@@ -28,6 +29,7 @@ function buildCharts(customerNoun: string): { metric: string; title: string; too
 }
 
 export function RunHistoryPage() {
+  const deleteFlow = useDeleteFlow();
   const [params, setParams] = useSearchParams();
   const businessId = params.get("business") ? Number(params.get("business")) : null;
 
@@ -118,6 +120,25 @@ export function RunHistoryPage() {
                     <td>
                       <button type="button" className="link-button" onClick={() => openRun(r.id)}>
                         {openingId === r.id ? "Opening…" : "Reopen"}
+                      </button>{" "}
+                      <button
+                        type="button"
+                        className="link-button"
+                        aria-label={`Delete run #${r.id}`}
+                        onClick={() =>
+                          deleteFlow.ask({
+                            kind: "run",
+                            id: r.id,
+                            scenarioNames: r.scenario_names,
+                            onDone: () => {
+                              if (openedRun?.id === r.id) setOpenedRun(null);
+                              runs.reload();
+                            },
+                            onUndone: () => runs.reload(),
+                          })
+                        }
+                      >
+                        Delete
                       </button>
                     </td>
                   </tr>
@@ -153,6 +174,7 @@ export function RunHistoryPage() {
           )}
         </>
       )}
+      {deleteFlow.dialog}
     </div>
   );
 }

@@ -15,11 +15,13 @@ interface Props {
   onToggle: (id: number) => void;
   /** Marks the scenario's decisions confirmed on the server; the page then ticks the card. */
   onConfirm: (id: number) => Promise<void>;
+  /** Asks to delete a scenario (the page shows the "Are you sure?" box and the Undo message). */
+  onDelete?: (scenario: ScenarioOut) => void;
 }
 
 /** Scenario cards for the Compare page. Choosing is one tick; a scenario whose decisions the owner has not
  * confirmed yet shows "Check & add", which lists them in plain words so they can confirm with one click. */
-export function ScenarioPicker({ scenarios, businessId, staffNoun, currency, selectedIds, onToggle, onConfirm }: Props) {
+export function ScenarioPicker({ scenarios, businessId, staffNoun, currency, selectedIds, onToggle, onConfirm, onDelete }: Props) {
   const [showOlder, setShowOlder] = useState(false);
   const [checking, setChecking] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
@@ -75,6 +77,16 @@ export function ScenarioPicker({ scenarios, businessId, staffNoun, currency, sel
               }}
             >
               Check &amp; add
+            </button>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              className="link-button pick-delete"
+              aria-label={`Delete ${s.name}`}
+              onClick={() => onDelete(s)}
+            >
+              Delete
             </button>
           )}
         </div>

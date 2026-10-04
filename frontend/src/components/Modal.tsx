@@ -9,11 +9,13 @@ interface ModalProps {
   children: ReactNode;
   /** A short label for the close button; "Close" by default. */
   closeLabel?: string;
+  /** For dialogs that already have their own Cancel button. Esc still closes. */
+  hideClose?: boolean;
 }
 
 /** A small dialog that keeps the keyboard inside it: focus moves in when it opens, Tab and Shift+Tab stay inside,
  * Esc closes it, and focus goes back to whatever opened it. */
-export function Modal({ title, onClose, children, closeLabel = "Close" }: ModalProps) {
+export function Modal({ title, onClose, children, closeLabel = "Close", hideClose = false }: ModalProps) {
   const titleId = useId();
   const box = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
@@ -69,9 +71,11 @@ export function Modal({ title, onClose, children, closeLabel = "Close" }: ModalP
       >
         <div className="modal-head">
           <h2 id={titleId}>{title}</h2>
-          <button type="button" className="link-button" onClick={() => onCloseRef.current()}>
-            {closeLabel}
-          </button>
+          {!hideClose && (
+            <button type="button" className="link-button" onClick={() => onCloseRef.current()}>
+              {closeLabel}
+            </button>
+          )}
         </div>
         {children}
       </div>

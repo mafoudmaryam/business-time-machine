@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { getToday, getTodayNote, type TodayNote, type TodayOut } from "../../api";
 import { AskCoach } from "../../components/AskCoach";
 import { useConfig } from "../../components/config";
@@ -77,6 +77,7 @@ function CoachNote({ note, businessId, onAsk }: { note: TodayNote; businessId: n
 
 function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
   const config = useConfig();
+  const navigate = useNavigate();
   const [asking, setAsking] = useState(false);
   const [touring, setTouring] = useState(() => !tourSeen());
   const industryName = industryWord(today.industry);
@@ -89,12 +90,17 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
 
   return (
     <div className="page today-page">
-      <h1>Today at {today.name}</h1>
+      <h1>
+        Today at {today.name}
+        {today.is_sample && <span className="sample-tag">Sample business</span>}
+      </h1>
       {today.is_sample && (
-        <p className="sample-banner" role="note">
-          This is a sample {industryName}: example numbers, not a real business.{" "}
-          <Link to="/start">Use my own numbers</Link>
-        </p>
+        <div className="sample-banner">
+          <p>This is a sample {industryName}: example numbers, not a real business.</p>
+          <button type="button" onClick={() => navigate("/")}>
+            Start with my own numbers
+          </button>
+        </div>
       )}
 
       {coachOn && today.note && (
@@ -148,13 +154,12 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
 }
 
 export function TodayPage() {
-  const [params] = useSearchParams();
   const navigate = useNavigate();
-  const fromUrl = Number(params.get("business"));
-  const id = Number.isInteger(fromUrl) && fromUrl > 0 ? fromUrl : getRememberedBusinessId();
+  // Only a business the owner chose in this visit. Never "the first one in the database".
+  const id = getRememberedBusinessId();
   const today = useAsync(() => (id ? getToday(id) : Promise.reject(new Error("no business"))), [id]);
 
-  if (!id) return <Navigate to="/start" replace />;
+  if (!id) return <Navigate to="/" replace />;
   if (today.loading && !today.data) {
     return (
       <div className="page">
@@ -176,7 +181,7 @@ export function TodayPage() {
             className="secondary"
             onClick={() => {
               forgetBusiness();
-              navigate("/start");
+              navigate("/");
             }}
           >
             Start fresh

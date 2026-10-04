@@ -14,6 +14,7 @@ import {
 } from "../../api";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
+import { useDeleteFlow } from "../../components/useDeleteFlow";
 import { useAsync } from "../../hooks/useAsync";
 import type { ScenarioPrefill } from "../../lib/coachIdea";
 import { DEFAULT_CURRENCY } from "../../lib/format";
@@ -28,6 +29,7 @@ function scenarioLabel(s: ScenarioOut): string {
 }
 
 export function ScenarioBuilderPage() {
+  const deleteFlow = useDeleteFlow();
   const [params, setParams] = useSearchParams();
   const businessId = params.get("business") ? Number(params.get("business")) : null;
 
@@ -219,6 +221,22 @@ export function ScenarioBuilderPage() {
                     <button type="button" className="link-button" onClick={() => duplicateAsNewVersion(s)}>
                       Duplicate as new version
                     </button>
+                    <button
+                      type="button"
+                      className="link-button"
+                      aria-label={`Delete ${s.name}`}
+                      onClick={() =>
+                        deleteFlow.ask({
+                          kind: "scenario",
+                          id: s.id,
+                          name: s.name,
+                          onDone: () => scenarios.reload(),
+                          onUndone: () => scenarios.reload(),
+                        })
+                      }
+                    >
+                      Delete
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -316,6 +334,7 @@ export function ScenarioBuilderPage() {
           </section>
         </>
       )}
+      {deleteFlow.dialog}
     </div>
   );
 }

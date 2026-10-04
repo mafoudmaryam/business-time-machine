@@ -10,7 +10,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from .. import models, schemas, settings
+from .. import models, schemas, settings, lookup
 from ..database import get_db
 from ..interpret import service
 
@@ -33,7 +33,7 @@ def _get(db: Session, interpretation_id: int) -> models.Interpretation:
 
 @router.post("/businesses/{business_id}/interpret", response_model=schemas.InterpretationOut)
 def interpret(business_id: int, payload: schemas.InterpretIn, db: Session = Depends(get_db)):
-    business = db.get(models.Business, business_id)
+    business = lookup.business(db, business_id)
     if business is None:
         raise HTTPException(status_code=404, detail="business not found")
     try:

@@ -9,9 +9,17 @@
     doesn't intercept local traffic. If an old uvicorn (or anything else) is
     still holding port 8000, it's stopped first.
 
-    Run from the repo root:  .\start.ps1
+    With -TempDb the backend uses a brand-new throwaway database (a file in your
+    temp folder, tables created by "alembic upgrade head") instead of backend\btm.db.
+    Use it for every browser walkthrough or experiment, so test data never lands
+    in your real development database.
+
+    Run from the repo root:  .\start.ps1            (your real dev database)
+                             .\start.ps1 -TempDb     (throwaway database)
     Stop both servers with:  .\stop.ps1
 #>
+
+param([switch]$TempDb)
 
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
@@ -29,7 +37,15 @@ Stop-PortListener -Port 8000
 
 $env:NO_PROXY = "localhost,127.0.0.1"
 
-$backendCmd = "`$env:NO_PROXY = 'localhost,127.0.0.1'; Set-Location '$root\backend'; . .\.venv\Scripts\Activate.ps1; uvicorn app.main:app --reload --port 8000"
+$dbSetup = ""
+if ($TempDb) {
+    $dbFile = Join-Path $env:TEMP ("btm-walkthrough-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".db")
+    $dbUrl = "sqlite:///" + ($dbFile -replace "\\", "/")
+    $dbSetup = "`$env:DATABASE_URL = '$dbUrl'; alembic upgrade head; "
+    Write-Host "TEMPORARY DATABASE: $dbFile  (backend\btm.db is not used and will not be touched)" -ForegroundColor Yellow
+}
+
+$backendCmd = "`$env:NO_PROXY = 'localhost,127.0.0.1'; Set-Location '$root\backend'; . .\.venv\Scripts\Activate.ps1; " + $dbSetup + "uvicorn app.main:app --reload --port 8000"
 $frontendCmd = "`$env:NO_PROXY = 'localhost,127.0.0.1'; Set-Location '$root\frontend'; npm run dev"
 
 $backendProc = Start-Process powershell -ArgumentList "-NoExit", "-ExecutionPolicy", "Bypass", "-Command", $backendCmd -PassThru

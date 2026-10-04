@@ -156,20 +156,6 @@ export function StartPage() {
 
       {step === 0 && (
         <>
-          {existing.length > 0 && (
-            <div className="continue-box">
-              <p>Welcome back. Pick up where you left off:</p>
-              <ul>
-                {existing.slice(-3).reverse().map((b) => (
-                  <li key={b.id}>
-                    <button type="button" className="secondary" onClick={() => enter(b, "continue")}>
-                      Continue with {b.name}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
           {industries.loading && <Spinner label="Loading business types…" />}
           <ErrorBanner message={industries.error} />
           {industries.data && (
@@ -319,6 +305,23 @@ export function StartPage() {
           </button>
         )}
       </div>
+
+      {step === 0 && existing.length > 0 && (
+        <section className="continue-box" aria-labelledby="my-businesses">
+          <h2 id="my-businesses">My businesses</h2>
+          <p className="field-help">Already set one up? Pick it to carry on. Nothing is opened unless you choose it.</p>
+          <ul>
+            {[...existing].reverse().map((b) => (
+              <li key={b.id}>
+                <button type="button" className="secondary" onClick={() => enter(b, "continue")}>
+                  Continue with {b.name}
+                </button>
+                {b.is_sample && <span className="sample-tag">Sample business</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

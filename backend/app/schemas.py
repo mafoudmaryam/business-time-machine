@@ -522,3 +522,27 @@ class ConfigOut(BaseModel):
     coach_enabled: bool
     coach_mode: Optional[str] = None          # only when COACH_SHOW_MODE=true
     study_mode: bool = False                  # reserved for the study release
+
+
+# ---------- delete / undo ----------
+
+
+class DeletedOut(BaseModel):
+    """DELETE /... -- what was hidden, so the front end can say so and offer "Undo"."""
+
+    id: int
+    kind: Literal["business", "scenario", "run"]
+    name: str
+    deleted_at: dt.datetime
+
+
+class ScenarioImpact(BaseModel):
+    """What deleting a scenario also takes with it: its steps. Runs that used it keep their saved results."""
+
+    decisions: int
+    runs: int
+
+
+class BusinessImpact(BaseModel):
+    scenarios: int
+    runs: int

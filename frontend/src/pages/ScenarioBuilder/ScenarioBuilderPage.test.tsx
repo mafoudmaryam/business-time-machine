@@ -15,6 +15,9 @@ vi.mock("../../api", async (importOriginal) => {
     interpretText: vi.fn(),
     createScenario: vi.fn(),
     logInterpretOutcome: vi.fn(),
+    getScenarioImpact: vi.fn(),
+    deleteScenario: vi.fn(),
+    restoreScenario: vi.fn(),
   };
 });
 
@@ -277,5 +280,48 @@ describe("ScenarioBuilderPage: describe it in your own words", () => {
       await user.keyboard("{Enter}");
       expect(screen.getByText("2 steps · 2 confirmed")).toBeTruthy();
     });
+  });
+});
+
+
+describe("ScenarioBuilderPage: deleting a scenario (Advanced list)", () => {
+  const existing: api.ScenarioOut = {
+    id: 5, business_id: 1, name: "Raise prices", parent_scenario_id: null, parent_scenario_name: null, created_at: "x",
+    decisions: [{ id: 1, type: "price", start_month: 3, value: 10, unit: "percent", extra: {}, source: "user", confirmed: true }],
+  };
+
+  beforeEach(() => {
+    vi.resetAllMocks();
+    vi.mocked(api.listBusinesses).mockResolvedValue([
+      { id: 1, name: "Sunrise Bakery", industry: "bakery", currency: "USD", created_at: "2026-01-01", setup_source: "full", is_sample: false, baseline: { id: 1, created_at: "2026-01-01", assumed_fields: null, ...baseline } },
+    ]);
+    vi.mocked(api.listIndustries).mockResolvedValue([
+      { id: "bakery", display_name: "Bakery", customer_noun: "regulars", staff_noun: "baker", capacity_label: "ovens", default_baseline: baseline, field_labels: {} },
+    ]);
+    vi.mocked(api.listScenarios).mockResolvedValue([existing]);
+    vi.mocked(api.getScenarioImpact).mockResolvedValue({ decisions: 1, runs: 0 });
+    vi.mocked(api.deleteScenario).mockResolvedValue({ id: 5, kind: "scenario", name: "Raise prices", deleted_at: "x" });
+  });
+
+  it("asks first, then deletes and refreshes the list", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(await screen.findByRole("button", { name: "Delete Raise prices" }));
+    const box = await screen.findByRole("dialog", { name: "Delete “Raise prices”?" });
+    expect(within(box).getByRole("button", { name: "Cancel" })).toBeTruthy();
+    expect(api.deleteScenario).not.toHaveBeenCalled();
+    vi.mocked(api.listScenarios).mockResolvedValue([]);
+    await user.click(within(box).getByRole("button", { name: "Delete" }));
+    expect(api.deleteScenario).toHaveBeenCalledWith(5);
+    expect(await screen.findByText("No scenarios yet.")).toBeTruthy();
+  });
+
+  it("Cancel leaves it alone", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(await screen.findByRole("button", { name: "Delete Raise prices" }));
+    await user.click(await screen.findByRole("button", { name: "Cancel" }));
+    expect(api.deleteScenario).not.toHaveBeenCalled();
+    expect(screen.getByText("Raise prices")).toBeTruthy();
   });
 });

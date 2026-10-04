@@ -13,7 +13,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from .. import models, schemas
+from .. import models, schemas, lookup
 from ..coach import service
 from ..database import get_db
 
@@ -21,7 +21,7 @@ router = APIRouter(tags=["coach"])
 
 
 def _get_run(db: Session, run_id: int) -> models.SimulationRun:
-    run = db.get(models.SimulationRun, run_id)
+    run = lookup.run(db, run_id)
     if run is None:
         raise HTTPException(status_code=404, detail="simulation run not found")
     return run

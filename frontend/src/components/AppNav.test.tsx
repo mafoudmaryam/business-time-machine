@@ -1,11 +1,21 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as api from "../api";
 import { rememberBusiness } from "../lib/session";
 import { AppNav } from "./AppNav";
 
-beforeEach(() => window.localStorage.clear());
+vi.mock("../api", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api")>();
+  return { ...actual, listBusinesses: vi.fn() };
+});
+
+beforeEach(() => {
+  window.localStorage.clear();
+  window.sessionStorage.clear();
+  vi.mocked(api.listBusinesses).mockResolvedValue([]);
+});
 
 function nav(path = "/today") {
   render(
@@ -49,10 +59,16 @@ describe("AppNav", () => {
     expect(screen.getByRole("link", { name: "Try a change" }).className).not.toContain("active");
   });
 
-  it("the title takes you to Today", async () => {
+  it("the title always takes you to the start screen, whatever is open", async () => {
+    rememberBusiness(4);
     const user = userEvent.setup();
     nav("/compare");
-    expect(screen.getByRole("link", { name: "Business Time Machine" }).getAttribute("href")).toBe("/today");
+    expect(screen.getByRole("link", { name: "Business Time Machine" }).getAttribute("href")).toBe("/");
     await user.click(screen.getByText("Advanced"));
+  });
+
+  it("has the business menu in the header", async () => {
+    nav();
+    expect(await screen.findByRole("button", { name: /Choose a business/ })).toBeTruthy();
   });
 });

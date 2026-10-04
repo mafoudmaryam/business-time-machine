@@ -35,17 +35,22 @@ function remove(store: Store, key: string): void {
   }
 }
 
+/** The business the owner chose in THIS tab (by finishing the four questions, trying a sample, or picking one from
+ * "My businesses"). It is kept only for this visit: a new tab or a new browser session starts at the start screen, so
+ * nobody is ever dropped into numbers they did not choose. An older version kept it for good, so that is cleared. */
 export function getRememberedBusinessId(): number | null {
-  const raw = read("local", BUSINESS_KEY);
+  remove("local", BUSINESS_KEY);
+  const raw = read("session", BUSINESS_KEY);
   const id = raw === null ? NaN : Number(raw);
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
 export function rememberBusiness(id: number): void {
-  write("local", BUSINESS_KEY, String(id));
+  write("session", BUSINESS_KEY, String(id));
 }
 
 export function forgetBusiness(): void {
+  remove("session", BUSINESS_KEY);
   remove("local", BUSINESS_KEY);
 }
 

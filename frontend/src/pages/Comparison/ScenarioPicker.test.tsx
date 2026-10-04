@@ -15,7 +15,7 @@ function scenario(id: number, name: string, decisions: DecisionOut[] = [decision
 }
 
 /** Holds the chosen ids like the Compare page does, and lets a test decide what "Looks right" does. */
-function Harness({ scenarios, onConfirm, start = [] }: { scenarios: ScenarioOut[]; onConfirm?: (id: number) => Promise<void>; start?: number[] }) {
+function Harness({ scenarios, onConfirm, start = [], onDelete }: { scenarios: ScenarioOut[]; onConfirm?: (id: number) => Promise<void>; start?: number[]; onDelete?: (s: ScenarioOut) => void }) {
   const [ids, setIds] = useState<number[]>(start);
   const [list, setList] = useState(scenarios);
   return (
@@ -26,6 +26,7 @@ function Harness({ scenarios, onConfirm, start = [] }: { scenarios: ScenarioOut[
         staffNoun="barista"
         currency="USD"
         selectedIds={ids}
+        onDelete={onDelete}
         onToggle={(id) => setIds((x) => (x.includes(id) ? x.filter((i) => i !== id) : x.length < 3 ? [...x, id] : x))}
         onConfirm={async (id) => {
           await onConfirm?.(id);
@@ -182,5 +183,38 @@ describe("ScenarioPicker", () => {
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Check & add" }));
     await user.keyboard("{Enter}");
     expect(screen.getByRole("group", { name: /Check Hire a barista/ })).toBeTruthy();
+  });
+});
+
+
+describe("ScenarioPicker: delete", () => {
+  it("every scenario card has a Delete button named after it, and the fixed card does not", () => {
+    render(<Harness scenarios={[scenario(1, "Raise prices"), scenario(2, "Hire a barista")]} onDelete={() => undefined} />);
+    expect(screen.getByRole("button", { name: "Delete Raise prices" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Delete Hire a barista" })).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: /^Delete / })).toHaveLength(2);
+    const base = screen.getByText("If you change nothing").closest("li")!;
+    expect(within(base).queryByRole("button")).toBeNull();
+  });
+
+  it("clicking it asks the page to delete that scenario, and changes nothing by itself", async () => {
+    const user = userEvent.setup();
+    const onDelete = vi.fn();
+    render(<Harness scenarios={[scenario(1, "Raise prices"), scenario(2, "Hire a barista")]} onDelete={onDelete} start={[2]} />);
+    await user.click(screen.getByRole("button", { name: "Delete Raise prices" }));
+    expect(onDelete).toHaveBeenCalledTimes(1);
+    expect(onDelete.mock.calls[0][0].id).toBe(1);
+    expect(screen.getByText("Raise prices")).toBeTruthy();
+    expect((screen.getByRole("checkbox", { name: /Hire a barista/ }) as HTMLInputElement).checked).toBe(true);
+  });
+
+  it("a scenario waiting to be checked can be deleted too", () => {
+    render(<Harness scenarios={[scenario(3, "Idea", [decision({ confirmed: false })])]} onDelete={() => undefined} />);
+    expect(screen.getByRole("button", { name: "Delete Idea" })).toBeTruthy();
+  });
+
+  it("shows no Delete buttons if the page does not offer deleting", () => {
+    render(<Harness scenarios={[scenario(1, "Raise prices")]} />);
+    expect(screen.queryByRole("button", { name: /^Delete / })).toBeNull();
   });
 });

@@ -11,6 +11,7 @@ import {
 import { CoachCard } from "../../components/CoachCard";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Spinner } from "../../components/Spinner";
+import { useDeleteFlow } from "../../components/useDeleteFlow";
 import { MAX_SCENARIOS_PER_RUN } from "../../constants";
 import { useAsync } from "../../hooks/useAsync";
 import { DEFAULT_CURRENCY, capitalize } from "../../lib/format";
@@ -72,6 +73,8 @@ export function ComparisonDashboardPage() {
       return [...ids, id];
     });
   }
+
+  const deleteFlow = useDeleteFlow();
 
   /** "Looks right": confirm on the server, refresh the list, and tick the card (if there is room). */
   async function confirmAndPick(id: number) {
@@ -143,6 +146,18 @@ export function ComparisonDashboardPage() {
                 selectedIds={selectedIds}
                 onToggle={toggleScenario}
                 onConfirm={confirmAndPick}
+                onDelete={(s) =>
+                  deleteFlow.ask({
+                    kind: "scenario",
+                    id: s.id,
+                    name: s.name,
+                    onDone: () => {
+                      setSelectedIds((ids) => ids.filter((x) => x !== s.id));
+                      scenarios.reload();
+                    },
+                    onUndone: () => scenarios.reload(),
+                  })
+                }
               />
             )}
           </div>
@@ -197,6 +212,7 @@ export function ComparisonDashboardPage() {
           )}
         </>
       )}
+      {deleteFlow.dialog}
     </div>
   );
 }

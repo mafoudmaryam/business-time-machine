@@ -30,9 +30,23 @@ describe("remembered business", () => {
 
   it("ignores junk", () => {
     for (const junk of ["abc", "-3", "0", "2.5", ""]) {
-      window.localStorage.setItem("btm.businessId", junk);
+      window.sessionStorage.setItem("btm.businessId", junk);
       expect(getRememberedBusinessId()).toBeNull();
     }
+  });
+});
+
+describe("a business is only ever chosen in this visit", () => {
+  it("is kept for this tab only, never in storage that outlives the visit", () => {
+    rememberBusiness(9);
+    expect(window.sessionStorage.getItem("btm.businessId")).toBe("9");
+    expect(window.localStorage.getItem("btm.businessId")).toBeNull();
+  });
+
+  it("ignores (and clears) a choice left behind by an older version of the app", () => {
+    window.localStorage.setItem("btm.businessId", "6");
+    expect(getRememberedBusinessId()).toBeNull();
+    expect(window.localStorage.getItem("btm.businessId")).toBeNull();
   });
 });
 

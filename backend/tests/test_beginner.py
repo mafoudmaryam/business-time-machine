@@ -433,3 +433,20 @@ def test_sample_business_gets_a_today_page_in_every_industry(client):
         bid = client.post("/sample_business", json={"industry": industry}).json()["id"]
         t = today(client, bid)
         assert t["is_sample"] is True and t["note"]["text"]
+
+
+# ---------- nothing is ever created or chosen for the owner ----------
+
+def test_opening_the_app_creates_nothing(client):
+    for path in ("/config", "/industries", "/businesses", "/coach/status", "/health"):
+        assert client.get(path).status_code == 200
+    assert client.get("/businesses").json() == []
+    assert client.get("/businesses/1/today").status_code == 404      # there is no "default" business to fall back on
+    assert client.get("/businesses").json() == []
+
+
+def test_a_sample_or_quick_business_only_exists_after_it_is_asked_for(client):
+    quick(client)                                                      # a preview saves nothing
+    assert client.get("/businesses").json() == []
+    client.post("/sample_business", json={"industry": "cafe"})
+    assert len(client.get("/businesses").json()) == 1
