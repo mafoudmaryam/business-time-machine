@@ -83,3 +83,24 @@ export function getSessionId(): string {
 export function resetSessionMemory(): void {
   memorySessionId = null;
 }
+
+// ---------- the "last month isn't in your journal" reminder on Today ----------
+// Only a convenience: if the browser will not store it, the reminder simply shows again.
+
+const reminderKey = (businessId: number, month: string) => `btm.journalReminder.${businessId}.${month}`;
+
+export function journalReminderDismissed(businessId: number, month: string): boolean {
+  try {
+    return window.localStorage.getItem(reminderKey(businessId, month)) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function dismissJournalReminder(businessId: number, month: string): void {
+  try {
+    window.localStorage.setItem(reminderKey(businessId, month), "1");
+  } catch {
+    /* not stored: it will show again, which is fine */
+  }
+}

@@ -500,6 +500,122 @@ class TodayOut(BaseModel):
     assumed_by_app: bool                       # False: the owner typed every number
 
 
+# ---------- journal: what really happened, against what we expected ----------
+
+_MONEY = dict(ge=-1e12, le=1e12, allow_inf_nan=False)
+MONTH_PATTERN = r"^\d{4}-(0[1-9]|1[0-2])$"
+
+
+class JournalEntryIn(BaseModel):
+    month: str = Field(pattern=MONTH_PATTERN)                  # "YYYY-MM"
+    actual_profit: float = Field(**_MONEY)
+    actual_cash: float = Field(**_MONEY)
+    actual_visits: float = Field(ge=0, le=1e9, allow_inf_nan=False)
+    note: Optional[str] = Field(None, max_length=1000)
+
+
+class JournalEntryUpdate(BaseModel):
+    """PUT /businesses/{id}/journal/{month}: the month is in the address."""
+    actual_profit: float = Field(**_MONEY)
+    actual_cash: float = Field(**_MONEY)
+    actual_visits: float = Field(ge=0, le=1e9, allow_inf_nan=False)
+    note: Optional[str] = Field(None, max_length=1000)
+
+
+class JournalEntryOut(BaseModel):
+    id: int
+    business_id: int
+    month: str
+    month_label: str                                           # "October 2026"
+    actual_profit: float
+    actual_cash: float
+    actual_visits: float
+    note: Optional[str] = None
+    created_at: dt.datetime
+
+
+class JournalComparisonOut(BaseModel):
+    metric: Literal["profit", "cash", "visits"]
+    actual: float
+    expected_low: float
+    expected: float
+    expected_high: float
+    difference: float
+    percent_difference: Optional[float] = None
+    position: Literal["below", "inside", "above"]
+    sentence: str
+
+
+class JournalMonthOut(BaseModel):
+    entry: JournalEntryOut
+    has_prediction: bool
+    prediction_run_id: Optional[int] = None
+    comparisons: list[JournalComparisonOut]                    # empty when there was no prediction for the month
+    summary: str                                               # plain sentence, no AI
+
+
+class JournalDueOut(BaseModel):
+    month: str
+    month_label: str
+
+
+class JournalAccuracyOut(BaseModel):
+    metric: Literal["profit", "cash", "visits"]
+    months: int
+    inside: int
+    below: int
+    above: int
+    mean_difference: Optional[float] = None
+    mean_abs_percent_difference: Optional[float] = None
+
+
+class JournalForecastMonth(BaseModel):
+    month: str
+    month_label: str
+    p10: float
+    p50: float
+    p90: float
+
+
+class JournalForecast(BaseModel):
+    """What the latest Today forecast said about profit, month by month (for the chart)."""
+    run_id: int
+    months: list[JournalForecastMonth]
+
+
+class JournalOut(BaseModel):
+    business_id: int
+    currency: str
+    is_sample: bool
+    entries: list[JournalMonthOut]                             # newest month first
+    due: list[JournalDueOut]                                   # months that ended, have a forecast, no entry yet
+    accuracy: list[JournalAccuracyOut]                         # empty until a month has been compared
+    forecast: Optional[JournalForecast] = None                 # None until a Today forecast exists
+
+
+class JournalAccuracyRow(BaseModel):
+    business_id: int
+    month: str
+    metric: str
+    actual: float
+    expected_low: float
+    expected: float
+    expected_high: float
+    difference: float
+    percent_difference: Optional[float] = None
+    position: str
+    engine_version: str
+    seed: int
+    iterations: int
+
+
+class JournalAccuracyReport(BaseModel):
+    """GET /journal/accuracy -- thesis output: every compared month, and totals per metric."""
+    pilot: bool = True
+    rows: list[JournalAccuracyRow]
+    totals: list[JournalAccuracyOut]
+
+
 class EventIn(BaseModel):
     name: str = Field(pattern=r"^[a-z0-9_]{1,40}$")
     screen: Optional[str] = Field(None, pattern=r"^[a-z0-9_/\-]{1,60}$")
@@ -531,7 +647,7 @@ class DeletedOut(BaseModel):
     """DELETE /... -- what was hidden, so the front end can say so and offer "Undo"."""
 
     id: int
-    kind: Literal["business", "scenario", "run"]
+    kind: Literal["business", "scenario", "run", "journal"]
     name: str
     deleted_at: dt.datetime
 

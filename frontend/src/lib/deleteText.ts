@@ -55,3 +55,10 @@ export function businessWords(name: string, impact: BusinessImpact | null): Dele
   lines.push("Your other businesses are not affected.");
   return { title: `Delete “${name}”?`, lines };
 }
+
+export function journalWords(monthLabel: string): DeleteWords {
+  return {
+    title: `Delete your ${monthLabel} figures?`,
+    lines: ["This removes what you wrote down for that month, including your note.", "Nothing else is affected: your forecast and your other months stay as they are."],
+  };
+}

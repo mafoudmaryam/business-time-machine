@@ -109,3 +109,31 @@ export function makeRun(over: Partial<import("./api").SimulationRunOut> = {}): i
     ...over,
   };
 }
+
+/** One compared month as the journal gets it (override any part). */
+export function makeJournalMonth(over: Partial<import("./api").JournalMonthOut> & { month?: string; label?: string } = {}): import("./api").JournalMonthOut {
+  const { month = "2026-11", label = "November 2026", ...rest } = over;
+  const comparison = (metric: "profit" | "cash" | "visits", actual: number, low: number, mid: number, high: number, position: "below" | "inside" | "above", sentence: string) => ({
+    metric, actual, expected_low: low, expected: mid, expected_high: high, difference: actual - mid,
+    percent_difference: (100 * (actual - mid)) / Math.abs(mid), position, sentence,
+  });
+  return {
+    entry: {
+      id: 1, business_id: 1, month, month_label: label, actual_profit: 5900, actual_cash: 52000, actual_visits: 4300, note: null,
+      created_at: "2026-12-01T10:00:00",
+    },
+    has_prediction: true,
+    prediction_run_id: 10,
+    comparisons: [
+      comparison("profit", 5900, 4800, 6000, 7300, "inside", "You made about $5,900. We expected $4,800 to $7,300, most likely $6,000, so it landed inside the range we showed."),
+      comparison("cash", 52000, 53000, 57000, 61000, "below", "You ended the month with about $52,000 in the bank. We expected $53,000 to $61,000, most likely $57,000, so it came in below the range."),
+      comparison("visits", 4300, 3800, 4000, 4200, "above", "You had about 4,300 customer visits. We expected 3,800 to 4,200, most likely 4,000, so it came in better than the range."),
+    ],
+    summary: "You made about $5,900. We expected $4,800 to $7,300, most likely $6,000, so it landed inside the range we showed.",
+    ...rest,
+  };
+}
+
+export function makeJournal(over: Partial<import("./api").JournalOut> = {}): import("./api").JournalOut {
+  return { business_id: 1, currency: "USD", is_sample: false, entries: [], due: [], accuracy: [], forecast: null, ...over };
+}

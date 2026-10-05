@@ -26,6 +26,11 @@ export function AppNav() {
           </NavLink>
         </li>
         <li>
+          <NavLink to="/journal" className={({ isActive }) => (isActive ? "active" : "")}>
+            My journal
+          </NavLink>
+        </li>
+        <li>
           {/* keyed by address so the menu closes after you pick something */}
           <details className={inAdvanced ? "appnav-more active" : "appnav-more"} key={location.pathname}>
             <summary>Advanced</summary>

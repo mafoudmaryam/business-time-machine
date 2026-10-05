@@ -732,7 +732,7 @@ export function logEvents(sessionId: string, businessId: number | null, events: 
 
 export interface DeletedOut {
   id: number;
-  kind: "business" | "scenario" | "run";
+  kind: "business" | "scenario" | "run" | "journal";
   name: string;
   deleted_at: string;
 }
@@ -866,4 +866,99 @@ export function getHow(businessId: number): Promise<HowOut> {
 /** The same numbers as Today, without the coach note (so no AI is started). Used by the share page. */
 export function getSummary(businessId: number): Promise<TodayOut> {
   return request(`/businesses/${businessId}/summary`);
+}
+
+// ---------- journal: what really happened, next to what we expected ----------
+
+export type JournalMetric = "profit" | "cash" | "visits";
+export type JournalPosition = "below" | "inside" | "above";
+
+export interface JournalEntryIn {
+  month: string; // "YYYY-MM"
+  actual_profit: number;
+  actual_cash: number;
+  actual_visits: number;
+  note: string | null;
+}
+
+export interface JournalEntryOut {
+  id: number;
+  business_id: number;
+  month: string;
+  month_label: string;
+  actual_profit: number;
+  actual_cash: number;
+  actual_visits: number;
+  note: string | null;
+  created_at: string;
+}
+
+export interface JournalComparison {
+  metric: JournalMetric;
+  actual: number;
+  expected_low: number;
+  expected: number;
+  expected_high: number;
+  difference: number;
+  percent_difference: number | null;
+  position: JournalPosition;
+  sentence: string;
+}
+
+export interface JournalMonthOut {
+  entry: JournalEntryOut;
+  has_prediction: boolean;
+  prediction_run_id: number | null;
+  comparisons: JournalComparison[];
+  summary: string;
+}
+
+export interface JournalDue {
+  month: string;
+  month_label: string;
+}
+
+export interface JournalAccuracy {
+  metric: JournalMetric;
+  months: number;
+  inside: number;
+  below: number;
+  above: number;
+  mean_difference: number | null;
+  mean_abs_percent_difference: number | null;
+}
+
+export interface JournalForecastMonth {
+  month: string;
+  month_label: string;
+  p10: number;
+  p50: number;
+  p90: number;
+}
+
+export interface JournalOut {
+  business_id: number;
+  currency: string;
+  is_sample: boolean;
+  entries: JournalMonthOut[];
+  due: JournalDue[];
+  accuracy: JournalAccuracy[];
+  forecast: { run_id: number; months: JournalForecastMonth[] } | null;
+}
+
+export function getJournal(businessId: number): Promise<JournalOut> {
+  return request(`/businesses/${businessId}/journal`);
+}
+
+/** Saves a month; saving a month that already has an entry edits it. */
+export function saveJournalEntry(businessId: number, entry: JournalEntryIn): Promise<JournalMonthOut> {
+  return request(`/businesses/${businessId}/journal`, { method: "POST", body: JSON.stringify(entry) });
+}
+
+export function deleteJournalEntry(businessId: number, month: string): Promise<DeletedOut> {
+  return request(`/businesses/${businessId}/journal/${month}`, { method: "DELETE" });
+}
+
+export function restoreJournalEntry(businessId: number, month: string): Promise<JournalMonthOut> {
+  return request(`/businesses/${businessId}/journal/${month}/restore`, { method: "POST" });
 }

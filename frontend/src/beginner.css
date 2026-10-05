@@ -1502,3 +1502,260 @@ button.danger {
     min-height: 44px;
   }
 }
+
+/* ---------- Phase 4: the journal ---------- */
+
+.journal-page {
+  max-width: 760px;
+}
+
+.journal-form,
+.journal-entry,
+.journal-due,
+.journal-prompt {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 0 0 16px;
+}
+
+.journal-prompt {
+  background: var(--band);
+}
+
+.journal-prompt a,
+.journal-prompt a:visited,
+.journal-page a,
+.journal-page a:visited {
+  color: var(--button);
+}
+
+.journal-due p {
+  margin: 4px 0;
+}
+
+button.linklike {
+  background: none;
+  border: none;
+  padding: 0;
+  min-height: 44px;
+  color: var(--button);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.journal-form textarea {
+  width: 100%;
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+}
+
+.journal-form select {
+  min-height: 44px;
+  max-width: 100%;
+}
+
+.journal-saved {
+  min-height: 1.5em;
+  margin: 0 0 8px;
+  color: var(--muted-1);
+}
+
+.journal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.journal-entry-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.journal-entry-head h3 {
+  margin: 0;
+}
+
+.journal-entry-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.journal-entry-actions button {
+  min-height: 44px;
+}
+
+.journal-compare {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.journal-compare li {
+  margin: 0 0 14px;
+}
+
+.journal-metric {
+  margin: 0 0 4px;
+  font-weight: 600;
+  color: var(--muted-1);
+}
+
+.journal-where {
+  font-weight: 600;
+}
+
+.journal-sentence {
+  margin: 4px 0 0;
+}
+
+.journal-note {
+  margin: 8px 0 0;
+  color: var(--muted-1);
+  font-style: italic;
+}
+
+.range-bar {
+  display: block;
+  width: 100%;
+  height: 28px;
+}
+
+.range-bar-track {
+  stroke: var(--border);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.range-bar-range {
+  fill: #d9c4ae;
+}
+
+.range-bar-expected {
+  stroke: var(--muted-1);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.range-bar-actual {
+  fill: var(--button);
+  stroke: #fff;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.journal-accuracy ul {
+  padding-left: 20px;
+}
+
+@media (max-width: 640px) {
+  .journal-entry-actions {
+    width: 100%;
+  }
+
+  .journal-entry-actions button {
+    flex: 1;
+  }
+}
+
+@media print {
+  .journal-entry-actions,
+  .journal-form {
+    display: none;
+  }
+}
+
+.journal-chart {
+  margin: 0 0 20px;
+}
+
+.journal-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.journal-chart-band {
+  fill: #d9c4ae;
+  fill-opacity: 0.75;
+}
+
+.journal-chart-line {
+  stroke: var(--muted-1);
+  stroke-width: 2;
+}
+
+.journal-chart-dot {
+  fill: var(--button);
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.journal-chart figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 6px;
+  color: var(--muted-1);
+  font-size: 14px;
+}
+
+.journal-chart-key::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 2px;
+  background: #d9c4ae;
+}
+
+.journal-chart-key-line::before {
+  height: 3px;
+  vertical-align: middle;
+  background: var(--muted-1);
+}
+
+.journal-chart-key-dot::before {
+  width: 10px;
+  border-radius: 50%;
+  background: var(--button);
+}
+
+.journal-chart-range {
+  flex-basis: 100%;
+}
+
+.journal-summary {
+  margin: 0 0 12px;
+}
+
+.journal-prompt {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+
+.journal-prompt button {
+  min-height: 44px;
+}
+
+/* Journal: every control is at least 44px tall, so it is easy to tap on a phone. */
+.journal-page button,
+.journal-page .journal-form input[type="text"],
+.journal-page .journal-form select {
+  min-height: 44px;
+}

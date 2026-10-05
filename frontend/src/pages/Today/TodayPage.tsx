@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { getBusinessImpact, getToday, getTodayNote, type TodayNote, type TodayOut } from "../../api";
+import { getBusinessImpact, getJournal, getToday, getTodayNote, type TodayNote, type TodayOut } from "../../api";
 import { AskCoach } from "../../components/AskCoach";
 import { useConfig } from "../../components/config";
 import { EmptyState } from "../../components/EmptyState";
@@ -11,7 +11,8 @@ import { Spinner } from "../../components/Spinner";
 import { Tour } from "../../components/Tour";
 import { useAsync } from "../../hooks/useAsync";
 import { track } from "../../lib/events";
-import { forgetBusiness, getRememberedBusinessId, rememberBusiness, tourSeen } from "../../lib/session";
+import { monthOptions } from "../../lib/journalView";
+import { dismissJournalReminder, forgetBusiness, getRememberedBusinessId, journalReminderDismissed, rememberBusiness, tourSeen } from "../../lib/session";
 import { industryWord, lowestCashTile, noteIsPending, profitTile, safetyTile, type Tile } from "../../lib/todayView";
 import { Assumptions } from "./Assumptions";
 import { TodayChart } from "./TodayChart";
@@ -146,8 +147,11 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
         </p>
       )}
 
+      <JournalPrompt businessId={today.business_id} />
+
       <p className="today-links">
-        <Link to="/how">How did we get these numbers?</Link> · <Link to="/share">Print or share this summary</Link>
+        <Link to="/how">How did we get these numbers?</Link> · <Link to="/share">Print or share this summary</Link> ·{" "}
+        <Link to="/journal">My journal</Link>
       </p>
 
       <Assumptions
@@ -170,6 +174,36 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
       )}
       {touring && <Tour onClose={() => setTouring(false)} />}
     </div>
+  );
+}
+
+/** One quiet line when LAST month is missing from the journal (and we had made a forecast for it). The owner can dismiss it,
+ *  and then it never comes back for that month. If the journal cannot be read, nothing is shown: a nudge, never a blocker. */
+function JournalPrompt({ businessId }: { businessId: number }) {
+  const journal = useAsync(() => Promise.resolve().then(() => getJournal(businessId)), [businessId]);
+  const [hidden, setHidden] = useState(false);
+  const now = new Date();
+  const last = monthOptions(now, 2)[1].value;
+  const due = journal.data?.due.find((d) => d.month === last);
+  if (!due || hidden || journalReminderDismissed(businessId, due.month)) return null;
+  return (
+    <p className="journal-prompt">
+      <span>Last month isn't in your journal yet.</span>
+      <Link to={`/journal?month=${due.month}`} onClick={() => track("journal_prompt_clicked", "today")}>
+        Write it down
+      </Link>
+      <button
+        type="button"
+        className="secondary"
+        onClick={() => {
+          dismissJournalReminder(businessId, due.month);
+          track("journal_prompt_dismissed", "today");
+          setHidden(true);
+        }}
+      >
+        Not now
+      </button>
+    </p>
   );
 }
 

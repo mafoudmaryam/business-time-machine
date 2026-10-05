@@ -34,6 +34,10 @@ def purge(db: Session, older_than: dt.timedelta, now: Optional[dt.datetime] = No
     interp_ids = _ids(db.query(m.Interpretation.id).filter(m.Interpretation.business_id.in_(business_ids))) if business_ids else []
     run_list, scenario_list = sorted(run_ids), sorted(scenario_ids)
 
+    journal_q = db.query(m.JournalEntry).filter(
+        (m.JournalEntry.deleted_at.isnot(None) & (m.JournalEntry.deleted_at <= cutoff))
+        | (m.JournalEntry.business_id.in_(business_ids) if business_ids else False))
+
     def count(query) -> int:
         return query.count()
 
@@ -47,6 +51,7 @@ def purge(db: Session, older_than: dt.timedelta, now: Optional[dt.datetime] = No
         "decisions": count(db.query(m.Decision).filter(m.Decision.scenario_id.in_(scenario_list))) if scenario_list else 0,
         "runs": len(run_list),
         "run_results": count(db.query(m.SimulationResult).filter(m.SimulationResult.simulation_run_id.in_(run_list))) if run_list else 0,
+        "journal_entries": count(journal_q),
         "coach_results": count(db.query(m.CoachResult).filter(m.CoachResult.simulation_run_id.in_(run_list))) if run_list else 0,
         "ai_logs_kept": len({row.id for q in (ai_run, ai_biz, ai_int) if q is not None for row in q}),
     }
@@ -81,7 +86,10 @@ def purge(db: Session, older_than: dt.timedelta, now: Optional[dt.datetime] = No
         db.query(m.Decision).filter(m.Decision.scenario_id.in_(scenario_list)).delete(synchronize_session=False)
         db.query(m.Scenario).filter(m.Scenario.id.in_(scenario_list)).delete(synchronize_session=False)
 
-    # 4. The businesses themselves.
+    # 4. Journal entries removed long ago, and all entries of purged businesses; then the businesses themselves.
+    for row in journal_q.all():
+        db.delete(row)
+    db.flush()
     if business_ids:
         db.query(m.UiEvent).filter(m.UiEvent.business_id.in_(business_ids)).delete(synchronize_session=False)
         db.query(m.Interpretation).filter(m.Interpretation.business_id.in_(business_ids)).delete(synchronize_session=False)

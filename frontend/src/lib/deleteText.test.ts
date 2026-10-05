@@ -50,3 +50,13 @@ describe("runWords", () => {
     expect(runWords(1, ["baseline"]).lines[0]).toBe("This removes the run from your history, with its charts and the coach's notes about it.");
   });
 });
+
+describe("journalWords", () => {
+  it("names the month, says the note goes too, and that nothing else is affected", async () => {
+    const { journalWords } = await import("./deleteText");
+    const w = journalWords("November 2026");
+    expect(w.title).toBe("Delete your November 2026 figures?");
+    expect(w.lines.join(" ")).toMatch(/note/);
+    expect(w.lines.join(" ")).toMatch(/Nothing else is affected/);
+  });
+});

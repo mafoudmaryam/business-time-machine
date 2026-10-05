@@ -238,6 +238,25 @@ class TodayNote(Base):
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
 
 
+class JournalEntry(Base):
+    """What really happened in one calendar month, in the owner's own words and numbers (no AI, no confirmation step)."""
+
+    __tablename__ = "journal_entries"
+    __table_args__ = (UniqueConstraint("business_id", "month", name="uq_journal_business_month"),)
+
+    id = Column(Integer, primary_key=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True)
+    month = Column(String, nullable=False)                 # "YYYY-MM"
+    actual_profit = Column(Float, nullable=False)
+    actual_cash = Column(Float, nullable=False)
+    actual_visits = Column(Float, nullable=False)
+    note = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
+    deleted_at = Column(DateTime, nullable=True)           # soft delete: saving the month again brings the row back
+
+    business = relationship("Business")
+
+
 class UiEvent(Base):
     """One thing the person did in the app (screen opened, tour skipped, ...), for the study. No free text."""
 

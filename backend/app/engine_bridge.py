@@ -15,6 +15,8 @@ from btm_engine import (BusinessBaseline, DECISIONS_JSON_SCHEMA, Decision as Eng
                         answers_from_baseline, build_facts, build_today_facts, describe_decision, format_money, get_template, list_industries,
                         month_one_summary, preview_change, quick_baseline, run_scenarios, sample_assumed)
 
+from btm_engine.journal import accuracy_summary, compare_month, months_between
+
 from . import models
 
 SEED_MAX = 2_000_000_000
