@@ -1,14 +1,11 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { ADVANCED_LINKS } from "../lib/navLinks";
-import { getRememberedBusinessId } from "../lib/session";
 import { BusinessSwitcher } from "./BusinessSwitcher";
 
-const ADVANCED_PATHS = ["/compare", "/history", "/setup"];
+const ADVANCED_PATHS = ["/scenarios", "/compare", "/history", "/setup"];
 
 export function AppNav() {
   const location = useLocation();
-  const businessId = getRememberedBusinessId();
-  const tryTo = businessId ? `/scenarios?business=${businessId}` : "/scenarios";
   const inAdvanced = ADVANCED_PATHS.includes(location.pathname);
 
   return (
@@ -24,10 +21,7 @@ export function AppNav() {
           </NavLink>
         </li>
         <li>
-          <NavLink
-            to={tryTo}
-            className={() => (location.pathname === "/scenarios" ? "active" : "")}
-          >
+          <NavLink to="/try" className={() => (location.pathname === "/try" || location.pathname === "/timeline" ? "active" : "")}>
             Try a change
           </NavLink>
         </li>

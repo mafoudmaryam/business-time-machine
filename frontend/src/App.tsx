@@ -5,7 +5,9 @@ import { ComparisonDashboardPage } from "./pages/Comparison/ComparisonDashboardP
 import { RunHistoryPage } from "./pages/RunHistory/RunHistoryPage";
 import { ScenarioBuilderPage } from "./pages/ScenarioBuilder/ScenarioBuilderPage";
 import { StartPage } from "./pages/Start/StartPage";
+import { TimelinePage } from "./pages/Timeline/TimelinePage";
 import { TodayPage } from "./pages/Today/TodayPage";
+import { TryPage } from "./pages/Try/TryPage";
 
 /** The front page. Every visit to it (the header title, "New business", a typed address) is a new location, so the
  * form starts over; without the key, being on the page already would leave a half-filled form in place. */
@@ -22,7 +24,9 @@ export function App() {
         <Route path="/" element={<FrontPage />} />
         <Route path="/start" element={<FrontPage />} />
         <Route path="/today" element={<TodayPage />} />
-        {/* The earlier pages keep their addresses; they now live under "Advanced" (and "Try a change"). */}
+        <Route path="/try" element={<TryPage />} />
+        <Route path="/timeline" element={<TimelinePage />} />
+        {/* The earlier pages keep their addresses; they now live under "Advanced". */}
         <Route path="/setup" element={<BusinessSetupPage />} />
         <Route path="/scenarios" element={<ScenarioBuilderPage />} />
         <Route path="/compare" element={<ComparisonDashboardPage />} />

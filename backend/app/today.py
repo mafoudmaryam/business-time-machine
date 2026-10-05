@@ -46,14 +46,23 @@ def _labels(customer_noun: str, staff_noun: str) -> dict[str, str]:
     }
 
 
+MONTH_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+              "November", "December"]
+
+
+def labels_from(start: dt.date, horizon: int, long: bool = False) -> list[str]:
+    """'Nov 2026' (or 'November 2026') for each simulation month; month 1 is the month after `start`."""
+    names = MONTH_LONG if long else MONTH_SHORT
+    out = []
+    for m in range(1, horizon + 1):
+        year, month = calendar_of(m, start)
+        out.append(f"{names[month - 1]} {year}")
+    return out
+
+
 def month_labels(run: models.SimulationRun) -> list[str]:
     """'Nov 2026' ... for each simulation month. Month 1 is the month after the run was made."""
-    start = run.created_at.date()
-    out = []
-    for m in range(1, run.horizon + 1):
-        year, month = calendar_of(m, start)
-        out.append(f"{MONTH_SHORT[month - 1]} {year}")
-    return out
+    return labels_from(run.created_at.date(), run.horizon)
 
 
 def assumptions_for(business: models.Business) -> list[schemas.AssumptionOut]:

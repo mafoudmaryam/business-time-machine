@@ -114,10 +114,10 @@ describe("Today: the coach speaks first", () => {
     expect((await screen.findByText(/Scenarios, not forecasts/)).textContent).toContain("Not financial advice");
   });
 
-  it("links to Try a change for this business", async () => {
+  it("links to the Try a change page", async () => {
     mount();
     const link = await screen.findByRole("link", { name: "Try a change" });
-    expect(link.getAttribute("href")).toBe("/scenarios?business=1");
+    expect(link.getAttribute("href")).toBe("/try");
   });
 });
 

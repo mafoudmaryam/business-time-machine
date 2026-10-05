@@ -178,7 +178,7 @@ export function listIndustries(): Promise<IndustryOut[]> {
 
 /** How the owner confirmed a step (thesis data): ticked one by one, "Confirm all", "Confirm all and save",
  * or by editing it (saving an edit counts as reviewing it). */
-export type ConfirmVia = "one_by_one" | "confirm_all" | "confirm_all_on_save" | "edited";
+export type ConfirmVia = "one_by_one" | "confirm_all" | "confirm_all_on_save" | "edited" | "try_change";
 
 /** Where a step came from when the owner described it in their own words (UI only, never sent to the API). */
 export interface StepOrigin {
@@ -777,4 +777,62 @@ export function deleteBusiness(id: number): Promise<DeletedOut> {
 
 export function restoreBusiness(id: number): Promise<BusinessOut> {
   return request(`/businesses/${id}/restore`, { method: "POST" });
+}
+
+// ---------- "Try a change": the quick sketch ----------
+
+export type SketchKind = "price" | "hours" | "hiring" | "marketing";
+
+export interface SketchRequest {
+  type: SketchKind;
+  amount: number;
+  start_month: number; // 1-12
+}
+
+export interface StartOption {
+  key: string;
+  label: string;
+  month: number;
+  name: string;
+}
+
+export function getStartOptions(): Promise<{ options: StartOption[] }> {
+  return request("/start_options");
+}
+
+export interface SketchPath {
+  profit: Band;
+  cash: Band;
+  customers: Band;
+  lowest_cash_amount: number;
+  lowest_cash_month: number;
+}
+
+/** The answer to a slider position. It is only a sketch: nothing is saved, and the AI never explains it. */
+export interface Sketch {
+  just_a_sketch: boolean;
+  type: SketchKind;
+  amount: number;
+  start_month: number;
+  start_label: string;
+  sentence: string;
+  engine_version: string;
+  seed: number;
+  iterations: number;
+  horizon: number;
+  month_labels: string[];
+  extra_profit_per_month: number;
+  profit_per_month_with_change: number;
+  profit_per_month_without: number;
+  visits_change_per_month: number;
+  visits_per_month_without: number;
+  ahead_of_10: number;
+  cash_now: number;
+  change: SketchPath;
+  baseline: SketchPath;
+  example: { before: number; after: number } | null;
+}
+
+export function previewChange(businessId: number, body: SketchRequest, signal?: AbortSignal): Promise<Sketch> {
+  return request(`/businesses/${businessId}/preview_change`, { method: "POST", body: JSON.stringify(body), signal });
 }

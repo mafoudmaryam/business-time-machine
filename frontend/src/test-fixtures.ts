@@ -39,3 +39,28 @@ export function makeToday(over: Partial<TodayOut> = {}): TodayOut {
     ...over,
   };
 }
+
+const SKETCH_MONTHS = ["Nov 2026", "Dec 2026", "Jan 2027", "Feb 2027", "Mar 2027", "Apr 2027", "May 2027", "Jun 2027", "Jul 2027", "Aug 2027", "Sep 2027", "Oct 2027"];
+
+function path(profitStart: number, cashStart: number, customersStart: number, lowestMonth = 1) {
+  return {
+    profit: band(profitStart, 8, 1200),
+    cash: band(cashStart, profitStart, 2500),
+    customers: band(customersStart, -1, 25),
+    lowest_cash_amount: cashStart,
+    lowest_cash_month: lowestMonth,
+  };
+}
+
+/** A realistic answer to a +7% price sketch (override any part). */
+export function makeSketch(over: Partial<import("./api").Sketch> = {}): import("./api").Sketch {
+  return {
+    just_a_sketch: true, type: "price", amount: 7, start_month: 1, start_label: "November 2026",
+    sentence: "Raise prices by 7% from November 2026 (month 1)", engine_version: "1", seed: 1006, iterations: 300, horizon: 12,
+    month_labels: SKETCH_MONTHS, extra_profit_per_month: 534.29, profit_per_month_with_change: 6095.96,
+    profit_per_month_without: 5561.67, visits_change_per_month: -382, visits_per_month_without: 7897, ahead_of_10: 9, cash_now: 25000,
+    change: path(6100, 31000, 900), baseline: path(5560, 30500, 900),
+    example: { before: 6.5, after: 6.96 },
+    ...over,
+  };
+}

@@ -546,3 +546,62 @@ class ScenarioImpact(BaseModel):
 class BusinessImpact(BaseModel):
     scenarios: int
     runs: int
+
+
+# ---------- "Try a change": the quick sketch ----------
+
+
+class StartOption(BaseModel):
+    key: str
+    label: str            # "Next month"
+    month: int            # simulation month 1-12
+    name: str             # "November 2026"
+
+
+class StartOptionsOut(BaseModel):
+    options: list[StartOption]
+
+
+class PreviewChangeIn(BaseModel):
+    """POST /businesses/{id}/preview_change -- one slider position. The ranges are checked by the engine."""
+
+    type: Literal["price", "hours", "hiring", "marketing"]
+    amount: float = Field(allow_inf_nan=False)
+    start_month: int = Field(1, ge=1, le=12)
+
+
+class SketchPath(BaseModel):
+    profit: Band
+    cash: Band
+    customers: Band
+    lowest_cash_amount: float
+    lowest_cash_month: int
+
+
+class PriceExample(BaseModel):
+    before: float
+    after: float
+
+
+class PreviewChangeOut(BaseModel):
+    just_a_sketch: bool = True        # the page must say so; nothing here is stored or explained by the AI
+    type: str
+    amount: float
+    start_month: int
+    start_label: str
+    sentence: str
+    engine_version: str
+    seed: int
+    iterations: int
+    horizon: int
+    month_labels: list[str]
+    extra_profit_per_month: float
+    profit_per_month_with_change: float
+    profit_per_month_without: float
+    visits_change_per_month: float
+    visits_per_month_without: float
+    ahead_of_10: int
+    cash_now: float
+    change: SketchPath
+    baseline: SketchPath
+    example: Optional[PriceExample] = None

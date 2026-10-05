@@ -42,15 +42,28 @@ describe("AppNav", () => {
     expect(hrefs).toEqual({ Compare: "/compare", "Run history": "/history", "Full business setup": "/setup" });
   });
 
-  it("Try a change opens the scenario builder for the remembered business", () => {
+  it("Try a change opens the Try page, with or without a business open (the page itself sends you to the start screen if none)", () => {
     rememberBusiness(4);
     nav();
-    expect(screen.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/scenarios?business=4");
+    expect(screen.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/try");
   });
 
-  it("without a remembered business it still goes to the builder", () => {
+  it("the old scenario builder is under Advanced", () => {
     nav();
-    expect(screen.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/scenarios");
+    expect(screen.getByRole("link", { name: "Scenario builder", hidden: true }).getAttribute("href")).toBe("/scenarios");
+  });
+
+  it("Try a change is marked as current on the Try page and on the 12-month page", () => {
+    for (const path of ["/try", "/timeline"]) {
+      const { unmount } = render(
+        <MemoryRouter initialEntries={[path]}>
+          <AppNav />
+        </MemoryRouter>,
+      );
+      expect(screen.getByRole("link", { name: "Try a change" }).className).toContain("active");
+      expect(screen.getByRole("link", { name: "Today" }).className).not.toContain("active");
+      unmount();
+    }
   });
 
   it("marks the current page", () => {

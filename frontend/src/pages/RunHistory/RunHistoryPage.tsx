@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getSimulationRun, listBusinesses, listIndustries, listSimulationRuns, type SimulationRunOut } from "../../api";
 import { CoachCard } from "../../components/CoachCard";
@@ -46,6 +46,20 @@ export function RunHistoryPage() {
   const [openedRun, setOpenedRun] = useState<SimulationRunOut | null>(null);
   const [openError, setOpenError] = useState<string | null>(null);
   const [openingId, setOpeningId] = useState<number | null>(null);
+
+  // "Save this as a scenario" sends people here with ?run=<id>: open that run, with its coach, straight away.
+  const runFromAddress = params.get("run") ? Number(params.get("run")) : null;
+  useEffect(() => {
+    if (runFromAddress === null || !Number.isInteger(runFromAddress)) return;
+    let cancelled = false;
+    getSimulationRun(runFromAddress).then(
+      (run) => !cancelled && setOpenedRun(run),
+      (err) => !cancelled && setOpenError(err instanceof Error ? err.message : String(err)),
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [runFromAddress]);
 
   function selectBusiness(id: number) {
     setParams({ business: String(id) });

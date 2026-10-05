@@ -11,6 +11,7 @@ from .sensitivity import one_at_a_time
 from .explain import (month_one_summary, profit_breakdown, key_moments, build_facts, build_today_facts, describe_decision,
                       format_money, round_display)
 from .quickstart import QuickStart, quick_baseline, sample_assumed
+from .sketch import SKETCH_HORIZON, SKETCH_ITERATIONS, SKETCH_TYPES, preview_change, sketch_decision
 from .templates import TEMPLATES, get_template, list_industries
 
 __all__ = [
@@ -19,5 +20,6 @@ __all__ = [
     "run_deterministic", "run_scenarios", "one_at_a_time",
     "month_one_summary", "profit_breakdown", "key_moments", "build_facts", "build_today_facts", "describe_decision", "format_money", "round_display",
     "QuickStart", "quick_baseline", "sample_assumed",
+    "SKETCH_HORIZON", "SKETCH_ITERATIONS", "SKETCH_TYPES", "preview_change", "sketch_decision",
     "TEMPLATES", "get_template", "list_industries",
 ]

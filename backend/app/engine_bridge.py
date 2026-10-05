@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from btm_engine import (BusinessBaseline, DECISIONS_JSON_SCHEMA, Decision as EngineDecision,
                         build_facts, build_today_facts, describe_decision, format_money, get_template, list_industries,
-                        month_one_summary, quick_baseline, run_scenarios, sample_assumed)
+                        month_one_summary, preview_change, quick_baseline, run_scenarios, sample_assumed)
 
 from . import models
 
@@ -243,3 +243,10 @@ BASELINE_FIELDS = tuple(BusinessBaseline().to_dict())
 def check_baseline(values: dict) -> None:
     """Raise ValueError (plain reason) if these numbers do not make a valid business."""
     BusinessBaseline(**values).validate()
+
+
+def sketch_change(business: models.Business, kind: str, amount: float, start_month: int) -> dict:
+    """The quick "just a sketch" for one change. Read-only. The seed depends only on the business, so the same slider
+    position always gives the same picture. Raises ValueError (plain reason) for an amount or month that makes no sense."""
+    return preview_change(to_baseline(business.baseline), get_template(business.industry), kind, amount, start_month,
+                          seed=1000 + business.id, currency=business.currency)

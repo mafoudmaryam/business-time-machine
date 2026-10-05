@@ -697,3 +697,331 @@ button.danger {
 .back-button .back-arrow {
   flex: none;
 }
+
+/* ---------- Try a change and the 12-month page ---------- */
+
+.try-lead {
+  color: var(--muted-1);
+  font-size: 17px;
+  margin: 0 0 20px;
+}
+
+.try-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.try-card {
+  padding: 20px 22px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 16px;
+}
+
+.try-eyebrow {
+  margin: 0 0 8px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-1);
+}
+
+/* Same height and the number takes the same room for "7%" and "13%", so the slider under it never moves while you drag. */
+.try-big-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: nowrap;
+  min-height: 84px;
+  margin-bottom: 12px;
+}
+
+.try-big {
+  flex: none;
+  min-width: 2.2ch;
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 72px;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: lining-nums;
+}
+
+.try-example {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  color: var(--muted-1);
+  font-size: 16px;
+  min-height: 1.5em;
+}
+
+/* The slider: a big thumb (32px) that is easy to grab with a finger. */
+.try-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 4px 0 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.try-slider::-webkit-slider-runnable-track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--band);
+  border: 1px solid var(--border);
+}
+
+.try-slider::-moz-range-track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--band);
+  border: 1px solid var(--border);
+}
+
+.try-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  margin-top: -12px;
+  border-radius: 50%;
+  background: var(--button);
+  border: 3px solid var(--card);
+  box-shadow: 0 0 0 1px var(--button);
+}
+
+.try-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--button);
+  border: 3px solid var(--card);
+  box-shadow: 0 0 0 1px var(--button);
+}
+
+.try-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted-1);
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.try-when {
+  margin-top: 10px;
+}
+
+.try-when-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.try-start {
+  min-height: 44px;
+  padding: 10px 18px;
+  background: transparent;
+  color: var(--button);
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 15px;
+}
+
+.try-start-on {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--button-text);
+}
+
+.try-note {
+  padding: 14px 18px;
+  background: #f6e7d2;
+  border: 1px solid #e6cfae;
+  border-radius: 12px;
+  color: var(--ink);
+}
+
+.try-note p {
+  margin: 0;
+  font-size: 16px;
+}
+
+.sketch-pill {
+  display: inline-block;
+  margin: 0 0 8px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--button-text);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sketch-note {
+  margin: 0 0 12px;
+  color: var(--muted-1);
+  font-size: 14px;
+}
+
+.try-numbers h3 {
+  margin: 16px 0 6px;
+}
+
+.try-numbers-updating {
+  opacity: 0.6;
+}
+
+.try-keep {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.try-keep-number {
+  font-family: var(--font-heading);
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #11694b;
+  font-variant-numeric: lining-nums;
+}
+
+.try-keep-word {
+  font-size: 20px;
+  color: var(--muted-1);
+}
+
+.try-dots {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 8px;
+}
+
+.try-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--button);
+  background: transparent;
+}
+
+.try-dot-on {
+  background: var(--button);
+}
+
+.try-status {
+  min-height: 1.4em;
+  margin: 12px 0 0;
+  color: var(--muted-1);
+  font-size: 14px;
+  font-style: italic;
+}
+
+.try-working,
+.try-failed {
+  color: var(--muted-1);
+  font-style: italic;
+}
+
+.try-failed {
+  color: #a3281b;
+  font-style: normal;
+}
+
+.try-watch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  margin-bottom: 10px;
+  padding: 12px 20px;
+  background: var(--ink);
+  color: var(--button-text);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+}
+
+.try-watch:hover {
+  background: var(--button);
+}
+
+.try-save {
+  width: 100%;
+  min-height: 48px;
+}
+
+.try-save-sentence {
+  font-family: var(--font-heading);
+  font-size: 20px;
+}
+
+/* 12-month page */
+
+.timeline-controls .timeline-month-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.timeline-month-name {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.timeline-compare {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.timeline-compare input {
+  width: 22px;
+  height: 22px;
+}
+
+.timeline-lowest {
+  font-size: 18px;
+  margin: 8px 0 16px;
+}
+
+@media (max-width: 760px) {
+  .try-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .try-big {
+    font-size: 60px;
+  }
+
+  .try-keep-number {
+    font-size: 40px;
+  }
+
+  .try-start {
+    flex: 1 1 auto;
+  }
+}
+
+.timeline-compare input {
+  accent-color: var(--button);
+}

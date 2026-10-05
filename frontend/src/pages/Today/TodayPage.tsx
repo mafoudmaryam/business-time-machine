@@ -125,7 +125,7 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
 
       <p className="today-try">
         Thinking about a change?{" "}
-        <Link to={`/scenarios?business=${today.business_id}`} onClick={() => track("try_a_change_clicked", "today")}>
+        <Link to="/try" onClick={() => track("try_a_change_clicked", "today")}>
           Try a change
         </Link>
       </p>
