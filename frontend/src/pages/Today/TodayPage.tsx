@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
-import { getToday, getTodayNote, type TodayNote, type TodayOut } from "../../api";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { getBusinessImpact, getToday, getTodayNote, type TodayNote, type TodayOut } from "../../api";
 import { AskCoach } from "../../components/AskCoach";
 import { useConfig } from "../../components/config";
-import { ErrorBanner } from "../../components/ErrorBanner";
+import { EmptyState } from "../../components/EmptyState";
 import { InfoTip } from "../../components/InfoTip";
+import { LoadError } from "../../components/LoadError";
 import { Modal } from "../../components/Modal";
 import { Spinner } from "../../components/Spinner";
 import { Tour } from "../../components/Tour";
@@ -81,7 +82,16 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
   const [asking, setAsking] = useState(false);
   const [touring, setTouring] = useState(() => !tourSeen());
   const industryName = industryWord(today.industry);
+  const { hash } = useLocation();
+  // Nothing saved yet (no scenarios, no runs)? Then say so kindly and point at the one next step. If the count cannot be loaded, say nothing.
+  const saved = useAsync(() => getBusinessImpact(today.business_id), [today.business_id]);
+  const nothingSaved = saved.data !== null && saved.data.scenarios === 0 && saved.data.runs === 0;
   const coachOn = config.coachEnabled && today.note !== null;
+
+  // "Change this" on the how-we-worked-it-out page lands on #assumed: scroll to the list once the page is there.
+  useEffect(() => {
+    if (hash === "#assumed") document.getElementById("assumed")?.scrollIntoView?.({ block: "start" });
+  }, [hash, today.run_id]);
 
   useEffect(() => {
     rememberBusiness(today.business_id);
@@ -123,11 +133,21 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
 
       <TodayChart today={today} />
 
-      <p className="today-try">
-        Thinking about a change?{" "}
-        <Link to="/try" onClick={() => track("try_a_change_clicked", "today")}>
-          Try a change
-        </Link>
+      {nothingSaved ? (
+        <EmptyState compact title="You haven't tried a change yet" action={{ label: "Try a change", to: "/try" }}>
+          <p>Everything above is how things stand today. When you try a change, you'll see here what it could do.</p>
+        </EmptyState>
+      ) : (
+        <p className="today-try">
+          Thinking about a change?{" "}
+          <Link to="/try" onClick={() => track("try_a_change_clicked", "today")}>
+            Try a change
+          </Link>
+        </p>
+      )}
+
+      <p className="today-links">
+        <Link to="/how">How did we get these numbers?</Link> · <Link to="/share">Print or share this summary</Link>
       </p>
 
       <Assumptions
@@ -170,23 +190,23 @@ export function TodayPage() {
   if (today.error || !today.data) {
     return (
       <div className="page">
-        <h1>We couldn't open that business</h1>
-        <ErrorBanner message={today.error ?? "Something went wrong."} />
-        <div className="wizard-nav">
-          <button type="button" onClick={today.reload}>
-            Try again
-          </button>
-          <button
-            type="button"
-            className="secondary"
-            onClick={() => {
-              forgetBusiness();
-              navigate("/");
-            }}
-          >
-            Start fresh
-          </button>
-        </div>
+        <LoadError
+          message={today.error}
+          what="that business"
+          onRetry={today.reload}
+          extra={
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => {
+                forgetBusiness();
+                navigate("/");
+              }}
+            >
+              Start fresh
+            </button>
+          }
+        />
       </div>
     );
   }

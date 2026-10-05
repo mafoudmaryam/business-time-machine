@@ -37,6 +37,7 @@ beforeEach(() => {
   window.sessionStorage.clear();
   window.localStorage.setItem("btm.tourSeen", "1");
   vi.mocked(api.listIndustries).mockResolvedValue([]);
+  vi.mocked(api.getBusinessImpact).mockResolvedValue({ scenarios: 1, runs: 1 });
   vi.mocked(api.listBusinesses).mockResolvedValue(EXISTING);
   vi.mocked(api.getToday).mockResolvedValue(makeToday());
 });

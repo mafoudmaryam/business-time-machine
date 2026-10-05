@@ -12,7 +12,9 @@ import {
   type Interpretation,
   type ScenarioOut,
 } from "../../api";
+import { EmptyState } from "../../components/EmptyState";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { LoadError } from "../../components/LoadError";
 import { Spinner } from "../../components/Spinner";
 import { useDeleteFlow } from "../../components/useDeleteFlow";
 import { useAsync } from "../../hooks/useAsync";
@@ -187,8 +189,8 @@ export function ScenarioBuilderPage() {
       <div className="field">
         <label htmlFor="business-select">Business</label>
         {businesses.loading && <Spinner label="Loading businesses…" />}
-        <ErrorBanner message={businesses.error} />
-        {businesses.data && (
+        {businesses.error && <LoadError message={businesses.error} what="your businesses" onRetry={businesses.reload} />}
+        {businesses.data && businesses.data.length > 0 && (
           <select
             id="business-select"
             value={businessId ?? ""}
@@ -206,13 +208,23 @@ export function ScenarioBuilderPage() {
         )}
       </div>
 
+      {businesses.data && businesses.data.length === 0 && (
+        <EmptyState title="No businesses yet" action={{ label: "Set up a business", to: "/" }}>
+          <p>Add your café, restaurant or bakery first. It takes about a minute.</p>
+        </EmptyState>
+      )}
+
       {businessId && (
         <>
           <section>
             <h2>Existing scenarios</h2>
             {scenarios.loading && <Spinner label="Loading scenarios…" />}
-            <ErrorBanner message={scenarios.error} />
-            {scenarios.data && scenarios.data.length === 0 && <p className="empty-hint">No scenarios yet.</p>}
+            {scenarios.error && <LoadError message={scenarios.error} what="your scenarios" onRetry={scenarios.reload} />}
+            {scenarios.data && scenarios.data.length === 0 && (
+              <EmptyState compact title="No scenarios yet" secondary={{ label: "Or use the sliders on Try a change", to: "/try" }}>
+                <p>Describe a change in your own words below, or build one step by step. It will be listed here once you save it.</p>
+              </EmptyState>
+            )}
             {scenarios.data && scenarios.data.length > 0 && (
               <ul className="scenario-list">
                 {scenarios.data.map((s) => (

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   confirmScenario,
   listBusinesses,
@@ -9,13 +9,16 @@ import {
   type SimulationRunOut,
 } from "../../api";
 import { CoachCard } from "../../components/CoachCard";
+import { EmptyState } from "../../components/EmptyState";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { LoadError } from "../../components/LoadError";
 import { Spinner } from "../../components/Spinner";
 import { useDeleteFlow } from "../../components/useDeleteFlow";
 import { MAX_SCENARIOS_PER_RUN } from "../../constants";
 import { useAsync } from "../../hooks/useAsync";
 import { DEFAULT_CURRENCY, capitalize } from "../../lib/format";
 import { friendlyErrorMessage } from "../../lib/friendlyError";
+import { rememberBusiness } from "../../lib/session";
 import { heroImage } from "../../lib/images";
 import { ChartCaption } from "./ChartCaption";
 import { MetricChart } from "./MetricChart";
@@ -110,8 +113,8 @@ export function ComparisonDashboardPage() {
       <div className="field">
         <label htmlFor="business-select">Business</label>
         {businesses.loading && <Spinner label="Loading businesses…" />}
-        <ErrorBanner message={businesses.error} />
-        {businesses.data && (
+        {businesses.error && <LoadError message={businesses.error} what="your businesses" onRetry={businesses.reload} />}
+        {businesses.data && businesses.data.length > 0 && (
           <select
             id="business-select"
             value={businessId ?? ""}
@@ -129,13 +132,25 @@ export function ComparisonDashboardPage() {
         )}
       </div>
 
+      {businesses.data && businesses.data.length === 0 && (
+        <EmptyState title="No businesses yet" action={{ label: "Set up a business", to: "/" }}>
+          <p>Add your café, restaurant or bakery first. It takes about a minute.</p>
+        </EmptyState>
+      )}
+
       {businessId && (
         <>
           <div className="field">
             {scenarios.loading && <Spinner label="Loading scenarios…" />}
-            <ErrorBanner message={scenarios.error} />
+            {scenarios.error && <LoadError message={scenarios.error} what="your scenarios" onRetry={scenarios.reload} />}
             {scenarios.data && scenarios.data.length === 0 && (
-              <p className="empty-hint">This business has no scenarios yet.</p>
+              <EmptyState
+                title="No scenarios yet"
+                action={{ label: "Try a change", to: "/try" }}
+                secondary={{ label: "Describe one in your own words", to: "/scenarios" }}
+              >
+                <p>A scenario is one idea you want to test, like raising your prices. Try one and it will appear here, ready to compare.</p>
+              </EmptyState>
             )}
             {scenarios.data && scenarios.data.length > 0 && (
               <ScenarioPicker
@@ -208,6 +223,10 @@ export function ComparisonDashboardPage() {
                 currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
               />
               <RunMeta run={run} />
+              <p className="result-links">
+                <Link to="/how" onClick={() => rememberBusiness(run.business_id)}>How did we get these numbers?</Link> ·{" "}
+                <Link to={`/share?run=${run.id}`} onClick={() => rememberBusiness(run.business_id)}>Print or share this result</Link>
+              </p>
             </section>
           )}
         </>

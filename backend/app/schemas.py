@@ -605,3 +605,36 @@ class PreviewChangeOut(BaseModel):
     change: SketchPath
     baseline: SketchPath
     example: Optional[PriceExample] = None
+
+
+# ---------- "How we worked it out" and the share page ----------
+
+
+class HowItem(BaseModel):
+    """One number the owner gave us, in their own words."""
+
+    key: str
+    label: str
+    value: float
+    unit: Literal["money", "count", "percent", "days", "number"]
+
+
+class HowRun(BaseModel):
+    """What the stored run behind the Today page used, so the answer can be repeated."""
+
+    iterations: int
+    horizon: int
+    engine_version: str
+    seed: int
+
+
+class HowOut(BaseModel):
+    business_id: int
+    name: str
+    industry: str
+    currency: str
+    is_sample: bool
+    setup_source: str
+    told: list[HowItem]                 # the owner's own numbers
+    assumed: list[AssumptionOut]        # the numbers we filled in, each with its rule
+    run: HowRun

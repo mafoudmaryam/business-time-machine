@@ -168,3 +168,29 @@ def test_today_facts_are_json_and_rounded():
 def test_today_facts_show_a_loss_when_costs_beat_sales():
     _, _, facts = _today(TEMPLATES[0], customers_per_day=20, avg_spend=5, monthly_rent=6000, staff=6)
     assert facts["today"]["profit_a_month"] < 0
+
+
+# ---------- the answers can be read back ("what you told us") ----------
+
+from btm_engine import answers_from_baseline  # noqa: E402
+
+
+@pytest.mark.parametrize("tpl", TEMPLATES, ids=IDS)
+@pytest.mark.parametrize("answers", [
+    dict(customers_per_day=150, avg_spend=7, monthly_rent=3000, staff=4),
+    dict(customers_per_day=37.5, avg_spend=11.25, monthly_rent=0, staff=1),
+    dict(customers_per_day=900, avg_spend=4.1, monthly_rent=12_345.67, staff=22),
+])
+def test_the_four_answers_come_back_as_typed(tpl, answers):
+    back = answers_from_baseline(quick_baseline(tpl, **answers).baseline)
+    assert back["customers_per_day"] == pytest.approx(answers["customers_per_day"], abs=0.1)
+    assert back["avg_spend"] == answers["avg_spend"]
+    assert back["monthly_rent"] == pytest.approx(answers["monthly_rent"], abs=0.01)
+    assert back["staff"] == answers["staff"]
+
+
+def test_the_answers_of_an_industry_default_business():
+    tpl = TEMPLATES[0]
+    back = answers_from_baseline(tpl.default_baseline)
+    assert set(back) == {"customers_per_day", "avg_spend", "monthly_rent", "staff"}
+    assert back["customers_per_day"] == pytest.approx((tpl.default_baseline.customers * tpl.default_baseline.visits_per_regular + tpl.default_baseline.walk_in_visits) / 28, abs=0.1)

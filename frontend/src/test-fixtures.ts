@@ -64,3 +64,48 @@ export function makeSketch(over: Partial<import("./api").Sketch> = {}): import("
     ...over,
   };
 }
+
+/** A quick-start business as the "how we worked it out" page gets it (override any part). */
+export function makeHow(over: Partial<import("./api").HowOut> = {}): import("./api").HowOut {
+  return {
+    business_id: 1, name: "noah", industry: "cafe", currency: "USD", is_sample: false, setup_source: "quick",
+    told: [
+      { key: "customers_per_day", label: "Customers on a normal day", value: 150, unit: "count" },
+      { key: "avg_spend", label: "Average spend per customer", value: 7, unit: "money" },
+      { key: "monthly_rent", label: "Monthly rent", value: 3000, unit: "money" },
+      { key: "staff", label: "People who work there", value: 4, unit: "count" },
+    ],
+    assumed: [CASH_ASSUMPTION, RENT_ASSUMPTION, CHURN_ASSUMPTION],
+    run: { iterations: 1000, horizon: 12, engine_version: "0.1.0", seed: 1001 },
+    ...over,
+  };
+}
+
+function resultFor(name: string, profitStart: number, over: Record<string, number> = {}): import("./api").ScenarioResultOut {
+  const b = (start: number, step: number, spread: number) => band(start, step, spread);
+  const profit = b(profitStart, 10, 1500);
+  return {
+    scenario_id: name === "baseline" ? null : 5,
+    scenario_name: name,
+    bands: { profit, cash: b(30000, profitStart, 3000), customers: b(900, -1, 20), revenue: b(30000, 0, 1000), visits: b(7900, 0, 100), service_quality: b(1, 0, 0) },
+    summary: {
+      total_profit_p10: 52000, total_profit_p50: profitStart * 12, total_profit_p90: 84000, end_cash_p50: 100000, min_cash_p10: 25000,
+      prob_cash_negative: 0, first_month_cash_risk_10pct: null, end_customers_p50: 880, avg_service_quality_p50: 1,
+      ...over,
+    },
+  };
+}
+
+/** A saved run: "if you change nothing" and one scenario that does better. */
+export function makeRun(over: Partial<import("./api").SimulationRunOut> = {}): import("./api").SimulationRunOut {
+  return {
+    id: 2, business_id: 1, engine_version: "0.1.0", seed: 7, iterations: 1000, horizon: 12, created_at: "2026-10-05T10:00:00",
+    results: [
+      resultFor("baseline", 5600, { total_profit_p50: 67000, total_profit_p10: 50000, total_profit_p90: 82000, end_cash_p50: 90000, end_customers_p50: 900 }),
+      resultFor("Raise prices by 13% from November 2026", 6900, {
+        total_profit_p50: 82800, total_profit_p10: 61000, total_profit_p90: 99000, end_cash_p50: 112000, end_customers_p50: 861, prob_beats_baseline_profit: 0.93,
+      }),
+    ],
+    ...over,
+  };
+}

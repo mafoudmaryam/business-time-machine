@@ -106,6 +106,19 @@ def quick_baseline(tpl: IndustryTemplate, customers_per_day: float, avg_spend: f
     return QuickStart(baseline=baseline, assumed=assumed, warnings=warnings)
 
 
+def answers_from_baseline(base: BusinessBaseline) -> dict[str, float]:
+    """The four answers behind a quick-start business: the rules of `quick_baseline` run backwards, so the
+    "what you told us" list can show customers a day, spend, rent and staff the way the owner typed them.
+    Only meaningful while those numbers are still the quick-start ones (the app checks that)."""
+    visits = base.customers * base.visits_per_regular + base.walk_in_visits
+    return {
+        "customers_per_day": round(visits / base.open_days, 1),
+        "avg_spend": base.avg_ticket,
+        "monthly_rent": round(base.fixed_costs / (1 + OTHER_FIXED_SHARE_OF_RENT), 2),
+        "staff": base.staff_fte,
+    }
+
+
 def _plain(x: float) -> str:
     return f"{x:,.0f}" if x >= 10 else f"{x:g}"
 

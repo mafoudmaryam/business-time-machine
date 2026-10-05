@@ -313,7 +313,7 @@ describe("ScenarioBuilderPage: deleting a scenario (Advanced list)", () => {
     vi.mocked(api.listScenarios).mockResolvedValue([]);
     await user.click(within(box).getByRole("button", { name: "Delete" }));
     expect(api.deleteScenario).toHaveBeenCalledWith(5);
-    expect(await screen.findByText("No scenarios yet.")).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "No scenarios yet" })).toBeTruthy();
   });
 
   it("Cancel leaves it alone", async () => {

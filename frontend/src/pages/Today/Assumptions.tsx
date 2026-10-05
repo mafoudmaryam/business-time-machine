@@ -91,7 +91,7 @@ export function Assumptions({ businessId, currency, industryName, assumptions, i
   }
 
   return (
-    <section className="assumed-panel" aria-labelledby="assumed-title">
+    <section className="assumed-panel" id="assumed" aria-labelledby="assumed-title">
       <h2 id="assumed-title">What we assumed</h2>
       <p>
         {isSample

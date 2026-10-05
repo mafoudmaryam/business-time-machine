@@ -12,7 +12,7 @@ from jsonschema import ValidationError, validate as jsonschema_validate
 from sqlalchemy.orm import Session
 
 from btm_engine import (BusinessBaseline, DECISIONS_JSON_SCHEMA, Decision as EngineDecision,
-                        build_facts, build_today_facts, describe_decision, format_money, get_template, list_industries,
+                        answers_from_baseline, build_facts, build_today_facts, describe_decision, format_money, get_template, list_industries,
                         month_one_summary, preview_change, quick_baseline, run_scenarios, sample_assumed)
 
 from . import models
@@ -250,3 +250,8 @@ def sketch_change(business: models.Business, kind: str, amount: float, start_mon
     position always gives the same picture. Raises ValueError (plain reason) for an amount or month that makes no sense."""
     return preview_change(to_baseline(business.baseline), get_template(business.industry), kind, amount, start_month,
                           seed=1000 + business.id, currency=business.currency)
+
+
+def quick_answers(snapshot: models.BusinessSnapshot) -> dict:
+    """The four answers behind a quick-start business, read back from its numbers ("what you told us")."""
+    return answers_from_baseline(to_baseline(snapshot))

@@ -102,7 +102,8 @@ def get_today_run(db: Session, business: models.Business, now: Optional[dt.datet
                                         kind="today")
 
 
-def build_today(db: Session, business: models.Business) -> schemas.TodayOut:
+def build_today(db: Session, business: models.Business, with_note: bool = True) -> schemas.TodayOut:
+    """The Today payload. With `with_note=False` (the plain summary for the share page) no coach note is started: no AI job, no row."""
     run = get_today_run(db, business)
     facts = engine_bridge.build_today_run_facts(db, run)
     t = facts["today"]
@@ -110,10 +111,11 @@ def build_today(db: Session, business: models.Business) -> schemas.TodayOut:
     baseline = next(r for r in run.results if r.scenario_name == "baseline")
 
     note = None
-    try:
-        note = schemas.TodayNoteOut(**today_note.start_note(db, run, facts))
-    except today_note.CoachDisabled:
-        pass
+    if with_note:
+        try:
+            note = schemas.TodayNoteOut(**today_note.start_note(db, run, facts))
+        except today_note.CoachDisabled:
+            pass
 
     snapshot = business.baseline
     return schemas.TodayOut(

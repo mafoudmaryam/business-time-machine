@@ -1,9 +1,11 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
+import { HowPage } from "./pages/How/HowPage";
 import { BusinessSetupPage } from "./pages/BusinessSetup/BusinessSetupPage";
 import { ComparisonDashboardPage } from "./pages/Comparison/ComparisonDashboardPage";
 import { RunHistoryPage } from "./pages/RunHistory/RunHistoryPage";
 import { ScenarioBuilderPage } from "./pages/ScenarioBuilder/ScenarioBuilderPage";
+import { SharePage } from "./pages/Share/SharePage";
 import { StartPage } from "./pages/Start/StartPage";
 import { TimelinePage } from "./pages/Timeline/TimelinePage";
 import { TodayPage } from "./pages/Today/TodayPage";
@@ -26,6 +28,8 @@ export function App() {
         <Route path="/today" element={<TodayPage />} />
         <Route path="/try" element={<TryPage />} />
         <Route path="/timeline" element={<TimelinePage />} />
+        <Route path="/how" element={<HowPage />} />
+        <Route path="/share" element={<SharePage />} />
         {/* The earlier pages keep their addresses; they now live under "Advanced". */}
         <Route path="/setup" element={<BusinessSetupPage />} />
         <Route path="/scenarios" element={<ScenarioBuilderPage />} />

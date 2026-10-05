@@ -10,7 +10,7 @@ Describe a change, check the plan, and watch what could happen to your profit, c
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-TypeScript-61DAFB?logo=react&logoColor=black)
-![Tests](https://img.shields.io/badge/tests-546%20backend%20%C2%B7%20480%20frontend%20%C2%B7%20243%20engine-2F6F4F)
+![Tests](https://img.shields.io/badge/tests-564%20backend%20%C2%B7%20587%20frontend%20%C2%B7%20253%20engine-2F6F4F)
 ![Status](https://img.shields.io/badge/status-master's%20thesis%20project-8A4B2F)
 
 </div>
@@ -33,6 +33,7 @@ Most small food businesses make big choices on instinct: raise prices, hire a ba
 | **A simple start** | Pick a business type and answer four questions (customers on a normal day, average spend, rent, people who work there), or try a one-click sample café, restaurant or bakery. Everything else is filled in with typical numbers, and a "What we assumed" note shows each guess so you can change it. |
 | **The coach speaks first** | The Today page opens with 2 to 4 friendly sentences about your business as it is, three tiles (what you keep each month, your safety net, your lowest cash point) and a 12-month chart. A short 3-step tour appears the first time. |
 | **Try a change** | Move a price slider and see, as you drag, what you would keep each month, the catch (fewer visits) and ten dots for "ahead in N of 10 futures". It is labelled "just a sketch" and nothing is saved. "Watch the next 12 months" opens a month-by-month view with a good-case/bad-case band, and "Save this as a scenario" runs the full simulation with your coach. |
+| **How we worked it out** | A plain page that separates what you told us from what we assumed (each guess has a "Change this" link), explains how the answer is made without equations, and lists what we do not know. A one-page summary can be printed or saved as a PDF from your browser; nothing is sent anywhere. |
 | **Always a way back** | Every page except the start screen has a "← Back" button under the top bar. It returns to the page you were just on, or to the page one level up if you opened a link directly. The browser's own Back button keeps working. |
 | **Switch, delete, undo** | A business menu in the header lets you switch between your businesses, start a new one or try a sample. You can delete a scenario, a run or a whole business; the box says what else goes with it, and an Undo message stays for 8 seconds. Nothing is erased for good (it is hidden), and the AI logs are always kept. |
 | **Say it in your own words** | Type "raise prices 10% in March and hire a baker for the summer". The app turns it into editable steps with your own words shown beside each one, and asks a question when something is missing. |
@@ -152,9 +153,9 @@ COACH_PROVIDER=ollama
 ## Running the tests
 
 ```powershell
-cd backend;  .\.venv\Scripts\python.exe -m pytest      # 546 tests
-cd engine;   .\.venv\Scripts\python.exe -m pytest      # 243 tests
-cd frontend; npm test                                  # 480 tests
+cd backend;  .\.venv\Scripts\python.exe -m pytest      # 564 tests
+cd engine;   .\.venv\Scripts\python.exe -m pytest      # 253 tests
+cd frontend; npm test                                  # 587 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser:
@@ -203,7 +204,7 @@ The coach can be switched off (`COACH_ENABLED=false`) for a no-coach comparison 
 - [x] Scenario picker and "Confirm all"
 - [x] Beginner journey, phase 1: four-question start, sample business, Today page with the coach speaking first, tour, simpler navigation
 - [x] Beginner journey, phase 2: "Try a change" with a live price slider (just a sketch) and a 12-month timeline
-- [ ] Beginner journey, phase 3: "How did we work this out?" and a printable plan
+- [x] Beginner journey, phase 3: "How we worked it out", a one-page print/PDF summary, and friendly empty and error states
 - [ ] Beginner journey, phase 4: a journal that compares predictions with real months (pilot feature)
 - [ ] The rest of the visual redesign (see `docs/redesign-plan.md`)
 - [ ] Streaming explanations

@@ -124,7 +124,7 @@ export function chartRows(today: TodayOut, kind: ChartKind): ChartRow[] {
 
 // ---------- what we assumed ----------
 
-export function formatAssumptionValue(a: Assumption, currency: string): string {
+export function formatAssumptionValue(a: Pick<Assumption, "value" | "unit">, currency: string): string {
   switch (a.unit) {
     case "money":
       return formatMoney(a.value, currency);

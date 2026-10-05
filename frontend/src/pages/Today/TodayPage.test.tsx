@@ -10,7 +10,7 @@ import { TodayPage } from "./TodayPage";
 
 vi.mock("../../api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../api")>();
-  return { ...actual, getToday: vi.fn(), getTodayNote: vi.fn(), changeNumbers: vi.fn() };
+  return { ...actual, getToday: vi.fn(), getTodayNote: vi.fn(), changeNumbers: vi.fn(), getBusinessImpact: vi.fn() };
 });
 vi.mock("../../lib/events", () => ({ track: vi.fn() }));
 vi.mock("./TodayChart", () => ({ TodayChart: () => <p>The chart</p> }));
@@ -43,6 +43,7 @@ beforeEach(() => {
   markTourSeen(); // most tests are not about the tour
   rememberBusiness(1);
   vi.mocked(api.getToday).mockResolvedValue(makeToday());
+  vi.mocked(api.getBusinessImpact).mockResolvedValue({ scenarios: 1, runs: 1 });
 });
 
 afterEach(() => {
@@ -300,8 +301,9 @@ describe("Today: finding the business", () => {
   it("shows a friendly message, with Try again and Start fresh, when it cannot load", async () => {
     vi.mocked(api.getToday).mockRejectedValue(new api.ApiError(404, "business not found"));
     const { user } = mount();
-    expect(await screen.findByRole("heading", { name: "We couldn't open that business" })).toBeTruthy();
-    expect(screen.getByRole("alert").textContent).toContain("business not found");
+    expect(await screen.findByRole("heading", { name: "We couldn't load that business" })).toBeTruthy();
+    expect(screen.getByRole("alert").textContent).not.toContain("business not found"); // never the raw message
+    expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Start fresh" }));
     expect(await screen.findByText("Start page")).toBeTruthy();
     expect(getRememberedBusinessId()).toBeNull();

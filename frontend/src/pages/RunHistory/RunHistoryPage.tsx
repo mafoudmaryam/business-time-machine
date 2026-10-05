@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getSimulationRun, listBusinesses, listIndustries, listSimulationRuns, type SimulationRunOut } from "../../api";
 import { CoachCard } from "../../components/CoachCard";
+import { EmptyState } from "../../components/EmptyState";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { LoadError } from "../../components/LoadError";
 import { Spinner } from "../../components/Spinner";
 import { useDeleteFlow } from "../../components/useDeleteFlow";
 import { useAsync } from "../../hooks/useAsync";
 import { DEFAULT_CURRENCY, capitalize } from "../../lib/format";
 import { displayScenarioName } from "../../lib/scenarioLabel";
+import { rememberBusiness } from "../../lib/session";
 import { ChartCaption } from "../Comparison/ChartCaption";
 import { MetricChart } from "../Comparison/MetricChart";
 import { RiskAlerts } from "../Comparison/RiskAlert";
@@ -87,8 +90,8 @@ export function RunHistoryPage() {
       <div className="field">
         <label htmlFor="business-select">Business</label>
         {businesses.loading && <Spinner label="Loading businesses…" />}
-        <ErrorBanner message={businesses.error} />
-        {businesses.data && (
+        {businesses.error && <LoadError message={businesses.error} what="your businesses" onRetry={businesses.reload} />}
+        {businesses.data && businesses.data.length > 0 && (
           <select
             id="business-select"
             value={businessId ?? ""}
@@ -106,11 +109,25 @@ export function RunHistoryPage() {
         )}
       </div>
 
+      {businesses.data && businesses.data.length === 0 && (
+        <EmptyState title="No businesses yet" action={{ label: "Set up a business", to: "/" }}>
+          <p>Add your café, restaurant or bakery first. It takes about a minute.</p>
+        </EmptyState>
+      )}
+
       {businessId && (
         <>
           {runs.loading && <Spinner label="Loading run history…" />}
-          <ErrorBanner message={runs.error} />
-          {runs.data && runs.data.length === 0 && <p className="empty-hint">No simulation runs yet.</p>}
+          {runs.error && <LoadError message={runs.error} what="your run history" onRetry={runs.reload} />}
+          {runs.data && runs.data.length === 0 && (
+            <EmptyState
+              title="No runs yet"
+              action={{ label: "Try a change", to: "/try" }}
+              secondary={{ label: "Compare scenarios", to: "/compare" }}
+            >
+              <p>A run is one full simulation. When you save a change from Try a change, or run a comparison, its result is kept here.</p>
+            </EmptyState>
+          )}
           {runs.data && runs.data.length > 0 && (
             <table className="run-history-table">
               <thead>
@@ -166,6 +183,10 @@ export function RunHistoryPage() {
           {openedRun && (
             <section className="run-results">
               <h2>Run #{openedRun.id}</h2>
+              <p className="result-links">
+                <Link to="/how" onClick={() => rememberBusiness(openedRun.business_id)}>How did we get these numbers?</Link> ·{" "}
+                <Link to={`/share?run=${openedRun.id}`} onClick={() => rememberBusiness(openedRun.business_id)}>Print or share this result</Link>
+              </p>
               <CoachCard key={openedRun.id} runId={openedRun.id} businessId={openedRun.business_id} currency={currency} />
               <RiskAlerts results={openedRun.results} />
               <ChartCaption />

@@ -836,3 +836,34 @@ export interface Sketch {
 export function previewChange(businessId: number, body: SketchRequest, signal?: AbortSignal): Promise<Sketch> {
   return request(`/businesses/${businessId}/preview_change`, { method: "POST", body: JSON.stringify(body), signal });
 }
+
+// ---------- "How we worked it out" and the share page ----------
+
+/** One number the owner gave us (percent fields arrive as 0-1 ratios, like everywhere else). */
+export interface HowItem {
+  key: string;
+  label: string;
+  value: number;
+  unit: Unit;
+}
+
+export interface HowOut {
+  business_id: number;
+  name: string;
+  industry: string;
+  currency: string;
+  is_sample: boolean;
+  setup_source: string;
+  told: HowItem[]; // the owner's own numbers
+  assumed: Assumption[]; // the numbers we filled in, each with its rule
+  run: { iterations: number; horizon: number; engine_version: string; seed: number };
+}
+
+export function getHow(businessId: number): Promise<HowOut> {
+  return request(`/businesses/${businessId}/how`);
+}
+
+/** The same numbers as Today, without the coach note (so no AI is started). Used by the share page. */
+export function getSummary(businessId: number): Promise<TodayOut> {
+  return request(`/businesses/${businessId}/summary`);
+}

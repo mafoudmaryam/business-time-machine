@@ -4,6 +4,7 @@ import { useInAppDepth } from "../hooks/useInAppDepth";
 import { isStartScreen } from "../lib/backTarget";
 import { AppNav } from "./AppNav";
 import { BackButton } from "./BackButton";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 /** The frame around every page: skip link, top bar, a "← Back" button (on every page except the start screen), then the page.
  *  Pages do not add their own Back button; they just render inside this. */
@@ -19,7 +20,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <AppNav />
       <main id="main" tabIndex={-1}>
         {!isStartScreen(pathname) && <BackButton canGoBack={depth > 0} />}
-        {children}
+        <ErrorBoundary key={pathname}>{children}</ErrorBoundary>
       </main>
     </>
   );
