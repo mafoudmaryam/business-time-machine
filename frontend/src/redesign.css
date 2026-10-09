@@ -1,6 +1,24 @@
-/* ---------- The 2026 look ("direction B"): warm, light, friendly ----------
-   Loaded last, so it re-skins the older rules in index.css / beginner.css without changing what they do.
-   Colours, fonts and radii come from theme.css. Motion is at the bottom, and prefers-reduced-motion turns ALL of it off. */
+/* ====================================================================================================================
+   redesign.css: the 2026 look ("direction B": warm, light, friendly). Loaded LAST, so it re-skins the older rules in
+   index.css and beginner.css without changing what they do. Colours, fonts, radii and spacing come from theme.css.
+
+   Where things are (search for the heading):
+     Base                       page, headings, links, focus ring
+     Buttons                    pill buttons, .btn-amber (the one highlight), link buttons
+     Forms                      fields on the first pages
+     Top bar                    nav, active underline, "Get started", business switcher button
+     Cards                      the first cards, industry cards
+     Start page                 hero, photo cards, small steps, quote card, form
+     Try a change               big percent, slider, tiles, the coach note
+     Dialogs                    modal and backdrop
+     STEP 2 (every other page)  shared cards, fields, tables, charts, then Today, coach card, Timeline, My journal,
+                                How we worked it out, Run history / Compare / Advanced / Scenario builder, empty states,
+                                errors, undo bar, Share page (screen only)
+     Motion                     fade-up, hover lifts, confetti
+     Smaller screens            860px and 640px rules
+     Less motion                prefers-reduced-motion switches ALL motion off
+     Printing                   plain black on white; this block must stay last
+   ==================================================================================================================== */
 
 /* ---------- Base ---------- */
 
@@ -683,7 +701,7 @@ button.link-button:disabled {
   font-size: 2.6em;
   line-height: 0;
   vertical-align: -0.32em;
-  color: var(--amber);
+  color: var(--amber-ink);
 }
 
 .quote-card figcaption {
@@ -1240,6 +1258,1128 @@ button.link-button:disabled {
   }
 }
 
+/* =====================================================================================================================
+   STEP 2: every other page, in the same look as the start page and "Try a change".
+   Organised by page. Colours and sizes come from theme.css; nothing here invents a new colour.
+   ===================================================================================================================== */
+
+/* ---------- Shared: page entrance, cards, fields, tables ---------- */
+
+/* Every page fades up gently when it opens (switched off for people who asked for less motion, at the bottom). */
+.page {
+  animation: fade-up 0.55s var(--ease) backwards;
+}
+
+/* A "card" is white, 28px round, with a soft border and a gentle shadow. These are all the cards of the app. */
+.today-coach,
+.today-tile,
+.today-chart,
+.coach-card,
+.pick-card,
+.pick-panel,
+.journal-entry,
+.journal-form,
+.how-section,
+.describe-box,
+.decision-row,
+.run-meta,
+.metric-chart,
+.confirm-prompt,
+.assumed-panel,
+.empty-state,
+.load-error,
+.switcher-panel,
+.timeline-controls,
+.share-controls,
+.scenario-list li {
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.today-tile,
+.pick-card,
+.journal-entry,
+.metric-chart,
+.how-section {
+  transition: transform var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
+}
+
+.today-tile:hover,
+.pick-card:hover,
+.journal-entry:hover,
+.how-section:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lift);
+}
+
+/* Small coloured notes keep the sage / amber-soft family. */
+.sample-banner,
+.currency-notice,
+.error-banner,
+.success-message,
+.confirm-bar,
+.undo-toast {
+  border-radius: 24px;
+}
+
+.sample-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  background: var(--sage);
+  border: 2px solid var(--sage-edge);
+  color: var(--charcoal);
+}
+
+.sample-banner p {
+  margin: 0;
+}
+
+.currency-notice,
+.field-highlight input,
+.error-banner {
+  background: var(--amber-soft);
+  border: 2px solid var(--amber);
+  color: var(--charcoal);
+}
+
+.currency-notice {
+  padding: 12px 18px;
+}
+
+.error-banner {
+  padding: 12px 18px;
+  font-weight: 600;
+}
+
+.success-message {
+  padding: 12px 18px;
+  background: var(--sage);
+  border: 2px solid var(--sage-edge);
+  color: var(--green-heading);
+  font-weight: 600;
+}
+
+/* Fields on every page: big, rounded, a clear focus ring in amber with a green edge. */
+input[type="text"],
+input[type="number"],
+input[type="search"],
+input[type="email"],
+select,
+textarea {
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 2px solid var(--input-border);
+  border-radius: 16px;
+  background: var(--white);
+  color: var(--charcoal);
+  font-family: var(--font-body);
+  font-size: 17px;
+}
+
+textarea {
+  border-radius: 20px;
+  line-height: 1.5;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 3px solid var(--amber);
+  outline-offset: 1px;
+  border-color: var(--green);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--green);
+}
+
+.chip-row {
+  gap: 10px;
+}
+
+/* Tabs / chips: round, outlined, the chosen one filled green. */
+.chip-button {
+  min-height: 44px;
+  padding: 8px 20px;
+  border: 2px solid var(--green);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  color: var(--green-heading);
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.chip-button:hover:not(:disabled) {
+  background: var(--sage);
+}
+
+.chip-button[aria-pressed="true"] {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--white);
+}
+
+/* Tables: soft row striping, a sage header, rounded corners. */
+.chart-numbers table,
+.summary-table,
+.run-history-table,
+.share-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 2px solid var(--card-border);
+  border-radius: 20px;
+  background: var(--white);
+  font-size: 16px;
+}
+
+.chart-numbers th,
+.chart-numbers td,
+.summary-table th,
+.summary-table td,
+.run-history-table th,
+.run-history-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--card-border);
+  color: var(--charcoal);
+}
+
+.chart-numbers thead th,
+.summary-table thead th,
+.run-history-table thead th {
+  background: var(--sage);
+  color: var(--green-heading);
+  font-family: var(--font-heading);
+  font-weight: 800;
+}
+
+.chart-numbers tbody tr:nth-child(even),
+.summary-table tbody tr:nth-child(even),
+.run-history-table tbody tr:nth-child(even) {
+  background: var(--cream);
+}
+
+.chart-numbers tbody tr:last-child th,
+.chart-numbers tbody tr:last-child td,
+.summary-table tbody tr:last-child th,
+.summary-table tbody tr:last-child td,
+.run-history-table tbody tr:last-child th,
+.run-history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Every "show more" line is at least 44px tall, so it is easy to tap. */
+summary {
+  min-height: 44px;
+  padding-block: 8px;
+  cursor: pointer;
+  color: var(--green-heading);
+  font-weight: 700;
+}
+
+.chart-numbers summary,
+.coach-story summary,
+.idea-more summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--green-heading);
+  font-weight: 700;
+}
+
+/* Charts (Recharts): text, grid and tooltip in the app's own fonts and colours. */
+.recharts-text,
+.recharts-cartesian-axis-tick-value {
+  fill: var(--chart-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.recharts-legend-item-text {
+  color: var(--chart-text) !important;
+  font-size: 15px;
+}
+
+.recharts-default-tooltip {
+  border: 2px solid var(--card-border) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--shadow-lift);
+  font-family: var(--font-body);
+}
+
+.today-chart,
+.metric-chart {
+  padding: 22px 24px 18px;
+}
+
+.metric-chart {
+  margin-bottom: 20px;
+}
+
+.metric-chart h3,
+.today-chart h2 {
+  margin-top: 0;
+}
+
+/* ---------- Today ---------- */
+
+.today-coach {
+  margin: 20px 0;
+  padding: 24px 28px;
+  border-left-width: 2px;
+}
+
+.today-coach h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+}
+
+/* A small "from the model" tag stays on the coach's words, so it is clear who is speaking. */
+.today-coach-text {
+  font-size: 18px;
+  color: var(--charcoal);
+}
+
+.coach-adding {
+  font-style: normal;
+  color: var(--body);
+  font-size: 15px;
+}
+
+.coach-updated-tag,
+.sample-tag {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--sage);
+  color: var(--green-heading);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.today-tiles {
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.today-tile {
+  padding: 22px 24px;
+}
+
+.today-tile h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--body);
+}
+
+.today-tile .today-tile-number {
+  font-family: var(--font-heading);
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--green);
+}
+
+.today-tile-good .today-tile-number {
+  color: var(--green);
+}
+
+.today-tile-bad .today-tile-number {
+  color: var(--charcoal);
+}
+
+/* A caution is calm charcoal words inside an amber outline. Never red. */
+.today-tile .today-tile-risk {
+  display: inline-block;
+  padding: 4px 14px;
+  border: 2px solid var(--amber);
+  border-radius: 16px;
+  background: var(--white);
+  color: var(--charcoal);
+  font-weight: 600;
+}
+
+.assumed-panel {
+  padding: 22px 26px;
+}
+
+.assumed-row {
+  border-bottom: 2px solid var(--card-border);
+}
+
+.assumed-row-flag {
+  background: var(--amber-soft);
+  border-radius: 16px;
+}
+
+.assumed-tag {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--amber-soft);
+  border: 2px solid var(--amber);
+  color: var(--charcoal);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.disclaimer {
+  color: var(--body);
+  font-size: 15px;
+}
+
+/* ---------- The coach card (Compare, Run history) ---------- */
+
+.coach-card {
+  padding: 26px 28px;
+  border-left-width: 2px;
+  margin: 20px 0 28px;
+}
+
+.coach-headline {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  color: var(--green-heading);
+}
+
+.verdict-badge {
+  border: 2px solid transparent;
+}
+
+.verdict-good {
+  background: var(--sage);
+  color: var(--green-heading);
+  border-color: var(--sage-edge);
+}
+
+.verdict-try,
+.verdict-risky,
+.verdict-no {
+  background: var(--amber-soft);
+  color: var(--charcoal);
+  border-color: var(--amber);
+}
+
+.coach-tile {
+  border: 2px solid var(--card-border);
+  border-radius: 22px;
+  background: var(--cream);
+  padding: 14px 16px;
+}
+
+.coach-tile-title {
+  color: var(--body);
+}
+
+.coach-tile-values {
+  font-weight: 800;
+  color: var(--charcoal);
+}
+
+.coach-trend {
+  background: var(--sage);
+  color: var(--green-heading);
+}
+
+.trend-same .coach-trend {
+  background: var(--white);
+  border: 2px solid var(--card-border);
+  color: var(--body);
+}
+
+.trend-down .coach-trend {
+  background: var(--amber-soft);
+  border: 2px solid var(--amber);
+  color: var(--charcoal);
+}
+
+/* The "why" bars: green helps, amber (with stripes, so it is not colour alone) hurts. The + and - signs stay. */
+.bar-track {
+  height: 14px;
+  background: var(--sage);
+}
+
+.bar-helps .bar-fill {
+  background: var(--green);
+}
+
+.bar-hurts .bar-fill {
+  background: repeating-linear-gradient(135deg, var(--amber) 0 6px, var(--amber-soft) 6px 11px);
+  border: 2px solid var(--amber);
+}
+
+.bar-helps .bar-amount {
+  color: var(--green-heading);
+}
+
+.bar-hurts .bar-amount {
+  color: var(--charcoal);
+}
+
+.coach-card p.coach-watch,
+.coach-watch {
+  background: var(--amber-soft);
+  border: 2px solid var(--amber);
+  border-radius: 20px;
+  color: var(--charcoal);
+}
+
+.idea-card {
+  border: 2px solid var(--card-border);
+  border-radius: 24px;
+  background: var(--cream);
+  padding: 16px 18px;
+  transition: transform var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
+}
+
+.idea-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-soft);
+}
+
+.idea-chip {
+  background: var(--sage);
+  color: var(--green-heading);
+}
+
+.idea-chip.chip-bad {
+  background: var(--amber-soft);
+  border: 2px solid var(--amber);
+  color: var(--charcoal);
+}
+
+.idea-decisions,
+.idea-builds-on,
+.coach-footer {
+  color: var(--body);
+}
+
+.coach-card .coach-mode {
+  color: var(--body);
+}
+
+/* "Ask the coach": a quiet chat, round bubbles. */
+.chat-bubble,
+.chat-q,
+.chat-a {
+  border-radius: 22px;
+}
+
+.chat-q {
+  background: var(--sage);
+  color: var(--charcoal);
+}
+
+.chat-a {
+  background: var(--white);
+  border: 2px solid var(--card-border);
+  color: var(--charcoal);
+}
+
+.coach-examples .chip-button {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* ---------- Timeline (12 months) ---------- */
+
+.timeline-controls {
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+
+.timeline-month-name {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  color: var(--green-heading);
+}
+
+.timeline-compare {
+  min-height: 44px;
+}
+
+.timeline-compare input {
+  width: 26px;
+  height: 26px;
+}
+
+.timeline-lowest {
+  margin: 12px 0 18px;
+  padding: 14px 20px;
+  border: 2px solid var(--amber);
+  border-radius: 22px;
+  background: var(--white);
+  color: var(--charcoal);
+}
+
+/* ---------- My journal ---------- */
+
+.journal-form {
+  padding: 26px 28px;
+  margin-bottom: 24px;
+}
+
+.journal-form textarea {
+  border: 2px solid var(--input-border);
+  border-radius: 20px;
+  background: var(--white);
+}
+
+.journal-chart svg {
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+}
+
+.journal-chart-band {
+  fill: var(--chart-band);
+  fill-opacity: 1;
+  stroke: var(--chart-band-edge);
+  stroke-width: 1;
+}
+
+.journal-chart-line {
+  stroke: var(--chart-main);
+  stroke-width: 3;
+}
+
+.journal-chart-dot {
+  fill: var(--white);
+  stroke: var(--chart-caution-line);
+  stroke-width: 3;
+}
+
+.journal-chart figcaption {
+  color: var(--body);
+  font-size: 15px;
+}
+
+.journal-chart-key::before {
+  background: var(--chart-band);
+  border: 1px solid var(--chart-band-edge);
+}
+
+.journal-chart-key-line::before {
+  background: var(--chart-main);
+  border: none;
+}
+
+.journal-chart-key-dot::before {
+  background: var(--white);
+  border: 3px solid var(--chart-caution-line);
+  width: 12px;
+  height: 12px;
+}
+
+.journal-list {
+  display: grid;
+  gap: 20px;
+}
+
+.journal-entry {
+  padding: 22px 26px;
+  margin: 0;
+}
+
+.journal-entry-head h3 {
+  font-size: 24px;
+}
+
+.journal-metric {
+  color: var(--charcoal);
+  font-weight: 700;
+}
+
+/* Where the real month landed: inside / better / lower, in words first, colour second. */
+.journal-where {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--sage);
+  color: var(--green-heading);
+}
+
+.journal-where-below {
+  background: var(--amber-soft);
+  border: 2px solid var(--amber);
+  color: var(--charcoal);
+}
+
+.journal-where-above {
+  background: var(--sage);
+  border: 2px solid var(--green);
+}
+
+.journal-note {
+  font-style: normal;
+  color: var(--body);
+}
+
+.range-bar-track {
+  stroke: var(--card-border);
+  stroke-width: 2;
+}
+
+.range-bar-range {
+  fill: var(--chart-band);
+  stroke: var(--chart-band-edge);
+}
+
+.range-bar-expected {
+  stroke: var(--chart-baseline);
+}
+
+.range-bar-actual,
+.range-bar-actual-core {
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.range-bar-actual {
+  stroke: var(--chart-caution-line);
+  stroke-width: 16px;
+}
+
+.range-bar-actual-core {
+  stroke: var(--white);
+  stroke-width: 7px;
+}
+
+.journal-due,
+.journal-prompt {
+  padding: 14px 20px;
+  border: 2px solid var(--sage-edge);
+  border-radius: 24px;
+  background: var(--sage);
+}
+
+.journal-saved {
+  color: var(--green-heading);
+  font-weight: 600;
+}
+
+/* ---------- How we worked it out ---------- */
+
+.how-section {
+  padding: 24px 28px;
+  margin: 0 0 22px;
+}
+
+.how-section h2 {
+  margin-top: 0;
+  font-size: 24px;
+}
+
+.how-row {
+  padding: 12px 0;
+  border-bottom: 2px solid var(--card-border);
+}
+
+.how-row:last-child {
+  border-bottom: none;
+}
+
+.how-row-assumed {
+  background: var(--amber-soft);
+  border-radius: 16px;
+  padding-inline: 14px;
+}
+
+.how-limits li {
+  margin-bottom: 8px;
+}
+
+/* ---------- Run history, Compare, Advanced, Scenario builder ---------- */
+
+.run-meta {
+  padding: 14px 20px;
+  margin: 12px 0;
+  box-shadow: none;
+}
+
+.risk-alert {
+  padding: 14px 20px;
+  border: 2px solid var(--amber);
+  border-radius: 22px;
+  background: var(--white);
+  color: var(--charcoal);
+}
+
+.pick-grid {
+  gap: 16px;
+}
+
+.pick-card {
+  padding: 18px 20px;
+}
+
+.pick-card-chosen,
+.pick-card.chosen {
+  border-color: var(--green);
+  background: var(--sage);
+}
+
+.pick-counter {
+  color: var(--body);
+  font-weight: 600;
+}
+
+.pick-delete,
+.switcher-delete {
+  color: var(--charcoal);
+  text-decoration-color: var(--amber);
+}
+
+.scenario-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.scenario-list li {
+  padding: 14px 20px;
+}
+
+.decision-tiles {
+  gap: 14px;
+}
+
+.decision-tile {
+  border: 2px solid var(--card-border);
+  border-radius: 24px;
+  background: var(--white);
+  overflow: hidden;
+  transition: transform var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
+}
+
+.decision-tile:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lift);
+}
+
+.decision-tile.selected {
+  border-color: var(--green);
+  outline: 3px solid var(--amber);
+  outline-offset: 0;
+}
+
+.decision-tile-label {
+  font-family: var(--font-heading);
+  font-weight: 800;
+}
+
+.decision-form {
+  max-width: 600px;
+  padding: 24px 28px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.decision-row {
+  padding: 16px 20px;
+  box-shadow: none;
+}
+
+.decision-row-editing {
+  border-color: var(--green);
+}
+
+.decision-quote {
+  color: var(--body);
+}
+
+.confirm-bar {
+  padding: 12px 18px;
+  background: var(--sage);
+  border: 2px solid var(--sage-edge);
+}
+
+.describe-box {
+  padding: 22px 26px;
+}
+
+.confirm-prompt {
+  padding: 20px 24px;
+  border-color: var(--amber);
+}
+
+.hero-banner {
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.start-summary {
+  padding: 20px 24px;
+}
+
+.start-summary-loss {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.assumed-box {
+  padding: 20px 24px;
+}
+
+/* ---------- Empty states, errors, dialogs, undo ---------- */
+
+.empty-state,
+.load-error {
+  max-width: 640px;
+  margin: 28px auto;
+  padding: 32px 32px 28px;
+  text-align: center;
+  border-left-width: 2px;
+}
+
+.load-error {
+  border-color: var(--amber);
+}
+
+.empty-title {
+  margin: 0 0 8px;
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--green-heading);
+}
+
+.empty-text {
+  margin: 0 auto 18px;
+  max-width: 34em;
+  color: var(--body);
+}
+
+.empty-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.empty-state-compact {
+  padding: 18px 22px;
+  margin: 16px 0;
+  text-align: left;
+}
+
+.empty-action-quiet,
+button.quiet {
+  background: transparent;
+  color: var(--green-heading);
+  border-color: transparent;
+  text-decoration: underline;
+}
+
+button.danger {
+  background: var(--charcoal);
+  border-color: var(--charcoal);
+  color: var(--white);
+}
+
+button.danger:hover:not(:disabled) {
+  box-shadow: 0 0 0 4px var(--amber);
+}
+
+.confirm-delete-actions,
+.confirm-prompt-actions,
+.tour-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.undo-toast {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px 10px 22px;
+  background: var(--charcoal);
+  color: var(--white);
+  box-shadow: var(--shadow-lift);
+  border-radius: var(--radius-pill);
+}
+
+.undo-toast .undo-button {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: var(--charcoal);
+  min-height: 44px;
+}
+
+.undo-toast .undo-dismiss {
+  color: var(--white);
+}
+
+.switcher-panel {
+  padding: 14px;
+  box-shadow: var(--shadow-lift);
+}
+
+.switcher-item {
+  border-radius: 18px;
+}
+
+.switcher-item:hover {
+  background: var(--sage);
+}
+
+.spinner {
+  border-color: var(--sage);
+  border-top-color: var(--green);
+}
+
+.info-tip {
+  color: var(--green-heading);
+  border-bottom: 2px dotted var(--amber);
+}
+
+/* ---------- Share page (on screen only: printing stays plain black on white, see the very end of this file) ---------- */
+
+@media screen {
+  .share-controls {
+    padding: 20px 24px;
+  }
+
+  .share-sheet {
+    max-width: 840px;
+    padding: 32px 36px;
+    background: var(--white);
+    color: var(--charcoal);
+    border: 2px solid var(--card-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .share-sheet h1 {
+    color: var(--green-heading);
+  }
+
+  .share-header p,
+  .share-small,
+  .share-figure figcaption {
+    color: var(--body);
+    font-size: 15px;
+  }
+
+  .share-section h2 {
+    border-bottom: 2px solid var(--card-border);
+    color: var(--green-heading);
+  }
+
+  .share-fact .share-number {
+    font-weight: 800;
+    color: var(--green);
+  }
+
+  .plan-grid {
+    stroke: var(--chart-band-edge);
+  }
+
+  .plan-axis {
+    fill: var(--chart-text);
+  }
+
+  .plan-band {
+    fill: var(--chart-band);
+    fill-opacity: 1;
+  }
+
+  .plan-median {
+    stroke: var(--chart-main);
+    stroke-width: 3;
+  }
+
+  .plan-baseline {
+    stroke: var(--chart-baseline);
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+  }
+
+  .share-table th,
+  .share-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .share-table tbody tr:nth-child(even) {
+    background: var(--cream);
+  }
+
+  .share-table thead th {
+    background: var(--sage);
+    color: var(--green-heading);
+  }
+
+  .share-footer {
+    border-top: 2px solid var(--card-border);
+  }
+}
+
+/* ---------- Leftover pieces of the old look: the wizard steps, nav menu, tour ---------- */
+
+.wizard-nav {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.step-indicator {
+  color: var(--body);
+}
+
+.industry-picker {
+  margin-bottom: 20px;
+}
+
+.tour-count {
+  color: var(--body);
+}
+
+.skip-link:focus {
+  outline: 3px solid var(--amber);
+}
+
+.sample-tag {
+  margin-left: 10px;
+}
+
+.page > h1:first-child,
+.page > h2:first-child {
+  margin-top: 0;
+}
+
+/* The two buttons under the timeline: save (amber, the one highlight) and go back to change the amount. */
+.timeline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 8px 0 24px;
+}
+
+.timeline-actions .btn {
+  min-height: 52px;
+}
+
 /* ---------- Less motion: switch all of it off ---------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1255,6 +2395,12 @@ button.link-button:disabled {
   .btn:hover,
   .appnav-cta:hover,
   .photo-card:hover,
+  .today-tile:hover,
+  .pick-card:hover,
+  .journal-entry:hover,
+  .how-section:hover,
+  .idea-card:hover,
+  .decision-tile:hover,
   .industry-card:hover,
   .photo-card:hover .photo,
   .try-slider:hover::-webkit-slider-thumb {
@@ -1262,6 +2408,98 @@ button.link-button:disabled {
   }
 
   .confetti-layer {
+    display: none !important;
+  }
+}
+
+/* ---------- Printing: plain black on white, no decoration (the Share page's rule, kept on purpose) ----------
+   This block is last on purpose: it beats every colour, card and shadow above. Only fonts and layout survive. */
+
+@media print {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html,
+  body,
+  .page,
+  main,
+  .share-sheet {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .share-sheet {
+    max-width: none;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  .share-sheet h1,
+  .share-sheet h2,
+  .share-sheet h3,
+  .share-sheet p,
+  .share-sheet li,
+  .share-sheet th,
+  .share-sheet td,
+  .share-sheet figcaption,
+  .share-sheet .share-number,
+  .share-sheet .share-small,
+  .share-sheet a {
+    color: #000000 !important;
+    background: transparent !important;
+  }
+
+  .share-sheet h2 {
+    border-bottom: 1px solid #000000;
+  }
+
+  .share-table,
+  .share-table th,
+  .share-table td {
+    border-radius: 0;
+    background: #ffffff !important;
+    border-color: #bbbbbb;
+  }
+
+  .plan-band {
+    fill: #000000;
+    fill-opacity: 0.12;
+  }
+
+  .plan-median {
+    stroke: #000000;
+    stroke-width: 2.5;
+  }
+
+  .plan-baseline {
+    stroke: #444444;
+    stroke-width: 1.2;
+    stroke-dasharray: 5 4;
+  }
+
+  .plan-grid {
+    stroke: #bbbbbb;
+  }
+
+  .plan-axis {
+    fill: #000000;
+  }
+
+  .share-footer {
+    border-top: 2px solid #000000;
+  }
+
+  .confetti-layer,
+  .skip-link,
+  .appnav,
+  .no-print {
     display: none !important;
   }
 }

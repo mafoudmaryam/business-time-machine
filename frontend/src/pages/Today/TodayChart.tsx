@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { TodayOut } from "../../api";
+import { CHART } from "../../chartTheme";
 import { formatMoney } from "../../lib/format";
 import { chartRows, type ChartKind } from "../../lib/todayView";
 
@@ -35,7 +36,7 @@ export function TodayChart({ today }: { today: TodayOut }) {
         ))}
       </div>
       <p className="field-help">
-        {tab.help} The line is the most likely path; the shaded area runs from a bad case to a good case.
+        {tab.help} The solid green line is the most likely path; the dashed amber line is the bad case; the shaded area runs from a bad case to a good case.
       </p>
       <div
         role="img"
@@ -43,7 +44,7 @@ export function TodayChart({ today }: { today: TodayOut }) {
       >
         <ResponsiveContainer width="100%" height={280}>
           <ComposedChart data={rows} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} />
             <XAxis dataKey="label" interval="preserveStartEnd" minTickGap={24} />
             <YAxis tickFormatter={money} width={84} />
             <Tooltip
@@ -55,8 +56,9 @@ export function TodayChart({ today }: { today: TodayOut }) {
                 return [money(Number(value)), String(name)];
               }}
             />
-            <Area type="monotone" dataKey="range" name="Range" stroke="none" fill="#6b4331" fillOpacity={0.15} isAnimationActive={false} />
-            <Line type="monotone" dataKey="p50" name="Most likely" stroke="#6b4331" strokeWidth={2} dot={false} isAnimationActive={false} />
+            <Area type="monotone" dataKey="range" name="Range" stroke={CHART.bandEdge} strokeWidth={1} fill={CHART.band} fillOpacity={1} isAnimationActive={false} />
+            <Line type="monotone" dataKey="p10" name="Bad case" stroke={CHART.cautionLine} strokeWidth={2} strokeDasharray="6 4" dot={false} isAnimationActive={false} />
+            <Line type="monotone" dataKey="p50" name="Most likely" stroke={CHART.main} strokeWidth={3} dot={false} isAnimationActive={false} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

@@ -242,15 +242,15 @@ button.secondary:hover:not(:disabled) {
 }
 
 .today-tile-good .today-tile-number {
-  color: #11694b;
+  color: var(--green);
 }
 
 .today-tile-bad .today-tile-number {
-  color: #a3281b;
+  color: var(--charcoal);
 }
 
 .today-tile .today-tile-risk {
-  color: #a3281b;
+  color: var(--charcoal);
   font-weight: 600;
 }
 
@@ -308,7 +308,7 @@ button.secondary:hover:not(:disabled) {
 }
 
 .assumed-row-flag {
-  background: #fbf0d9;
+  background: var(--amber-soft);
   padding-inline: 8px;
 }
 
@@ -524,7 +524,7 @@ button.secondary:hover:not(:disabled) {
 }
 
 .switcher-delete {
-  color: #a3281b;
+  color: var(--charcoal);
   min-height: 44px;
   padding: 0 8px;
 }
@@ -561,8 +561,8 @@ button.secondary:hover:not(:disabled) {
 }
 
 button.danger {
-  background: #a3281b;
-  border-color: #a3281b;
+  background: var(--charcoal);
+  border-color: var(--charcoal);
 }
 
 .confirm-delete-actions {
@@ -578,7 +578,7 @@ button.danger {
 }
 
 .pick-delete {
-  color: #a3281b;
+  color: var(--charcoal);
 }
 
 .undo-region {
@@ -845,8 +845,8 @@ button.danger {
 
 .try-note {
   padding: 14px 18px;
-  background: #f6e7d2;
-  border: 1px solid #e6cfae;
+  background: var(--sage);
+  border: 1px solid var(--sage-edge);
   border-radius: 12px;
   color: var(--ink);
 }
@@ -895,7 +895,7 @@ button.danger {
   font-size: 48px;
   font-weight: 700;
   line-height: 1.1;
-  color: #11694b;
+  color: var(--green);
   font-variant-numeric: lining-nums;
 }
 
@@ -937,7 +937,7 @@ button.danger {
 }
 
 .try-failed {
-  color: #a3281b;
+  color: var(--error);
   font-style: normal;
 }
 
@@ -1045,7 +1045,7 @@ button.danger {
 }
 
 .load-error {
-  border-left-color: #a3281b;
+  border-left-color: var(--amber);
 }
 
 .empty-title {
@@ -1162,8 +1162,8 @@ button.danger {
   margin-left: 6px;
   padding: 1px 10px;
   border-radius: 999px;
-  background: #f6e7d2;
-  border: 1px solid #e6cfae;
+  background: var(--sage);
+  border: 1px solid var(--sage-edge);
   color: var(--ink);
   font-size: 12px;
   font-weight: 600;
@@ -1212,7 +1212,7 @@ button.danger {
 .share-header p,
 .share-small {
   margin: 0 0 6px;
-  color: #4a3527;
+  color: var(--body);
   font-size: 14px;
 }
 
@@ -1227,7 +1227,7 @@ button.danger {
 .share-section h2 {
   margin: 0 0 10px;
   font-size: 21px;
-  border-bottom: 1px solid #cdbfae;
+  border-bottom: 1px solid var(--card-border);
   padding-bottom: 4px;
 }
 
@@ -1265,7 +1265,7 @@ button.danger {
 .share-figure figcaption {
   margin-top: 4px;
   font-size: 13px;
-  color: #4a3527;
+  color: var(--body);
 }
 
 .plan-chart {
@@ -1276,28 +1276,28 @@ button.danger {
 }
 
 .plan-grid {
-  stroke: #d9ccbd;
+  stroke: var(--card-border);
   stroke-width: 1;
 }
 
 .plan-axis {
   font-family: var(--font-body);
   font-size: 12px;
-  fill: #4a3527;
+  fill: var(--body);
 }
 
 .plan-band {
-  fill: #6b4331;
+  fill: var(--green);
   fill-opacity: 0.16;
 }
 
 .plan-median {
-  stroke: #6b4331;
+  stroke: var(--green);
   stroke-width: 2.5;
 }
 
 .plan-baseline {
-  stroke: #6f5a4a;
+  stroke: var(--chart-baseline);
   stroke-width: 1.2;
   stroke-dasharray: 5 4;
 }
@@ -1311,7 +1311,7 @@ button.danger {
 .share-table th,
 .share-table td {
   padding: 6px 8px;
-  border-bottom: 1px solid #d9ccbd;
+  border-bottom: 1px solid var(--card-border);
   text-align: right;
 }
 
@@ -1552,7 +1552,7 @@ button.linklike {
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--white);
   color: var(--ink);
 }
 
@@ -1637,7 +1637,7 @@ button.linklike {
 }
 
 .range-bar-range {
-  fill: #d9c4ae;
+  fill: var(--chart-band-edge);
 }
 
 .range-bar-expected {
@@ -1688,7 +1688,7 @@ button.linklike {
 }
 
 .journal-chart-band {
-  fill: #d9c4ae;
+  fill: var(--chart-band-edge);
   fill-opacity: 0.75;
 }
 
@@ -1719,7 +1719,7 @@ button.linklike {
   height: 10px;
   margin-right: 6px;
   border-radius: 2px;
-  background: #d9c4ae;
+  background: var(--chart-band-edge);
 }
 
 .journal-chart-key-line::before {

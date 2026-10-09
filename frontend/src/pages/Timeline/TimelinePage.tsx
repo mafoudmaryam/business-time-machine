@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { Area, CartesianGrid, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { getBusiness } from "../../api";
+import { CHART } from "../../chartTheme";
 import { useAsync } from "../../hooks/useAsync";
 import { useSketch } from "../../hooks/useSketch";
 import { track } from "../../lib/events";
+import { SaveDialog } from "../Try/SaveDialog";
 import { DEFAULT_CURRENCY, formatCount, formatMoney } from "../../lib/format";
 import { getRememberedBusinessId } from "../../lib/session";
 import { lowestCashSentence, monthCard, monthValueText, parseTimelineQuery, timelineRows, type TimelineMetric } from "../../lib/sketch";
@@ -24,6 +26,7 @@ export function TimelinePage() {
   const [month, setMonth] = useState(1);
   const [compare, setCompare] = useState(true);
   const [metric, setMetric] = useState<TimelineMetric>("profit");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     track("screen_view", "timeline");
@@ -92,7 +95,7 @@ export function TimelinePage() {
             >
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={rows} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} />
                   <XAxis dataKey="label" interval="preserveStartEnd" minTickGap={24} />
                   <YAxis tickFormatter={fmt} width={84} />
                   <Tooltip
@@ -101,12 +104,12 @@ export function TimelinePage() {
                       return [fmt(Number(value)), String(name)];
                     }}
                   />
-                  <Area type="monotone" dataKey="range" name="Range" stroke="none" fill="#6b4331" fillOpacity={0.15} isAnimationActive={false} />
+                  <Area type="monotone" dataKey="range" name="Range" stroke={CHART.bandEdge} strokeWidth={1} fill={CHART.band} fillOpacity={1} isAnimationActive={false} />
                   {compare && (
-                    <Line type="monotone" dataKey="baseline" name="If you change nothing" stroke="#6f5a4a" strokeWidth={1} strokeDasharray="5 4" dot={false} isAnimationActive={false} />
+                    <Line type="monotone" dataKey="baseline" name="If you change nothing" stroke={CHART.baseline} strokeWidth={2} strokeDasharray="6 4" dot={false} isAnimationActive={false} />
                   )}
-                  <Line type="monotone" dataKey="p50" name="With the change" stroke="#6b4331" strokeWidth={2.5} dot={false} isAnimationActive={false} />
-                  <ReferenceLine x={label} stroke="#2b1d16" strokeDasharray="2 2" />
+                  <Line type="monotone" dataKey="p50" name="With the change" stroke={CHART.main} strokeWidth={3} dot={false} isAnimationActive={false} />
+                  <ReferenceLine x={label} stroke={CHART.text} strokeDasharray="2 2" />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
@@ -157,7 +160,28 @@ export function TimelinePage() {
               {compare && <p>{formatCount(card.customersBaseline)} if you change nothing.</p>}
             </div>
           </div>
+          {query.type === "price" && (
+            <div className="timeline-actions">
+              <button
+                type="button"
+                className="btn btn-amber"
+                onClick={() => {
+                  track("save_opened", "timeline");
+                  setSaving(true);
+                }}
+              >
+                Save as a plan
+              </button>
+              <Link className="btn btn-secondary" to="/try">
+                Change the amount
+              </Link>
+            </div>
+          )}
         </>
+      )}
+
+      {saving && sketch && businessId && (
+        <SaveDialog businessId={businessId} percent={query.amount} startMonth={query.start} sketch={sketch} onClose={() => setSaving(false)} />
       )}
     </div>
   );

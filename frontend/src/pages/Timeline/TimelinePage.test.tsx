@@ -5,15 +5,17 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { axe } from "vitest-axe";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as api from "../../api";
+import { celebrate } from "../../lib/celebrate";
 import { rememberBusiness } from "../../lib/session";
 import { makeSketch } from "../../test-fixtures";
 import { TimelinePage } from "./TimelinePage";
 
 vi.mock("../../api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../api")>();
-  return { ...actual, getBusiness: vi.fn(), previewChange: vi.fn(), requestCoach: vi.fn(), askCoach: vi.fn() };
+  return { ...actual, getBusiness: vi.fn(), previewChange: vi.fn(), requestCoach: vi.fn(), askCoach: vi.fn(), createScenario: vi.fn(), simulateBusiness: vi.fn() };
 });
 vi.mock("../../lib/events", () => ({ track: vi.fn() }));
+vi.mock("../../lib/celebrate", () => ({ celebrate: vi.fn(), prefersReducedMotion: () => false }));
 // Recharts needs a real layout to draw; here only the words and numbers around it matter.
 vi.mock("recharts", () => {
   const Box = ({ children }: { children?: ReactNode }) => <div>{children}</div>;
@@ -215,6 +217,40 @@ describe("The next 12 months: the chart and its numbers", () => {
     expect(first.textContent).toContain("$5,560");
     await user.click(screen.getByRole("switch"));
     expect(within(screen.getByRole("table")).getAllByRole("columnheader")).toHaveLength(4);
+  });
+});
+
+describe("The next 12 months: save as a plan", () => {
+  it("offers an amber 'Save as a plan' button for a price change, and nothing is saved by looking", async () => {
+    mount("?change=price&amount=7&start=3");
+    await settle(250);
+    const button = screen.getByRole("button", { name: "Save as a plan" });
+    expect(button.className).toContain("btn-amber");
+    expect(api.createScenario).not.toHaveBeenCalled();
+    expect(celebrate).not.toHaveBeenCalled(); // seeing a forecast is never celebrated
+  });
+
+  it("asks the owner to confirm the plain sentence, saves the plan, then celebrates once", async () => {
+    vi.mocked(api.createScenario).mockResolvedValue({ id: 31 } as api.ScenarioOut);
+    vi.mocked(api.simulateBusiness).mockResolvedValue({ id: 77 } as api.SimulationRunOut);
+    const { user } = mount("?change=price&amount=7&start=3");
+    await settle(250);
+    await user.click(screen.getByRole("button", { name: "Save as a plan" }));
+    const dialog = screen.getByRole("dialog", { name: "Save this as a plan?" });
+    expect(api.createScenario).not.toHaveBeenCalled(); // not until the owner says yes
+    await user.click(within(dialog).getByRole("button", { name: "Yes, that's what I mean" }));
+    await settle(50);
+    expect(api.createScenario).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(api.createScenario).mock.calls[0][2]).toEqual([
+      { type: "price", start_month: 3, value: 7, unit: "percent", source: "user", confirmed: true, confirmedVia: "try_change" },
+    ]);
+    expect(celebrate).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not offer saving for a kind of change that has no plan page yet", async () => {
+    mount("?change=hours&amount=2&start=1");
+    await settle(250);
+    expect(screen.queryByRole("button", { name: "Save as a plan" })).toBeNull();
   });
 });
 

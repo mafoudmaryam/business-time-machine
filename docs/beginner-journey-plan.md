@@ -273,3 +273,10 @@ I stop after each commit for your review before starting the next phase.
 - Staff are treated as full-time people, and the assumptions note says so. Currency is per business (USD default) with a small "Change currency" link on the start screen.
 - Old URLs keep working under "Advanced". `vitest-axe` added as a dev-only dependency. The journal will be labelled a pilot feature. The "big purchase" tile and PDF generation are cut. Pause for review after each phase.
 - Phase 1 answers I chose myself (my recommended options): Q5 part-timers count as one full-time person and the owner may count themself; Q6 currency lives in a small link on the start screen; Q7 framing of the journal is left for Phase 4; Q9 old URLs unchanged; Q11 pause after every phase.
+
+
+## 14. Roadmap status (updated 2026-10-09)
+
+- Phases 1 to 4 (simple start and Today, Try a change and the 12-month view, How we worked it out / share page / empty states, My journal): **built.**
+- Visual redesign ("direction B"): **built on every page**, in two steps (step 1: tokens, nav, start page, Try a change; step 2: every other page, one chart colour system, confetti on saving a plan or a journal month, a plain black-and-white print page). It replaces `docs/redesign-plan.md`. The rules are recorded in `CLAUDE.md`.
+- Not built: study mode (see `docs/study-mode-plan.md`, waiting for answers to its open questions), reminders by email or push, streaming explanations, accounts.

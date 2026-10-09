@@ -58,6 +58,7 @@
   --card-border: #ddebdf;   /* the 2px card outline */
   --input-border: #6b9777;  /* form controls need a 3:1 edge, so they get a stronger green than cards */
   --white: #ffffff;
+  --sage-edge: #c3dec8;     /* a slightly deeper sage for the edge of a sage panel and the rim of a chart band */
   --error: #9b2c1f;         /* the only red: form errors, in dark brick so it is calm and still readable */
 
   /* Shadows (soft and green-tinted) */
@@ -82,6 +83,25 @@
   --font-heading: "Nunito", "Segoe UI", system-ui, sans-serif;
   --font-body: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
   --font-script: "Patrick Hand", "Segoe Print", "Comic Sans MS", cursive;
+
+  /* ONE chart colour system, used by every chart (Today, Timeline, Compare, Journal, Share):
+     green = the main / most likely line, amber = caution / the bad case, sage = the range band, charcoal = text and the
+     "if you change nothing" line. Lines also differ by dash pattern, so colour is never the only clue. */
+  --chart-main: var(--green);
+  --chart-caution: var(--amber);
+  --chart-caution-line: var(--amber-ink);
+  --chart-band: var(--sage);
+  --chart-band-edge: var(--sage-edge);
+  --chart-text: var(--charcoal);
+  --chart-baseline: var(--body);
+
+  /* Good / careful / bad, for the coach card and tiles: no red anywhere. Bad = charcoal on a soft amber. */
+  --good: var(--green-heading);
+  --good-bg: var(--sage);
+  --warn: var(--amber-ink);
+  --warn-bg: var(--amber-soft);
+  --bad: var(--charcoal);
+  --bad-bg: var(--amber-soft);
 
   /* The names the older stylesheets already use now point at the new palette, so every page picks it up. */
   --page: var(--cream);

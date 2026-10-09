@@ -10,7 +10,7 @@ Describe a change, check the plan, and watch what could happen to your profit, c
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-TypeScript-61DAFB?logo=react&logoColor=black)
-![Tests](https://img.shields.io/badge/tests-619%20backend%20%C2%B7%20673%20frontend%20%C2%B7%20278%20engine-2F6F4F)
+![Tests](https://img.shields.io/badge/tests-619%20backend%20%C2%B7%20712%20frontend%20%C2%B7%20278%20engine-2F6F4F)
 ![Status](https://img.shields.io/badge/status-master's%20thesis%20project-8A4B2F)
 
 </div>
@@ -32,7 +32,7 @@ Most small food businesses make big choices on instinct: raise prices, hire a ba
 |---|---|
 | **A simple start** | Pick a business type and answer four questions (customers on a normal day, average spend, rent, people who work there), or try a one-click sample café, restaurant or bakery. Everything else is filled in with typical numbers, and a "What we assumed" note shows each guess so you can change it. |
 | **The coach speaks first** | The Today page opens with 2 to 4 friendly sentences about your business as it is, three tiles (what you keep each month, your safety net, your lowest cash point) and a 12-month chart. A short 3-step tour appears the first time. |
-| **Try a change** | Move a price slider and see, as you drag, what you would keep each month, the catch (fewer visits) and ten dots for "ahead in N of 10 futures". It is labelled "just a sketch" and nothing is saved. "Watch the next 12 months" opens a month-by-month view with a good-case/bad-case band, and "Save this as a scenario" runs the full simulation with your coach. |
+| **Try a change** | Move a price slider and see, as you drag, what you would keep each month, the catch (fewer visits) and ten dots for "ahead in N of 10 futures". It is labelled "just a sketch" and nothing is saved. "Watch the next 12 months" opens a month-by-month view with a good-case/bad-case band, and "Save as a plan" runs the full simulation with your coach. |
 | **How we worked it out** | A plain page that separates what you told us from what we assumed (each guess has a "Change this" link), explains how the answer is made without equations, and lists what we do not know. A one-page summary can be printed or saved as a PDF from your browser; nothing is sent anywhere. |
 | **My journal (pilot)** | Once a month you write down what really happened (what you kept, money in the bank, customer visits). The app puts it next to what it expected, in plain words and a small chart, and is honest when its forecasts were off. You can edit, delete (with undo) or download your journal as a spreadsheet file. No AI is involved, and nothing leaves your computer. |
 | **Always a way back** | Every page except the start screen has a "← Back" button under the top bar. It returns to the page you were just on, or to the page one level up if you opened a link directly. The browser's own Back button keeps working. |
@@ -45,17 +45,39 @@ Most small food businesses make big choices on instinct: raise prices, hire a ba
 | **Three industries** | Café, restaurant and bakery templates (the bakery includes waste). Currency is set per business. |
 | **Plain language everywhere** | No jargon: "if you change nothing", "bad case / most likely / good case", "in 3 of 10 futures", and a "?" tip next to every input and chart. |
 
-![The Today page: the coach speaks first, then three tiles](docs/images/today.jpg)
+![The start page: a welcome panel, a photo, and a slim "Continue" pill for returning visitors](docs/images/redesign-step1/start-1440-1-top-bar-continue-hero.jpg)
+
+*The start page. New visitors read what the app is for; people who already have a business see a slim "Continue" pill first.*
+
+![The Today page: the coach speaks first, then three tiles](docs/images/redesign-step2/today-1440-1-coach-and-tiles.jpg)
 
 *The Today page. The coach opens with a few plain sentences, then three tiles show what you keep each month, your safety net and your lowest cash point.*
 
-![The comparison page: the coach's verdict, now-and-later tiles and a "Why?" breakdown for a +10% price rise](docs/images/compare-coach.jpg)
+![The Try a change page: a slider, and three tiles for what you keep, money in the bank and the catch](docs/images/redesign-step1/try-desktop-2-result-tiles.jpg)
 
-*The Compare page. The coach shows a verdict, profit, cash and regulars now versus in two years, and why the profit changes.*
+*Try a change. A slider shows, as you drag, what a price rise could do. It is labelled "just a sketch" and nothing is saved.*
 
-![The scenario builder with the "Confirm all" bar above the steps](docs/images/scenario-confirm-all.jpg)
+![The 12-month view: a green most-likely line, a sage band from bad case to good case, and the amber Save as a plan button](docs/images/redesign-step2/timeline-1440-2-save-as-a-plan.jpg)
 
-*The scenario builder. Every step must be confirmed before anything can be simulated.*
+*The next 12 months, month by month, with "Save as a plan" in amber.*
+
+![The run page: the coach's verdict, now-and-later tiles and a "Why?" breakdown for a +7% price rise](docs/images/redesign-step2/run-history-1440-coach-card.jpg)
+
+*A saved result. The coach shows a verdict, profit, cash and regulars now versus in two years, and why the profit changes.*
+
+![My journal: a forecast band with the real months marked, and a card for each month written down](docs/images/redesign-step2/journal-1440-2-entry-cards.jpg)
+
+*My journal. What really happened, set next to what we expected, in words and a small picture.*
+
+![The scenario builder with the "Describe it in your own words" box](docs/images/redesign-step2/scenario-builder-1440.jpg)
+
+*The scenario builder (under Advanced). Every step must be confirmed before anything can be simulated.*
+
+On a phone every page fits the screen and every button is at least 44 pixels tall (see `docs/images/redesign-step2/today-390.jpg`, `journal-390.jpg` and `share-390.jpg`).
+
+## The look
+
+The 2026 look is warm, light and friendly: cream pages, green buttons and numbers, soft sage panels, and one amber highlight for the main action. All colours, fonts, shapes and spacing live in `frontend/src/theme.css`; `frontend/src/redesign.css` is organised page by page. The three fonts (Nunito, Inter, Patrick Hand) are served from the app itself, so it looks the same offline. Motion is gentle and switches off completely for people who ask their device for less motion. The Share page prints as plain black on white.
 
 ## How it works
 
@@ -207,13 +229,13 @@ The coach can be switched off (`COACH_ENABLED=false`) for a no-coach comparison 
 - [x] Beginner journey, phase 2: "Try a change" with a live price slider (just a sketch) and a 12-month timeline
 - [x] Beginner journey, phase 3: "How we worked it out", a one-page print/PDF summary, and friendly empty and error states
 - [x] Beginner journey, phase 4: a journal that compares predictions with real months (pilot feature)
-- [ ] The rest of the visual redesign (see `docs/redesign-plan.md`)
+- [x] The 2026 visual redesign ("direction B"): new look on every page, one colour system for all charts, self-hosted fonts, gentle motion (see `docs/redesign-plan.md`, superseded, and the notes in `CLAUDE.md`)
 - [ ] Streaming explanations
 - [ ] PostgreSQL, user accounts and Docker, as sketched in `CLAUDE.md`
 
 ## Credits
 
-Industry photographs are from Pexels, credited in `frontend/public/images/CREDITS.md`.
+Industry photographs are from Pexels. The four start-page photos are not yet fully credited (the hero is AI-generated). Everything is listed in `frontend/public/images/CREDITS.md`; the project owner still has to confirm the sources.
 
 ## License
 

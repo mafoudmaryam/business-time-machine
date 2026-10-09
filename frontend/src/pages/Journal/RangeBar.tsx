@@ -11,7 +11,9 @@ export function RangeBar({ comparison, label }: { comparison: JournalComparison;
       <line x1="0" y1="7" x2="100" y2="7" className="range-bar-track" />
       <rect x={g.low} y="3" width={Math.max(g.high - g.low, 0.6)} height="8" rx="2" className="range-bar-range" />
       <line x1={g.expected} y1="1.5" x2={g.expected} y2="12.5" className="range-bar-expected" />
-      <circle cx={g.actual} cy="7" r="3" className="range-bar-actual" />
+      {/* The dot is a zero-length line with round ends: it stays a true circle even though this picture is stretched sideways. */}
+      <line x1={g.actual} y1="7" x2={g.actual + 0.001} y2="7" className="range-bar-actual" />
+      <line x1={g.actual} y1="7" x2={g.actual + 0.001} y2="7" className="range-bar-actual-core" />
     </svg>
   );
 }

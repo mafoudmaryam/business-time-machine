@@ -1,5 +1,3 @@
-/** Fixed chart/legend colors: index 0 is always "if you change nothing". */
-export const SCENARIO_COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"] as const;
 
 export const MAX_SCENARIOS_PER_RUN = 3;
 

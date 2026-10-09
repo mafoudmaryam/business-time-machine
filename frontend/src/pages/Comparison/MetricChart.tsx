@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import type { ScenarioResultOut } from "../../api";
 import { InfoTip } from "../../components/InfoTip";
-import { SCENARIO_COLORS } from "../../constants";
+import { CHART, SERIES_STYLES } from "../../chartTheme";
 import { DEFAULT_CURRENCY, formatMoney } from "../../lib/format";
 import { displayScenarioName } from "../../lib/scenarioLabel";
 
@@ -20,7 +20,7 @@ interface Props {
   title: string;
   tooltip?: string;
   metric: string; // key into ScenarioResultOut.bands, e.g. "revenue"
-  results: ScenarioResultOut[]; // baseline first, so SCENARIO_COLORS[0] is always "if you change nothing"
+  results: ScenarioResultOut[]; // baseline first, so SERIES_STYLES[0] is always "if you change nothing"
   isMoney: boolean;
   currency?: string;
 }
@@ -55,7 +55,7 @@ export function MetricChart({ title, tooltip, metric, results, isMoney, currency
       </h3>
       <ResponsiveContainer width="100%" height={260}>
         <ComposedChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} />
           <XAxis dataKey="month" label={{ value: "Month", position: "insideBottom", offset: -4 }} />
           <YAxis tickFormatter={(v: number) => formatValue(v, isMoney, currency)} width={80} />
           <Tooltip
@@ -71,7 +71,7 @@ export function MetricChart({ title, tooltip, metric, results, isMoney, currency
           />
           <Legend formatter={(value) => displayScenarioName(String(value))} />
           {results.map((r, i) => {
-            const color = SCENARIO_COLORS[i % SCENARIO_COLORS.length];
+            const { color, dash } = SERIES_STYLES[i % SERIES_STYLES.length];
             return (
               <Fragment key={r.scenario_name}>
                 <Area
@@ -80,7 +80,7 @@ export function MetricChart({ title, tooltip, metric, results, isMoney, currency
                   name={r.scenario_name}
                   stroke="none"
                   fill={color}
-                  fillOpacity={0.15}
+                  fillOpacity={0.14}
                   isAnimationActive={false}
                   legendType="none"
                 />
@@ -89,7 +89,8 @@ export function MetricChart({ title, tooltip, metric, results, isMoney, currency
                   dataKey={`${r.scenario_name}_p50`}
                   name={r.scenario_name}
                   stroke={color}
-                  strokeWidth={2}
+                  strokeWidth={i === 0 ? 2 : 2.5}
+                  strokeDasharray={dash}
                   dot={false}
                   isAnimationActive={false}
                 />

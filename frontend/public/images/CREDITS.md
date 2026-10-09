@@ -28,13 +28,15 @@ three (chalkboard marketing sign, coins for price) -- see the "Used for" column.
 ## Start page photos (the 2026 redesign)
 
 These four photos are used only on the start page. They are served as WebP files made by
-`frontend/scripts/make-redesign-images.py` (cropped and resized; the originals are kept outside the build, in the git-ignored `frontend/.photo-originals/`).
+`frontend/scripts/make-redesign-images.py` (cropped and resized; the originals are kept outside the build, in the
+git-ignored `frontend/.photo-originals/`).
 
-| File | Used for | Source and photographer | Notes |
-| --- | --- | --- | --- |
-| `redesign/hero-720.webp` (from `hero2.jpg`) | Start page hero, right side | to be confirmed by the project owner | **AI-generated image.** |
-| `redesign/desk-632.webp` (from `desk.jpg`) | Start page card "See the impact" | to be confirmed by the project owner | |
-| `redesign/tablet-632.webp` (from `tablet.jpg`) | Start page card "Get a simple explanation" | to be confirmed by the project owner | |
-| `redesign/notes-632.webp` (from `notes.jpg`) | Start page card "Keep a journal" | to be confirmed by the project owner | |
+| File | Used for | Source and photographer | Licence | Notes |
+| --- | --- | --- | --- | --- |
+| `redesign/hero-720.webp` (from `hero2.jpg`) | Start page hero, right side | not applicable | not applicable | **AI-generated image.** It shows no real person. It must always be labelled as AI-generated. |
+| `redesign/desk-632.webp` (from `desk.jpg`) | Start page card "See the impact" | to be confirmed by the project owner | to be confirmed by the project owner | |
+| `redesign/tablet-632.webp` (from `tablet.jpg`) | Start page card "Get a simple explanation" | to be confirmed by the project owner | to be confirmed by the project owner | |
+| `redesign/notes-632.webp` (from `notes.jpg`) | Start page card "Keep a journal" | to be confirmed by the project owner | to be confirmed by the project owner | |
 
-No photographer names are given here on purpose: they are not known yet and must not be guessed.
+No photographer names or licences are written here on purpose: they are not known yet and must not be guessed. Until the
+project owner confirms them, treat these three photos as "source unknown" and do not publish the app outside the thesis.

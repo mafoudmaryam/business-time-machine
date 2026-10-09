@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import { axe } from "vitest-axe";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as api from "../../api";
+import { celebrate } from "../../lib/celebrate";
 import { App } from "../../App";
 import { UndoProvider } from "../../components/UndoProvider";
 import { track } from "../../lib/events";
@@ -18,6 +19,7 @@ vi.mock("../../api", async (importOriginal) => {
   };
 });
 vi.mock("../../lib/events", () => ({ track: vi.fn() }));
+vi.mock("../../lib/celebrate", () => ({ celebrate: vi.fn(), prefersReducedMotion: () => false }));
 vi.mock("../Today/TodayChart", () => ({ TodayChart: () => <p>The chart</p> }));
 
 function mount(path = "/journal") {
@@ -211,6 +213,28 @@ describe("writing a month down", () => {
     });
     expect(await screen.findByText("Saved November 2026.")).toBeTruthy();
     expect(api.getJournal).toHaveBeenCalledTimes(2);
+  });
+
+  it("celebrates once, only after the month is really saved", async () => {
+    vi.mocked(api.saveJournalEntry).mockResolvedValue(makeJournalMonth());
+    const { user } = mount();
+    await screen.findByRole("heading", { level: 1 });
+    expect(celebrate).not.toHaveBeenCalled(); // opening the page, or seeing numbers, is never celebrated
+    await fill(user, "5900", "52000", "4200");
+    await user.click(screen.getByRole("button", { name: "Save this month" }));
+    await screen.findByText(/^Saved /);
+    expect(celebrate).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not celebrate when the save fails or when a box is empty", async () => {
+    vi.mocked(api.saveJournalEntry).mockRejectedValue(new Error("boom"));
+    const { user } = mount();
+    await screen.findByRole("heading", { level: 1 });
+    await user.click(screen.getByRole("button", { name: "Save this month" })); // empty boxes: refused before saving
+    await fill(user, "5900", "52000", "4200");
+    await user.click(screen.getByRole("button", { name: "Save this month" })); // the server says no
+    await screen.findByText(/couldn't save that just now/);
+    expect(celebrate).not.toHaveBeenCalled();
   });
 
   it("accepts amounts typed the way people type them: 5,200 and $5200", async () => {

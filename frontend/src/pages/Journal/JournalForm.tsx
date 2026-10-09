@@ -4,6 +4,7 @@ import { saveJournalEntry } from "../../api";
 import { InfoTip } from "../../components/InfoTip";
 import { NumberField } from "../../components/NumberField";
 import { formatUnit } from "../../lib/format";
+import { celebrate } from "../../lib/celebrate";
 import { track } from "../../lib/events";
 import { METRIC_WORDS, monthOptions, parseAmount, startingMonth, toEntryIn, validateEntry, type EntryErrors } from "../../lib/journalView";
 
@@ -85,6 +86,7 @@ function JournalFields({ businessId, currency, month, onMonth, current, onSaved,
     try {
       const saved = await saveJournalEntry(businessId, toEntryIn({ month, profit, cash, visits, note }));
       track("journal_saved", "journal", { edited: current !== null, compared: saved.has_prediction });
+      celebrate(); // the owner just wrote a month down: we cheer that, never what the numbers say
       onSaved(saved, current !== null);
     } catch {
       setProblem("We couldn't save that just now. Nothing was lost. Please try again.");

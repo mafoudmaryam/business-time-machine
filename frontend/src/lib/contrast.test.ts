@@ -83,13 +83,40 @@ describe("contrast", () => {
     expect(contrastRatio(token("green"), token("white"))).toBeGreaterThanOrEqual(LARGE);
   });
 
-  it("the coach card tiles keep readable good and bad numbers", () => {
-    expect(contrastRatio("#17704f", "#ffffff")).toBeGreaterThanOrEqual(BODY);
-    expect(contrastRatio("#a5301f", "#ffffff")).toBeGreaterThanOrEqual(BODY);
+  it("the good / careful / bad colours (coach card, tiles, journal) are readable on their own backgrounds and on white", () => {
+    for (const [fg, bg] of [["good", "good-bg"], ["warn", "warn-bg"], ["bad", "bad-bg"]] as const) {
+      expect(contrastRatio(token(fg), token(bg)), `${fg} on ${bg}`).toBeGreaterThanOrEqual(BODY);
+      expect(contrastRatio(token(fg), token("white")), `${fg} on white`).toBeGreaterThanOrEqual(BODY);
+    }
+  });
+
+  it("there is no red left in the palette: bad is charcoal and warn is the dark amber", () => {
+    expect(token("bad")).toBe(token("charcoal"));
+    expect(token("warn")).toBe(token("amber-ink"));
+    expect(token("good")).toBe(token("green-heading"));
+  });
+
+  it("the dark buttons (delete, undo bar) and the amber undo button are readable", () => {
+    expect(contrastRatio(token("white"), token("charcoal"))).toBeGreaterThanOrEqual(BODY);
+    expect(contrastRatio(token("charcoal"), token("amber"))).toBeGreaterThanOrEqual(BODY);
+  });
+
+  it("chip and tab text: dark green on white, white on green", () => {
+    expect(contrastRatio(token("green-heading"), token("white"))).toBeGreaterThanOrEqual(BODY);
+    expect(contrastRatio(token("white"), token("green"))).toBeGreaterThanOrEqual(BODY);
+  });
+
+  it("amber is never used as text colour (it is for fills, underlines and rings)", () => {
+    const amber = token("amber");
+    const rules = css.split("}");
+    const re = new RegExp("(^|[;{\\s])color:\\s*(var\\(--amber\\)|" + amber + ")\\s*(;|$)", "i");
+    const offenders = rules.filter((r) => re.test(r));
+    expect(re.test("a { color: var(--amber); ")).toBe(true); // the check itself works
+    expect(offenders.map((r) => r.trim().slice(0, 60))).toEqual([]);
   });
 
   it("text on the flagged (amber) assumption rows is readable", () => {
-    expect(contrastRatio(token("ink"), "#fbf0d9")).toBeGreaterThanOrEqual(BODY);
-    expect(contrastRatio(token("muted-1"), "#fbf0d9")).toBeGreaterThanOrEqual(BODY);
+    expect(contrastRatio(token("ink"), token("amber-soft"))).toBeGreaterThanOrEqual(BODY);
+    expect(contrastRatio(token("muted-1"), token("amber-soft"))).toBeGreaterThanOrEqual(BODY);
   });
 });

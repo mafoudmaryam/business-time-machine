@@ -305,21 +305,7 @@ button:disabled {
   white-space: nowrap;
 }
 
-.needs-confirmation {
-  font-size: 13px;
-  color: var(--danger);
-}
-
 .scenario-list,
-.scenario-checklist {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
 .scenario-list li {
   display: flex;
   align-items: center;
@@ -464,27 +450,6 @@ table.run-history-table td {
   color: var(--text-muted);
 }
 
-.idea-result {
-  margin: 4px 0;
-  font-size: 14px;
-}
-
-.idea-result > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.idea-result dt {
-  color: var(--text-muted);
-}
-
-.idea-result dd {
-  margin: 0;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
 .idea-card button {
   margin-top: auto;
   align-self: flex-start;
@@ -511,18 +476,6 @@ table.run-history-table td {
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 8px;
-}
-
-.coach-answer {
-  background: var(--page);
-  border-radius: 6px;
-  padding: 8px 12px;
-  margin-top: 8px;
-  max-width: 640px;
-}
-
-.coach-answer p {
-  margin: 4px 0;
 }
 
 .coach-question {
@@ -559,8 +512,8 @@ table.run-history-table td {
 }
 
 .currency-notice {
-  background: #fff4d6;
-  border: 1px solid #d9a441;
+  background: var(--amber-soft);
+  border: 1px solid var(--amber);
   border-radius: 6px;
   padding: 8px 12px;
   max-width: 420px;
@@ -568,8 +521,8 @@ table.run-history-table td {
 }
 
 .field-highlight input {
-  background: #fff4d6;
-  border-color: #d9a441;
+  background: var(--amber-soft);
+  border-color: var(--amber);
   box-shadow: 0 0 0 2px rgba(217, 164, 65, 0.35);
 }
 
@@ -630,12 +583,6 @@ table.run-history-table td {
   /* lining numerals: Playfair's old-style digits make $25,000 look like $25,ooo */
   font-variant-numeric: lining-nums;
   font-feature-settings: "lnum" 1;
-  --good: #17704f;
-  --good-bg: #e0f2e9;
-  --bad: #a5301f;
-  --bad-bg: #fbe6e2;
-  --warn: #7a5200;
-  --warn-bg: #fff1d0;
 }
 
 .coach-top {
@@ -723,7 +670,7 @@ table.run-history-table td {
   color: var(--ink);
 }
 
-.trend-same .coach-trend { background: #e6e2dd; color: #4a4038; }
+.trend-same .coach-trend { background: var(--sage); color: var(--body); }
 .trend-up .coach-trend { background: var(--good-bg); color: var(--good); }
 .trend-down .coach-trend { background: var(--bad-bg); color: var(--bad); }
 
