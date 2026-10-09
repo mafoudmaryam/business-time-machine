@@ -1,0 +1,1167 @@
+/* ---------- The 2026 look ("direction B"): warm, light, friendly ----------
+   Loaded last, so it re-skins the older rules in index.css / beginner.css without changing what they do.
+   Colours, fonts and radii come from theme.css. Motion is at the bottom, and prefers-reduced-motion turns ALL of it off. */
+
+/* ---------- Base ---------- */
+
+body {
+  background: var(--cream);
+  color: var(--body);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+main {
+  max-width: 1120px;
+  padding: 24px 20px 40px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  color: var(--green-heading);
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: clamp(30px, 4.4vw, 40px);
+  margin: 8px 0 14px;
+}
+
+h2 {
+  font-size: 26px;
+  margin: 28px 0 10px;
+}
+
+h3 {
+  font-size: 20px;
+}
+
+p,
+li,
+dd {
+  font-size: inherit;
+}
+
+a {
+  color: var(--green-heading);
+}
+
+:focus-visible {
+  outline: 3px solid var(--green-heading);
+  outline-offset: 3px;
+}
+
+/* ---------- Buttons: fully round, plain words, easy to tap ---------- */
+
+button,
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 11px 26px;
+  border: 2px solid var(--green);
+  border-radius: var(--radius-pill);
+  background: var(--green);
+  color: var(--white);
+  font-family: var(--font-heading);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-transform: none;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
+}
+
+button:hover:not(:disabled),
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+button:active:not(:disabled),
+.btn:active {
+  transform: translateY(0);
+}
+
+button.secondary,
+.btn-secondary {
+  background: var(--white);
+  color: var(--green-heading);
+  border-color: var(--green);
+}
+
+button.secondary:hover:not(:disabled),
+.btn-secondary:hover {
+  background: var(--sage);
+}
+
+.btn-green {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--white);
+}
+
+/* The one highlight: the main call-to-action. Amber is too light for white text, so the text is charcoal. */
+.btn-amber,
+button.btn-amber {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: var(--charcoal);
+  box-shadow: 0 6px 18px rgba(242, 163, 58, 0.35);
+}
+
+.btn-amber:hover:not(:disabled) {
+  box-shadow: 0 10px 24px rgba(242, 163, 58, 0.45);
+}
+
+button:disabled {
+  opacity: 1;
+  background: var(--sage);
+  border-color: var(--card-border);
+  color: var(--muted-2);
+  cursor: not-allowed;
+}
+
+/* Buttons that are really links or small controls keep their own shape. */
+button.link-button,
+button.back-button,
+button.industry-card,
+button.chip-button {
+  box-shadow: none;
+}
+
+button.link-button {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--green-heading);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+button.link-button:hover:not(:disabled) {
+  transform: none;
+  background: none;
+  box-shadow: none;
+  color: var(--charcoal);
+}
+
+button.link-button:disabled {
+  background: none;
+  border: none;
+  color: var(--muted-2);
+}
+
+@media (pointer: coarse) {
+  button.link-button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
+/* ---------- Forms ---------- */
+
+.field {
+  max-width: 460px;
+}
+
+.field label,
+.field > span {
+  color: var(--charcoal);
+  font-weight: 700;
+}
+
+.field input,
+.field select,
+.field textarea {
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 2px solid var(--input-border);
+  border-radius: 16px;
+  background: var(--white);
+  color: var(--charcoal);
+  font-family: var(--font-body);
+  font-size: 17px;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: 3px solid var(--amber);
+  outline-offset: 1px;
+  border-color: var(--green);
+}
+
+.field-help,
+.field-unit,
+.chart-caption {
+  font-size: 15px;
+}
+
+.field-error {
+  color: var(--error);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ---------- Top bar ---------- */
+
+.skip-link {
+  background: var(--green-heading);
+  color: var(--white);
+  border-radius: var(--radius-pill);
+}
+
+.appnav {
+  gap: 6px 22px;
+  padding: 10px 24px;
+  background: rgba(255, 249, 240, 0.94);
+  border-bottom: 2px solid var(--card-border);
+}
+
+.appnav a.appnav-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-family: var(--font-heading);
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--green-heading);
+  text-decoration: none;
+}
+
+.appnav a,
+.appnav summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 6px 4px;
+  border-bottom: 3px solid transparent;
+  color: var(--body);
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.appnav a:hover,
+.appnav summary:hover {
+  color: var(--green-heading);
+  text-decoration: none;
+  border-bottom-color: var(--card-border);
+}
+
+/* The page you are on: bold dark-green words and the one amber underline. */
+.appnav a.active,
+.appnav-more.active summary {
+  color: var(--green-heading);
+  font-weight: 800;
+  text-decoration: none;
+  border-bottom-color: var(--amber);
+}
+
+.appnav a.appnav-title:hover {
+  color: var(--green-heading);
+  border-bottom-color: transparent;
+}
+
+.appnav-more ul {
+  padding: 8px 14px;
+  border: 2px solid var(--card-border);
+  border-radius: 22px;
+  background: var(--white);
+  box-shadow: var(--shadow-lift);
+}
+
+.appnav-cta {
+  min-height: 44px;
+  padding: 8px 24px !important;
+  border: 2px solid var(--green) !important;
+  border-radius: var(--radius-pill);
+  background: var(--green);
+  color: var(--white) !important;
+  font-family: var(--font-heading) !important;
+  font-weight: 800 !important;
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+
+.appnav-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+  color: var(--white) !important;
+}
+
+.switcher-button {
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  color: var(--charcoal);
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+.back-button {
+  color: var(--green-heading);
+  font-family: var(--font-body);
+  border-radius: var(--radius-pill);
+}
+
+.back-button:hover:not(:disabled) {
+  transform: none;
+  background: var(--sage);
+}
+
+/* ---------- Cards ---------- */
+
+.try-card,
+.assumed-box,
+.continue-box,
+.start-summary {
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.industry-card {
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-card);
+  width: 250px;
+  height: 300px;
+  transition: transform var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
+}
+
+.industry-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lift);
+}
+
+.industry-card.selected {
+  outline: 4px solid var(--green);
+  outline-offset: -4px;
+}
+
+.industry-card-label {
+  background: linear-gradient(to top, rgba(34, 107, 65, 0.88), transparent);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 24px;
+  color: var(--white);
+}
+
+.sample-tag {
+  background: var(--sage);
+  color: var(--green-heading);
+}
+
+/* ---------- Start page ---------- */
+
+.start-page {
+  padding-bottom: 24px;
+}
+
+.continue-current {
+  gap: 18px;
+  margin: 4px 0 24px;
+  padding: 18px 26px;
+  background: var(--sage);
+  border: 2px solid var(--green);
+  border-radius: var(--radius-card);
+}
+
+.continue-current p {
+  font-size: 19px;
+  color: var(--charcoal);
+}
+
+.hero-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: center;
+  gap: 40px;
+  margin-top: 8px;
+  padding: 56px 56px 56px 60px;
+  background: var(--sage);
+  border-radius: var(--radius-panel);
+}
+
+.hero-slogan {
+  margin: 0 0 6px;
+  font-family: var(--font-script);
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--amber-ink);
+}
+
+.hero-copy h1 {
+  margin: 0 0 18px;
+  font-size: clamp(34px, 5vw, 54px);
+  line-height: 1.08;
+  color: var(--green-heading);
+}
+
+.hero-lead {
+  max-width: 34em;
+  margin: 0 0 28px;
+  font-size: 19px;
+  color: var(--body);
+}
+
+.hero-copy .btn {
+  min-height: 56px;
+  padding: 14px 34px;
+  font-size: 19px;
+}
+
+.hero-small {
+  margin: 18px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--body);
+}
+
+.hero-photo {
+  position: relative;
+  justify-self: center;
+  width: 100%;
+  max-width: 460px;
+}
+
+.photo-frame {
+  overflow: hidden;
+  background: var(--sage);
+}
+
+.photo-frame-hero {
+  aspect-ratio: 4 / 5;
+  border-radius: 36px;
+  background: #cfe5d2;
+  box-shadow: var(--shadow-lift);
+}
+
+.photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease);
+}
+
+.photo-missing {
+  opacity: 0;
+}
+
+.float-card {
+  position: absolute;
+  left: -34px;
+  bottom: 38px;
+  padding: 14px 22px;
+  border: 2px solid var(--card-border);
+  border-radius: 24px;
+  background: var(--white);
+  box-shadow: var(--shadow-lift);
+}
+
+.float-card p {
+  margin: 0;
+}
+
+.float-card-number {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--green);
+  font-variant-numeric: lining-nums;
+}
+
+.float-card-label {
+  font-size: 15px;
+  color: var(--body);
+}
+
+.landing-section {
+  margin-top: 56px;
+}
+
+.landing-heading {
+  margin: 0 0 24px;
+  text-align: center;
+  font-size: clamp(28px, 3.6vw, 36px);
+}
+
+.photo-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.photo-card {
+  padding: 14px 14px 26px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+  transition: transform var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
+}
+
+.photo-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lift);
+}
+
+.photo-card:hover .photo {
+  transform: scale(1.05);
+}
+
+.photo-frame-card {
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
+}
+
+.photo-card h3,
+.photo-card p {
+  margin-inline: 12px;
+}
+
+.photo-card h3 {
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-size: 23px;
+}
+
+.photo-card p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.small-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.small-step {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.small-step h3 {
+  margin: 4px 0 6px;
+  font-size: 22px;
+}
+
+.small-step p {
+  margin: 0;
+}
+
+.small-step-number {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--green);
+  color: var(--white);
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.quote-card {
+  position: relative;
+  margin: 0;
+  padding: 44px 56px 44px 64px;
+  border-radius: var(--radius-card);
+  background: var(--amber-soft);
+}
+
+.quote-mark {
+  position: absolute;
+  left: 22px;
+  top: -6px;
+  font-family: var(--font-heading);
+  font-size: 120px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--amber);
+}
+
+.quote-card blockquote {
+  margin: 0;
+  max-width: 32em;
+}
+
+.quote-card blockquote p {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(21px, 2.6vw, 27px);
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--charcoal);
+}
+
+.quote-card figcaption {
+  margin-top: 14px;
+  font-weight: 600;
+  color: var(--amber-ink);
+}
+
+.coffee-cup {
+  position: absolute;
+  right: 36px;
+  bottom: 26px;
+}
+
+.start-form {
+  margin-top: 56px;
+  padding: 36px 36px 32px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.start-form:focus {
+  outline: none;
+}
+
+.start-form > h1,
+.start-form > h2 {
+  margin-top: 0;
+}
+
+.landing-footer {
+  margin-top: 40px;
+  padding: 22px 12px 8px;
+  text-align: center;
+  color: var(--body);
+}
+
+.landing-footer p {
+  max-width: 44em;
+  margin: 0 auto;
+  font-size: 16px;
+}
+
+/* ---------- Try a change ---------- */
+
+.try-lead {
+  color: var(--body);
+  font-size: 19px;
+}
+
+.try-grid {
+  gap: 28px;
+}
+
+.try-card {
+  padding: 28px 30px;
+}
+
+.try-eyebrow {
+  margin: 0 0 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--body);
+}
+
+.try-big-row {
+  min-height: 100px;
+}
+
+.try-big {
+  font-family: var(--font-heading);
+  font-size: 88px;
+  font-weight: 800;
+  color: var(--green);
+}
+
+.try-example {
+  font-size: 17px;
+  color: var(--body);
+}
+
+/* The slider: a soft track that fills with green, and a big green thumb with an amber ring. */
+.try-slider {
+  --fill: 50%;
+  height: 48px;
+}
+
+.try-slider::-webkit-slider-runnable-track {
+  height: 12px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(to right, var(--green) var(--fill), var(--sage) var(--fill));
+}
+
+.try-slider::-moz-range-track {
+  height: 12px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--sage);
+}
+
+.try-slider::-moz-range-progress {
+  height: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--green);
+}
+
+.try-slider::-webkit-slider-thumb {
+  width: 34px;
+  height: 34px;
+  margin-top: -11px;
+  border: 4px solid var(--white);
+  background: var(--green);
+  box-shadow: 0 0 0 4px var(--amber), 0 4px 10px rgba(34, 107, 65, 0.3);
+  transition: transform var(--t-fast) var(--ease);
+}
+
+.try-slider::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border: 4px solid var(--white);
+  background: var(--green);
+  box-shadow: 0 0 0 4px var(--amber), 0 4px 10px rgba(34, 107, 65, 0.3);
+}
+
+.try-slider:hover::-webkit-slider-thumb,
+.try-slider:active::-webkit-slider-thumb {
+  transform: scale(1.08);
+}
+
+.try-slider-labels {
+  color: var(--body);
+  font-size: 15px;
+}
+
+.try-start {
+  min-height: 44px;
+  padding: 8px 20px;
+  border: 2px solid var(--green);
+  background: var(--white);
+  color: var(--green-heading);
+  font-size: 16px;
+}
+
+.try-start:hover:not(:disabled) {
+  background: var(--sage);
+}
+
+.try-start-on,
+.try-start-on:hover:not(:disabled) {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--white);
+}
+
+/* The coach's note: green, friendly, with a small bulb. */
+.try-note {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 18px 22px;
+  border: 2px solid #c3dec8;
+  border-radius: 24px;
+  background: var(--sage);
+  color: var(--charcoal);
+}
+
+.try-note-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--green);
+}
+
+.try-note p {
+  font-size: 17px;
+}
+
+.sketch-pill {
+  padding: 5px 16px;
+  background: var(--amber);
+  color: var(--charcoal);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.sketch-note {
+  color: var(--body);
+  font-size: 16px;
+}
+
+.try-numbers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  transition: opacity var(--t-med) var(--ease);
+}
+
+.try-numbers-updating {
+  opacity: 0.65;
+}
+
+.try-tile {
+  padding: 16px 20px;
+  border: 2px solid var(--card-border);
+  border-radius: 24px;
+  background: var(--cream);
+}
+
+.try-tile p {
+  margin: 0;
+}
+
+.try-tile .try-eyebrow {
+  margin: 0 0 4px;
+}
+
+.try-tile-keep {
+  background: var(--sage);
+  border-color: #c3dec8;
+}
+
+.try-keep {
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.try-keep-number {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-size: 50px;
+  font-weight: 800;
+  color: var(--green);
+}
+
+.try-keep-word {
+  font-size: 19px;
+  color: var(--body);
+}
+
+.try-tile-number {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--green-heading);
+  font-variant-numeric: lining-nums;
+}
+
+/* "The catch" is a warning, so: calm charcoal words inside an amber outline. Never red. */
+.try-tile-catch {
+  border-color: var(--amber);
+  background: var(--white);
+  color: var(--charcoal);
+}
+
+.try-sure {
+  padding: 4px 4px 0;
+}
+
+.try-sure p {
+  margin: 0;
+}
+
+.try-dot {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--green);
+}
+
+.try-dot-on {
+  background: var(--green);
+}
+
+.try-status {
+  color: var(--body);
+  font-style: normal;
+  font-size: 15px;
+}
+
+.try-failed {
+  color: var(--error);
+}
+
+.try-watch,
+.try-save {
+  width: 100%;
+  min-height: 56px;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.try-save-sentence {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--green-heading);
+}
+
+/* ---------- Dialogs ---------- */
+
+.modal {
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-lift);
+}
+
+.modal-backdrop {
+  background: rgba(38, 48, 42, 0.5);
+}
+
+/* ---------- Motion (light, CSS only) ---------- */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes tick {
+  from {
+    transform: scale(0.94);
+    opacity: 0.6;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, -12vh, 0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--drift), 105vh, 0) rotate(var(--spin));
+    opacity: 0.9;
+  }
+}
+
+/* Sections and cards fade up as they appear. "backwards" means that once it has played, the element is simply its
+   normal self again, so hover lifts keep working. Where the browser can tie it to scrolling, it plays as you scroll. */
+.reveal {
+  animation: fade-up 0.7s var(--ease) backwards;
+  animation-delay: calc(var(--i, 0) * 100ms);
+}
+
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: fade-up linear backwards;
+    animation-delay: 0s;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+}
+
+.float-card {
+  animation: floaty 5.5s ease-in-out infinite;
+}
+
+.try-big,
+.try-keep-number,
+.try-tile-number {
+  animation: tick var(--t-med) var(--ease);
+}
+
+/* The confetti: a few small pieces falling for about two seconds. It never takes a click or a tap. */
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: 0;
+  left: var(--x);
+  width: 10px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--color);
+  animation: confetti-fall 2.1s cubic-bezier(0.25, 0.6, 0.4, 1) var(--delay) both;
+}
+
+/* ---------- Smaller screens ---------- */
+
+@media (max-width: 860px) {
+  .hero-panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    padding: 34px 24px 40px;
+    border-radius: 34px;
+  }
+
+  .hero-photo {
+    max-width: 380px;
+  }
+
+  .float-card {
+    left: -8px;
+    bottom: 22px;
+  }
+
+  .photo-cards,
+  .small-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .quote-card {
+    padding: 52px 26px 84px;
+  }
+
+  .quote-mark {
+    left: 18px;
+    top: -8px;
+    font-size: 96px;
+  }
+
+  .start-form {
+    padding: 26px 20px 24px;
+  }
+
+  .try-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .try-card {
+    padding: 22px 20px;
+  }
+
+  .try-big-row {
+    gap: 12px;
+  }
+
+  .try-example {
+    font-size: 16px;
+  }
+
+  .try-big {
+    font-size: 72px;
+  }
+}
+
+@media (max-width: 640px) {
+  main {
+    padding: 16px 16px 32px;
+  }
+
+  .appnav {
+    padding: 8px 16px;
+  }
+
+  .appnav-landing {
+    gap: 4px 8px;
+  }
+
+  /* Phone: the name on its own row, then the page links with the green button beside them, then the business switcher. */
+  .appnav-landing .appnav-title {
+    order: 1;
+    width: 100%;
+  }
+
+  .appnav-landing .appnav-links {
+    order: 2;
+    gap: 4px 10px;
+  }
+
+  .appnav-landing .appnav-links a {
+    padding-inline: 2px;
+    font-size: 15px;
+  }
+
+  .appnav-landing .appnav-cta {
+    order: 3;
+    margin-left: auto;
+    padding: 8px 12px !important;
+    font-size: 15px !important;
+  }
+
+  .appnav-landing .switcher {
+    order: 4;
+    width: 100%;
+  }
+
+  .industry-card {
+    width: 100%;
+    height: 220px;
+  }
+}
+
+/* ---------- Less motion: switch all of it off ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+
+  button:hover:not(:disabled),
+  .btn:hover,
+  .appnav-cta:hover,
+  .photo-card:hover,
+  .industry-card:hover,
+  .photo-card:hover .photo,
+  .try-slider:hover::-webkit-slider-thumb {
+    transform: none !important;
+  }
+
+  .confetti-layer {
+    display: none !important;
+  }
+}

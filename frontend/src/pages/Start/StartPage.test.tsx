@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { axe } from "vitest-axe";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as api from "../../api";
-import { getRememberedBusinessId } from "../../lib/session";
+import { getRememberedBusinessId, rememberBusiness } from "../../lib/session";
 import { StartPage } from "./StartPage";
 
 vi.mock("../../api", async (importOriginal) => {
@@ -278,5 +278,86 @@ describe("start screen: businesses that already exist", () => {
     mount();
     await screen.findByRole("button", { name: "Café" });
     expect(screen.queryByRole("heading", { name: "My businesses" })).toBeNull();
+  });
+});
+
+describe("StartPage: the welcome text", () => {
+  it("has one main heading, the hero, with the exact words", async () => {
+    mount();
+    await screen.findByRole("button", { name: "Café" });
+    const h1s = screen.getAllByRole("heading", { level: 1 });
+    expect(h1s).toHaveLength(1);
+    expect(h1s[0].textContent).toBe("Your business. A little more predictable.");
+    expect(screen.getByText("Better decisions today. A stronger tomorrow.")).toBeTruthy();
+    expect(screen.getByText(/Try a change on paper before you make it/)).toBeTruthy();
+    expect(screen.getByText("Free · Simple · Made for small businesses")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Start your journey →" })).toBeTruthy();
+  });
+
+  it("labels the floating money card as a fixed example", async () => {
+    mount();
+    await screen.findByRole("button", { name: "Café" });
+    const card = screen.getByRole("note", { name: "An example, not your numbers" });
+    expect(card.textContent).toContain("+$1,320 a month");
+    expect(card.textContent).toContain("An example, for a 7% price rise");
+  });
+
+  it("shows the three photo cards, the three small steps and the team's note", async () => {
+    mount();
+    await screen.findByRole("button", { name: "Café" });
+    for (const title of ["See the impact", "Get a simple explanation", "Keep a journal", "Tell us a little", "Try a change", "Learn from real life"]) {
+      expect(screen.getByRole("heading", { name: title })).toBeTruthy();
+    }
+    expect(screen.getByRole("heading", { name: "Three small steps" })).toBeTruthy();
+    expect(screen.getByText(/after your first change you can say: I understand my numbers/)).toBeTruthy();
+    expect(screen.getByText("The Business Time Machine team")).toBeTruthy();
+    expect(screen.getByText("Scenarios, not forecasts. Built from typical numbers and the ones you give us. Not financial advice.")).toBeTruthy();
+  });
+
+  it("gives every photo a width, a height and a real alt text, and loads only the hero at once", async () => {
+    mount();
+    await screen.findByRole("button", { name: "Café" });
+    const photos = Array.from(document.querySelectorAll("img.photo"));
+    expect(photos).toHaveLength(4);
+    for (const img of photos) {
+      expect(Number(img.getAttribute("width"))).toBeGreaterThan(0);
+      expect(Number(img.getAttribute("height"))).toBeGreaterThan(0);
+      expect((img.getAttribute("alt") ?? "").length).toBeGreaterThan(10);
+    }
+    expect(photos.filter((img) => img.getAttribute("loading") === "eager")).toHaveLength(1);
+    expect(photos.filter((img) => img.getAttribute("loading") === "lazy")).toHaveLength(3);
+    expect(photos[0].getAttribute("src")).toBe("/images/redesign/hero-720.webp");
+  });
+
+  it("keeps the working form on the page and one click away from the hero button", async () => {
+    mount();
+    await screen.findByRole("button", { name: "Café" });
+    expect(screen.getByRole("heading", { name: "What kind of business do you run?" })).toBeTruthy();
+    expect(document.getElementById("start-here")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Start your journey →" }).getAttribute("href")).toBe("#start-here");
+  });
+
+  it("puts the way back in at the very top for a returning visitor", async () => {
+    vi.mocked(api.listBusinesses).mockResolvedValue([BUSINESS({ id: 12, name: "My café" })]);
+    rememberBusiness(12);
+    const { container } = mount();
+    const button = await screen.findByRole("button", { name: "Continue with My café" });
+    const hero = container.querySelector(".hero-panel")!;
+    expect(button.compareDocumentPosition(hero) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("shows no welcome text once the four questions have started", async () => {
+    const { user } = mount();
+    await user.click(await screen.findByRole("button", { name: "Café" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(await screen.findByLabelText(/Customers on a normal day/)).toBeTruthy();
+    expect(screen.queryByText("Three small steps")).toBeNull();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+  });
+
+  it("passes the accessibility check", async () => {
+    const { container } = mount();
+    await screen.findByRole("button", { name: "Café" });
+    expect((await axe(container)).violations).toEqual([]);
   });
 });

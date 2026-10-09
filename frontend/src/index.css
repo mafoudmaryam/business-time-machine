@@ -1,33 +1,4 @@
-:root {
-  /* Café-house palette -- see docs/redesign-plan.md */
-  --page: #f3eae1;
-  --band: #eadbcd;
-  --card: #faf5ef;
-  --border: #e2d3c3;
-  --ink: #2b1d16;
-  --muted-1: #4a3527;
-  --muted-2: #6f5a4a;
-  --button: #6b4331;
-  --button-text: #fbf5ee;
-
-  /* Aliases so existing rules pick up the new palette without a rewrite. */
-  --text: var(--ink);
-  --text-muted: var(--muted-2);
-  --bg: var(--card);
-  --bg-alt: var(--band);
-  --accent: var(--button);
-  --danger: #c0392b;
-  --danger-bg: #fdecea;
-  --success: #1baf7a;
-
-  --font-heading: "Playfair Display", Georgia, serif;
-  --font-body: "Montserrat", system-ui, "Segoe UI", Roboto, sans-serif;
-  --font-script: "Great Vibes", cursive;
-
-  font: 16px/1.5 var(--font-body);
-  color: var(--ink);
-  background: var(--page);
-}
+/* The palette, fonts and shapes live in theme.css. */
 
 * {
   box-sizing: border-box;

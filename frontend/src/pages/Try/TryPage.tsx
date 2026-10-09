@@ -4,11 +4,12 @@ import { ApiError, createScenario, getBusiness, getStartOptions, simulateBusines
 import { Modal } from "../../components/Modal";
 import { useAsync } from "../../hooks/useAsync";
 import { useSketch } from "../../hooks/useSketch";
+import { celebrate } from "../../lib/celebrate";
 import { track } from "../../lib/events";
 import { DEFAULT_CURRENCY } from "../../lib/format";
 import { getRememberedBusinessId } from "../../lib/session";
 import {
-  PRICE_DEFAULT, PRICE_MAX, PRICE_MIN, catchText, dots, exampleText, futuresText, keepText, priceNote, scenarioName, timelineLink,
+  PRICE_DEFAULT, PRICE_MAX, PRICE_MIN, bankTile, catchText, dots, exampleText, futuresText, keepText, priceNote, scenarioName, timelineLink,
 } from "../../lib/sketch";
 
 const FULL_RUN_MONTHS = 24;
@@ -23,7 +24,7 @@ function Dots({ ahead }: { ahead: number }) {
   );
 }
 
-/** "Save this as a scenario": the owner confirms the plain sentence, then the normal flow runs (a real scenario, a full
+/** "Save as a plan": the owner confirms the plain sentence, then the normal flow runs (a real scenario, a full
  *  simulation, the coach). The sketch itself is never what gets saved: only the slider position, once confirmed. */
 function SaveDialog({ businessId, percent, startMonth, sketch, onClose }: {
   businessId: number; percent: number; startMonth: number; sketch: Sketch; onClose: () => void;
@@ -51,6 +52,7 @@ function SaveDialog({ businessId, percent, startMonth, sketch, onClose }: {
         }
       }
       const run = await simulateBusiness(businessId, [scenario!.id], FULL_RUN_MONTHS);
+      celebrate(); // the owner just saved something: that, and only that, is what we cheer
       navigate(`/history?business=${businessId}&run=${run.id}`);
     } catch (err) {
       setProblem(err instanceof Error ? err.message : "We couldn't save that just now.");
@@ -59,10 +61,10 @@ function SaveDialog({ businessId, percent, startMonth, sketch, onClose }: {
   }
 
   return (
-    <Modal title="Save this as a scenario?" onClose={() => !busy && onClose()} hideClose>
+    <Modal title="Save this as a plan?" onClose={() => !busy && onClose()} hideClose>
       <p className="try-save-sentence">{sketch.sentence}.</p>
       <p>
-        Saving makes a real scenario and runs the full simulation, with your coach. The numbers on the Try page were only a quick sketch.
+        Saving makes a plan and runs the full simulation, with your coach. The numbers on this page were only a quick sketch.
       </p>
       {problem && (
         <p className="field-error" role="alert">
@@ -105,6 +107,7 @@ export function TryPage() {
   const fresh = sketch !== null && !updating && sketch.amount === percent && sketch.start_month === startMonth;
   const keep = sketch ? keepText(sketch, currency) : null;
   const example = sketch ? exampleText(sketch.example, currency) : null;
+  const bank = sketch ? bankTile(sketch, currency) : null;
 
   return (
     <div className="page try-page">
@@ -116,11 +119,12 @@ export function TryPage() {
           <section className="try-card" aria-labelledby="try-how-much">
             <h2 id="try-how-much" className="try-eyebrow">How much would you raise your prices?</h2>
             <div className="try-big-row">
-              <p className="try-big" aria-hidden="true">{percent}%</p>
+              <p className="try-big" key={percent} aria-hidden="true">{percent}%</p>
               <p className="try-example">{example ?? " "}</p>
             </div>
             <input
               type="range" className="try-slider" min={PRICE_MIN} max={PRICE_MAX} step={1} value={percent}
+              style={{ ["--fill" as string]: `${((percent - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100}%` }}
               aria-labelledby="try-how-much" aria-valuetext={`${percent} percent`}
               onChange={(e) => setPercent(Number(e.target.value))}
             />
@@ -147,6 +151,12 @@ export function TryPage() {
           </section>
 
           <aside className="try-note" aria-label="A quick thought">
+            <span className="try-note-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" focusable="false">
+                <path d="M12 3a6.5 6.5 0 0 0-3.6 11.9c.5.4.8 1 .8 1.6V17h5.6v-.5c0-.6.3-1.2.8-1.6A6.5 6.5 0 0 0 12 3Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                <path d="M9.8 20.2h4.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </span>
             <p>{priceNote(percent)}</p>
           </aside>
         </div>
@@ -160,20 +170,32 @@ export function TryPage() {
             {!sketch && !failed && <p className="try-working">Working it out…</p>}
             {!sketch && failed && <p className="try-failed" role="alert">We couldn't work that out just now. Try moving the slider again.</p>}
 
-            {sketch && keep && (
+            {sketch && keep && bank && (
               <div className={updating ? "try-numbers try-numbers-updating" : "try-numbers"}>
-                <h3 className="try-eyebrow">Each month, you would keep about</h3>
-                <p className="try-keep">
-                  <span className="try-keep-number">{keep.amount}</span> <span className="try-keep-word">{keep.direction}</span>
-                </p>
-                <p>{keep.detail}</p>
+                <div className="try-tile try-tile-keep">
+                  <h3 className="try-eyebrow">What you keep</h3>
+                  <p className="try-keep">
+                    <span className="try-keep-number" key={keep.amount}>{keep.amount}</span> <span className="try-keep-word">{keep.direction} each month</span>
+                  </p>
+                  <p>{keep.detail}</p>
+                </div>
 
-                <h3 className="try-eyebrow">The catch</h3>
-                <p>{catchText(sketch.visits_change_per_month)}</p>
+                <div className="try-tile">
+                  <h3 className="try-eyebrow">Money in the bank</h3>
+                  <p className="try-tile-number" key={bank.amount}>{bank.amount}</p>
+                  <p>{bank.detail}</p>
+                </div>
 
-                <h3 className="try-eyebrow">How sure are we?</h3>
-                <Dots ahead={sketch.ahead_of_10} />
-                <p>{futuresText(sketch.ahead_of_10)}</p>
+                <div className="try-tile try-tile-catch">
+                  <h3 className="try-eyebrow">The catch</h3>
+                  <p>{catchText(sketch.visits_change_per_month)}</p>
+                </div>
+
+                <div className="try-sure">
+                  <h3 className="try-eyebrow">How sure are we?</h3>
+                  <Dots ahead={sketch.ahead_of_10} />
+                  <p>{futuresText(sketch.ahead_of_10)}</p>
+                </div>
               </div>
             )}
 
@@ -187,17 +209,17 @@ export function TryPage() {
             </p>
           </section>
 
-          <Link className="try-watch" to={timelineLink({ type: "price", amount: percent, start: startMonth })}>
+          <Link className="btn btn-green try-watch" to={timelineLink({ type: "price", amount: percent, start: startMonth })}>
             Watch the next 12 months →
           </Link>
           <button
-            type="button" className="secondary try-save" disabled={!fresh}
+            type="button" className="btn btn-amber try-save" disabled={!fresh}
             onClick={() => {
               track("save_opened", "try");
               setSaving(true);
             }}
           >
-            Save this as a scenario
+            Save as a plan
           </button>
         </div>
       </div>

@@ -12,3 +12,4 @@ frontend/.photo-candidates/
 # database backups (they contain real data)
 *.db.backup
 *.db.bak
+frontend/.photo-originals/

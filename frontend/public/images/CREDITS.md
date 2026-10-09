@@ -24,3 +24,17 @@ three (chalkboard marketing sign, coins for price) -- see the "Used for" column.
 | `bakery/investment.jpg` | Bakery investment | Angela Khebou | https://www.pexels.com/photo/close-up-of-a-dough-in-a-food-mixer-13112162/ (cropped to remove a visible brand name on the mixer) |
 | `{cafe,restaurant,bakery}/marketing.jpg` | Marketing, all three industries | Timothy Huliselan | https://www.pexels.com/photo/empty-chalkboard-on-brick-street-outdoors-32367351/ |
 | `{cafe,restaurant,bakery}/price.jpg` | Price, all three industries | ClickerHappy | https://www.pexels.com/photo/close-up-of-coins-on-table-332304/ |
+
+## Start page photos (the 2026 redesign)
+
+These four photos are used only on the start page. They are served as WebP files made by
+`frontend/scripts/make-redesign-images.py` (cropped and resized; the originals are kept outside the build, in the git-ignored `frontend/.photo-originals/`).
+
+| File | Used for | Source and photographer | Notes |
+| --- | --- | --- | --- |
+| `redesign/hero-720.webp` (from `hero2.jpg`) | Start page hero, right side | to be confirmed by the project owner | **AI-generated image.** |
+| `redesign/desk-632.webp` (from `desk.jpg`) | Start page card "See the impact" | to be confirmed by the project owner | |
+| `redesign/tablet-632.webp` (from `tablet.jpg`) | Start page card "Get a simple explanation" | to be confirmed by the project owner | |
+| `redesign/notes-632.webp` (from `notes.jpg`) | Start page card "Keep a journal" | to be confirmed by the project owner | |
+
+No photographer names are given here on purpose: they are not known yet and must not be guessed.

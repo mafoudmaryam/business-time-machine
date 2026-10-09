@@ -51,6 +51,24 @@ export function keepText(sketch: Sketch, currency: string): KeepText {
   };
 }
 
+export interface BankTile {
+  /** The lowest the money in the bank gets with this change, e.g. "$18,400". */
+  amount: string;
+  detail: string;
+}
+
+/** The "Money in the bank" tile: the lowest cash point of the changed path, in plain words. */
+export function bankTile(sketch: Sketch, currency: string): BankTile {
+  const path = sketch.change;
+  const where = sketch.month_labels[path.lowest_cash_month - 1] ?? `month ${path.lowest_cash_month}`;
+  const today = formatMoney(sketch.cash_now, currency);
+  let detail: string;
+  if (path.lowest_cash_amount < 0) detail = `Its lowest point is in ${where}, and that is below zero.`;
+  else if (path.lowest_cash_amount >= sketch.cash_now) detail = `It never drops below the ${today} you have today.`;
+  else detail = `Its lowest point is in ${where}. You have ${today} today.`;
+  return { amount: formatMoney(path.lowest_cash_amount, currency), detail };
+}
+
 export function catchText(visitsChange: number): string {
   const n = Math.round(Math.abs(visitsChange));
   if (n === 0) return "Almost no change in visits.";

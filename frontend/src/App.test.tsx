@@ -122,7 +122,5 @@ describe("getting back to the front page", () => {
     expect(await screen.findByRole("button", { name: "Continue with My café" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Continue with Demo Cafe" })).toBeNull();
     expect(screen.getByRole("button", { name: /Choose a business/ })).toBeTruthy();
-    await user.click(screen.getByRole("link", { name: "Today" }));
-    expect(await screen.findByRole("heading", { name: "What kind of business do you run?" })).toBeTruthy();
   });
 });

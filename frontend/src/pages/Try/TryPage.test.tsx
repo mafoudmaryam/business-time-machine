@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { axe } from "vitest-axe";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as api from "../../api";
+import { celebrate } from "../../lib/celebrate";
 import { rememberBusiness } from "../../lib/session";
 import { makeSketch } from "../../test-fixtures";
 import { TryPage } from "./TryPage";
@@ -16,6 +17,7 @@ vi.mock("../../api", async (importOriginal) => {
   };
 });
 vi.mock("../../lib/events", () => ({ track: vi.fn() }));
+vi.mock("../../lib/celebrate", () => ({ celebrate: vi.fn(), prefersReducedMotion: () => false }));
 
 const OPTIONS = [
   { key: "next", label: "Next month", month: 1, name: "November 2026" },
@@ -115,7 +117,7 @@ describe("Try a change: the answer", () => {
     mount();
     await settle();
     expect(screen.getByText("+$534")).toBeTruthy();
-    expect(screen.getByText("more")).toBeTruthy();
+    expect(screen.getByText("more each month")).toBeTruthy();
     expect(screen.getByText("That is $6,096 a month, instead of $5,562.")).toBeTruthy();
     expect(screen.getByText("About 382 fewer visits a month, because some people will come less often.")).toBeTruthy();
     expect(screen.getByText("You come out ahead in 9 of 10 possible futures.")).toBeTruthy();
@@ -135,7 +137,7 @@ describe("Try a change: the answer", () => {
   it("uses the headings from the brief", async () => {
     mount();
     await settle();
-    for (const h of ["Each month, you would keep about", "The catch", "How sure are we?"]) {
+    for (const h of ["What you keep", "Money in the bank", "The catch", "How sure are we?"]) {
       expect(screen.getByRole("heading", { name: h })).toBeTruthy();
     }
   });
@@ -145,7 +147,7 @@ describe("Try a change: the answer", () => {
     mount();
     await settle();
     expect(screen.getByText("-$120")).toBeTruthy();
-    expect(screen.getByText("less")).toBeTruthy();
+    expect(screen.getByText("less each month")).toBeTruthy();
     expect(document.querySelectorAll(".try-dot-on")).toHaveLength(2);
   });
 
@@ -247,21 +249,21 @@ describe("Try a change: live while dragging", () => {
   });
 });
 
-describe("Try a change: saving as a scenario", () => {
+describe("Try a change: saving as a plan", () => {
   async function openSave(user: ReturnType<typeof userEvent.setup>) {
     await settle();
-    await user.click(screen.getByRole("button", { name: "Save this as a scenario" }));
-    return screen.getByRole("dialog", { name: "Save this as a scenario?" });
+    await user.click(screen.getByRole("button", { name: "Save as a plan" }));
+    return screen.getByRole("dialog", { name: "Save this as a plan?" });
   }
 
   it("is disabled until the picture has settled, and enabled after", async () => {
     mount();
-    expect((screen.getByRole("button", { name: "Save this as a scenario" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "Save as a plan" }) as HTMLButtonElement).disabled).toBe(true);
     await settle();
-    expect((screen.getByRole("button", { name: "Save this as a scenario" }) as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByRole("button", { name: "Save as a plan" }) as HTMLButtonElement).disabled).toBe(false);
     vi.mocked(api.previewChange).mockImplementation(() => new Promise(() => undefined));
     fireEvent.change(slider(), { target: { value: "9" } });
-    expect((screen.getByRole("button", { name: "Save this as a scenario" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "Save as a plan" }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("asks the owner to confirm the plain sentence first, and saves nothing until they do", async () => {
@@ -302,6 +304,7 @@ describe("Try a change: saving as a scenario", () => {
     }]);
     expect(api.simulateBusiness).toHaveBeenCalledWith(1, [31], 24);
     expect((await screen.findByTestId("where")).textContent).toBe("/history?business=1&run=77");
+    expect(celebrate).toHaveBeenCalledTimes(1); // the owner saved something: that is what gets the confetti
   });
 
   it("if the name is taken it tries '(2)' instead of failing", async () => {
@@ -344,7 +347,7 @@ describe("Try a change: keyboard, phone and accessibility", () => {
       const el = document.activeElement as HTMLElement;
       reached.add(el.getAttribute("role") === "slider" || el.getAttribute("type") === "range" ? "slider" : (el.textContent ?? ""));
     }
-    for (const want of ["slider", "Next month", "In 3 months", "In spring", "Watch the next 12 months →", "Save this as a scenario"]) {
+    for (const want of ["slider", "Next month", "In 3 months", "In spring", "Watch the next 12 months →", "Save as a plan"]) {
       expect(reached.has(want), want).toBe(true);
     }
   });

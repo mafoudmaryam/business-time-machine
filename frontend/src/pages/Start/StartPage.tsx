@@ -20,6 +20,7 @@ import { heroImage } from "../../lib/images";
 import { getRememberedBusinessId, rememberBusiness } from "../../lib/session";
 import { describeStartingMonth } from "../../lib/startSummary";
 import { defaultBusinessName, toAnswers, validateAnswers, type AnswerDraft } from "../../lib/todayView";
+import { Landing, LandingFooter } from "./Landing";
 
 const WHO: Record<string, string> = { cafe: "customers", restaurant: "guests", bakery: "customers" };
 
@@ -133,9 +134,25 @@ export function StartPage() {
 
   const summary = quick ? describeStartingMonth(quick.preview, currency) : null;
 
+  const Heading = step === 0 ? "h2" : "h1"; // on the first step the welcome text above owns the page's main heading
+
   return (
     <div className="page start-page">
-      <h1>{step === 0 ? "What kind of business do you run?" : step === 1 ? `Tell us about your ${noun}` : "Here is what we worked out"}</h1>
+      {/* A returning visitor sees the way back in first, before any of the welcome text. */}
+      {step === 0 && current && (
+        <section className="continue-current" aria-label="Carry on where you were">
+          <p>
+            <strong>{current.name}</strong> is open.
+          </p>
+          <button type="button" onClick={() => enter(current, "continue")}>
+            Continue with {current.name}
+          </button>
+        </section>
+      )}
+      {step === 0 && <Landing />}
+
+      <section id="start-here" className="start-form" aria-labelledby="start-heading" tabIndex={-1}>
+      <Heading id="start-heading">{step === 0 ? "What kind of business do you run?" : step === 1 ? `Tell us about your ${noun}` : "Here is what we worked out"}</Heading>
       <p className="step-indicator">
         Step {step + 1} of 3
         {" · "}
@@ -160,16 +177,6 @@ export function StartPage() {
 
       {step === 0 && (
         <>
-          {current && (
-            <section className="continue-current" aria-label="Carry on where you were">
-              <p>
-                <strong>{current.name}</strong> is open.
-              </p>
-              <button type="button" onClick={() => enter(current, "continue")}>
-                Continue with {current.name}
-              </button>
-            </section>
-          )}
           {industries.loading && <Spinner label="Loading business types…" />}
           <ErrorBanner message={industries.error} />
           {industries.data && (
@@ -336,6 +343,8 @@ export function StartPage() {
           </ul>
         </section>
       )}
+      </section>
+      {step === 0 && <LandingFooter />}
     </div>
   );
 }

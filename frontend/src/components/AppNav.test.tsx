@@ -85,3 +85,36 @@ describe("AppNav", () => {
     expect(await screen.findByRole("button", { name: /Choose a business/ })).toBeTruthy();
   });
 });
+
+describe("AppNav on the start screen", () => {
+  it("offers the sections of the welcome page and a round Get started button", () => {
+    nav("/");
+    const main = screen.getByRole("navigation", { name: "Main" });
+    expect(within(main).getByRole("link", { name: "How it works" }).getAttribute("href")).toBe("#how-it-works");
+    expect(within(main).getByRole("link", { name: "What you get" }).getAttribute("href")).toBe("#what-you-get");
+    expect(within(main).getByRole("link", { name: "Get started" }).getAttribute("href")).toBe("#start-here");
+    expect(within(main).getByRole("link", { name: "Business Time Machine" }).getAttribute("href")).toBe("/");
+  });
+
+  it("has no Log in link, because the app has no login", () => {
+    nav("/");
+    expect(screen.queryByRole("link", { name: /log in/i })).toBeNull();
+  });
+
+  it("scrolls in place and does not add a history entry (that would reset the form)", async () => {
+    nav("/");
+    document.body.insertAdjacentHTML("beforeend", '<section id="start-here"></section>');
+    const scrolled = vi.fn();
+    Element.prototype.scrollIntoView = scrolled;
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("link", { name: "Get started" }));
+    expect(scrolled).toHaveBeenCalled();
+    expect(window.location.hash).toBe("");
+  });
+
+  it("keeps the app's own links on every other page", () => {
+    nav("/today");
+    expect(screen.queryByRole("link", { name: "How it works" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Today" })).toBeTruthy();
+  });
+});

@@ -1,0 +1,105 @@
+/* ---------- Design tokens: the ONE place the look is defined ("direction B": warm, light, friendly) ----------
+   Colours, fonts, shapes and motion timings. Every other stylesheet uses var(--...) and never a raw colour,
+   except for a few one-off tints that are named here. Every text/background pair used on screen is checked
+   against WCAG AA by src/lib/contrast.test.ts, so change a colour here and that test tells you if it still reads. */
+
+/* Fonts are served from the app itself (public/fonts), so the look is the same offline or when Google Fonts is blocked. */
+@font-face {
+  font-family: "Nunito";
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url("/fonts/nunito-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Nunito";
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url("/fonts/nunito-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Patrick Hand";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/patrick-hand-latin-400-normal.woff2") format("woff2");
+}
+
+:root {
+  /* Colours */
+  --cream: #fff9f0;         /* page background */
+  --green: #2e7d50;         /* buttons, icons, big numbers */
+  --green-heading: #226b41; /* headings, and green text on sage */
+  --sage: #e3f0e4;          /* big panels */
+  --amber: #f2a33a;         /* the ONE highlight: main call-to-action, active-tab underline, slider ring, "just a sketch" pill */
+  --amber-soft: #fff1d6;    /* the quote card and soft notes */
+  --amber-ink: #7a4a00;     /* amber-looking TEXT (amber itself is too light to read as text) */
+  --charcoal: #26302a;      /* text */
+  --body: #4a544d;          /* body gray-green */
+  --card-border: #ddebdf;   /* the 2px card outline */
+  --input-border: #6b9777;  /* form controls need a 3:1 edge, so they get a stronger green than cards */
+  --white: #ffffff;
+  --error: #9b2c1f;         /* the only red: form errors, in dark brick so it is calm and still readable */
+
+  /* Shadows (soft and green-tinted) */
+  --shadow-soft: 0 6px 22px rgba(34, 107, 65, 0.1);
+  --shadow-lift: 0 14px 34px rgba(34, 107, 65, 0.18);
+
+  /* Shapes */
+  --radius-card: 28px;
+  --radius-panel: 44px;
+  --radius-pill: 999px;
+
+  /* Motion timings (everything animated reads these, and prefers-reduced-motion switches it all off in redesign.css) */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --t-fast: 160ms;
+  --t-med: 260ms;
+
+  /* Fonts */
+  --font-heading: "Nunito", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-script: "Patrick Hand", "Segoe Print", "Comic Sans MS", cursive;
+
+  /* The names the older stylesheets already use now point at the new palette, so every page picks it up. */
+  --page: var(--cream);
+  --band: var(--sage);
+  --card: var(--white);
+  --border: var(--card-border);
+  --ink: var(--charcoal);
+  --muted-1: var(--body);
+  --muted-2: #56615a;
+  --button: var(--green);
+  --button-text: var(--white);
+
+  --text: var(--ink);
+  --text-muted: var(--muted-2);
+  --bg: var(--card);
+  --bg-alt: var(--band);
+  --accent: var(--button);
+  --danger: var(--error);
+  --danger-bg: var(--amber-soft);
+  --success: var(--green);
+
+  font: 17px/1.6 var(--font-body);
+  color: var(--ink);
+  background: var(--page);
+}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { makeSketch } from "../test-fixtures";
 import {
-  catchText, dots, exampleText, futuresText, keepText, lowestCashSentence, monthCard, monthValueText, parseTimelineQuery, pickStart,
+  bankTile, catchText, dots, exampleText, futuresText, keepText, lowestCashSentence, monthCard, monthValueText, parseTimelineQuery, pickStart,
   priceNote, scenarioName, timelineLink, timelineRows,
 } from "./sketch";
 
@@ -142,5 +142,27 @@ describe("the 12-month page", () => {
     const rows = timelineRows(s, "profit");
     expect(rows).toHaveLength(12);
     expect(rows[0]).toEqual({ label: "Nov 2026", p50: 6100, range: [4900, 7300], baseline: 5560 });
+  });
+});
+
+describe("bankTile (the 'Money in the bank' tile)", () => {
+  it("says the lowest point stays above today's cash when it never dips", () => {
+    const sketch = makeSketch({ cash_now: 25000 });
+    const tile = bankTile({ ...sketch, change: { ...sketch.change, lowest_cash_amount: 25000, lowest_cash_month: 1 } }, "USD");
+    expect(tile.amount).toBe("$25,000");
+    expect(tile.detail).toBe("It never drops below the $25,000 you have today.");
+  });
+
+  it("names the month of the lowest point when it dips below today's cash", () => {
+    const sketch = makeSketch({ cash_now: 25000 });
+    const tile = bankTile({ ...sketch, change: { ...sketch.change, lowest_cash_amount: 18400, lowest_cash_month: 3 } }, "USD");
+    expect(tile.amount).toBe("$18,400");
+    expect(tile.detail).toBe("Its lowest point is in Jan 2027. You have $25,000 today.");
+  });
+
+  it("says plainly when the lowest point is below zero", () => {
+    const sketch = makeSketch({ cash_now: 25000 });
+    const tile = bankTile({ ...sketch, change: { ...sketch.change, lowest_cash_amount: -1200, lowest_cash_month: 2 } }, "USD");
+    expect(tile.detail).toBe("Its lowest point is in Dec 2026, and that is below zero.");
   });
 });
