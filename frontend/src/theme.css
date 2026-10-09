@@ -69,6 +69,10 @@
   --radius-panel: 44px;
   --radius-pill: 999px;
 
+  /* One vertical rhythm between the big sections of a page (bigger on desktop, smaller on a phone). */
+  --space-section: 88px;
+  --space-gap: 56px; /* between the text and the photo in the hero */
+
   /* Motion timings (everything animated reads these, and prefers-reduced-motion switches it all off in redesign.css) */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --t-fast: 160ms;
@@ -102,4 +106,11 @@
   font: 17px/1.6 var(--font-body);
   color: var(--ink);
   background: var(--page);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --space-section: 48px;
+    --space-gap: 28px;
+  }
 }

@@ -233,25 +233,18 @@ button.link-button:disabled {
   border-bottom: 2px solid var(--card-border);
 }
 
-.appnav a.appnav-title {
-  display: inline-flex;
+.appnav {
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  font-family: var(--font-heading);
-  font-size: 21px;
-  font-weight: 800;
-  color: var(--green-heading);
-  text-decoration: none;
 }
 
 .appnav a,
 .appnav summary {
+  position: relative;
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 6px 4px;
-  border-bottom: 3px solid transparent;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
   color: var(--body);
   text-transform: none;
   letter-spacing: 0;
@@ -259,13 +252,18 @@ button.link-button:disabled {
   font-size: 16px;
   font-weight: 600;
   text-decoration: none;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.appnav-links {
+  gap: 4px;
 }
 
 .appnav a:hover,
 .appnav summary:hover {
+  background: var(--sage);
   color: var(--green-heading);
   text-decoration: none;
-  border-bottom-color: var(--card-border);
 }
 
 /* The page you are on: bold dark-green words and the one amber underline. */
@@ -274,12 +272,34 @@ button.link-button:disabled {
   color: var(--green-heading);
   font-weight: 800;
   text-decoration: none;
-  border-bottom-color: var(--amber);
+}
+
+.appnav a.active::after,
+.appnav-more.active summary::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 3px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--amber);
+}
+
+.appnav a.appnav-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 4px 4px;
+  font-family: var(--font-heading);
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--green-heading);
 }
 
 .appnav a.appnav-title:hover {
+  background: transparent;
   color: var(--green-heading);
-  border-bottom-color: transparent;
 }
 
 .appnav-more ul {
@@ -292,7 +312,7 @@ button.link-button:disabled {
 
 .appnav-cta {
   min-height: 44px;
-  padding: 8px 24px !important;
+  padding: 6px 24px !important;
   border: 2px solid var(--green) !important;
   border-radius: var(--radius-pill);
   background: var(--green);
@@ -302,13 +322,16 @@ button.link-button:disabled {
   transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
 }
 
-.appnav-cta:hover {
+.appnav a.appnav-cta:hover {
+  background: var(--green-heading);
   transform: translateY(-2px);
   box-shadow: var(--shadow-soft);
   color: var(--white) !important;
 }
 
 .switcher-button {
+  min-height: 44px;
+  padding: 8px 18px;
   border: 2px solid var(--card-border);
   border-radius: var(--radius-pill);
   background: var(--white);
@@ -377,49 +400,71 @@ button.link-button:disabled {
   padding-bottom: 24px;
 }
 
+/* "Continue with <name>": a slim pill above the hero, not a full-width bar. */
 .continue-current {
-  gap: 18px;
-  margin: 4px 0 24px;
-  padding: 18px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 20px;
+  max-width: 720px;
+  margin: 4px auto 28px;
+  padding: 8px 8px 8px 28px;
   background: var(--sage);
-  border: 2px solid var(--green);
-  border-radius: var(--radius-card);
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-pill);
 }
 
 .continue-current p {
-  font-size: 19px;
+  margin: 0;
+  font-size: 18px;
   color: var(--charcoal);
 }
 
+.continue-current button {
+  flex: none;
+}
+
+/* The hero: text on the left, one photo on the right, both centred against each other. */
 .hero-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
   align-items: center;
-  gap: 40px;
+  gap: var(--space-gap);
   margin-top: 8px;
-  padding: 56px 56px 56px 60px;
+  padding: 48px;
   background: var(--sage);
   border-radius: var(--radius-panel);
 }
 
+.hero-copy {
+  min-width: 0;
+}
+
 .hero-slogan {
-  margin: 0 0 6px;
+  margin: 0 0 10px;
   font-family: var(--font-script);
   font-size: 26px;
   line-height: 1.2;
   color: var(--amber-ink);
 }
 
+/* Two controlled lines. Each line stays whole when it fits, and balances when it must wrap, so no word is left alone. */
 .hero-copy h1 {
   margin: 0 0 18px;
-  font-size: clamp(34px, 5vw, 54px);
-  line-height: 1.08;
+  font-size: clamp(32px, 26px + 2.6vw, 46px);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
   color: var(--green-heading);
 }
 
+.hero-line {
+  display: block;
+  text-wrap: balance;
+}
+
 .hero-lead {
-  max-width: 34em;
-  margin: 0 0 28px;
+  max-width: 32em;
+  margin: 0 0 26px;
   font-size: 19px;
   color: var(--body);
 }
@@ -431,7 +476,7 @@ button.link-button:disabled {
 }
 
 .hero-small {
-  margin: 18px 0 0;
+  margin: 16px 0 0;
   font-size: 16px;
   font-weight: 600;
   color: var(--body);
@@ -439,9 +484,9 @@ button.link-button:disabled {
 
 .hero-photo {
   position: relative;
-  justify-self: center;
+  justify-self: end;
   width: 100%;
-  max-width: 460px;
+  max-width: 360px;
 }
 
 .photo-frame {
@@ -451,6 +496,7 @@ button.link-button:disabled {
 
 .photo-frame-hero {
   aspect-ratio: 4 / 5;
+  max-height: 450px;
   border-radius: 36px;
   background: #cfe5d2;
   box-shadow: var(--shadow-lift);
@@ -468,11 +514,14 @@ button.link-button:disabled {
   opacity: 0;
 }
 
+/* The example card sits fully inside the photo, never hanging off its edge. */
 .float-card {
   position: absolute;
-  left: -34px;
-  bottom: 38px;
-  padding: 14px 22px;
+  left: 16px;
+  right: auto;
+  bottom: 16px;
+  max-width: calc(100% - 32px);
+  padding: 12px 20px;
   border: 2px solid var(--card-border);
   border-radius: 24px;
   background: var(--white);
@@ -484,6 +533,7 @@ button.link-button:disabled {
 }
 
 .float-card-number {
+  white-space: nowrap;
   font-family: var(--font-heading);
   font-size: 28px;
   font-weight: 800;
@@ -497,23 +547,30 @@ button.link-button:disabled {
   color: var(--body);
 }
 
+/* One vertical rhythm: every big section is --space-section below the one before it. */
 .landing-section {
-  margin-top: 56px;
+  margin-top: var(--space-section);
 }
 
 .landing-heading {
-  margin: 0 0 24px;
+  margin: 0 0 28px;
   text-align: center;
   font-size: clamp(28px, 3.6vw, 36px);
 }
 
+/* Three cards: equal width, equal height, same top edge, text starts at the same height in each. */
 .photo-cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  align-items: stretch;
   gap: 24px;
 }
 
 .photo-card {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
   padding: 14px 14px 26px;
   border: 2px solid var(--card-border);
   border-radius: var(--radius-card);
@@ -532,6 +589,7 @@ button.link-button:disabled {
 }
 
 .photo-frame-card {
+  flex: none;
   aspect-ratio: 4 / 3;
   border-radius: 20px;
 }
@@ -590,53 +648,56 @@ button.link-button:disabled {
   font-weight: 800;
 }
 
+/* The team's note: compact, the quote mark inline at the start of the words, the cup beside them. */
 .quote-card {
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
   margin: 0;
-  padding: 44px 56px 44px 64px;
+  padding: 30px 44px;
   border-radius: var(--radius-card);
   background: var(--amber-soft);
 }
 
-.quote-mark {
-  position: absolute;
-  left: 22px;
-  top: -6px;
-  font-family: var(--font-heading);
-  font-size: 120px;
-  font-weight: 800;
-  line-height: 1;
-  color: var(--amber);
+.quote-body {
+  max-width: 60ch;
 }
 
 .quote-card blockquote {
   margin: 0;
-  max-width: 32em;
 }
 
 .quote-card blockquote p {
   margin: 0;
   font-family: var(--font-heading);
-  font-size: clamp(21px, 2.6vw, 27px);
+  font-size: clamp(21px, 2.4vw, 26px);
   font-weight: 700;
   line-height: 1.4;
   color: var(--charcoal);
 }
 
+.quote-mark {
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 2.6em;
+  line-height: 0;
+  vertical-align: -0.32em;
+  color: var(--amber);
+}
+
 .quote-card figcaption {
-  margin-top: 14px;
+  margin-top: 12px;
   font-weight: 600;
   color: var(--amber-ink);
 }
 
 .coffee-cup {
-  position: absolute;
-  right: 36px;
-  bottom: 26px;
+  flex: none;
 }
 
 .start-form {
-  margin-top: 56px;
+  margin-top: var(--space-section);
   padding: 36px 36px 32px;
   border: 2px solid var(--card-border);
   border-radius: var(--radius-card);
@@ -654,8 +715,8 @@ button.link-button:disabled {
 }
 
 .landing-footer {
-  margin-top: 40px;
-  padding: 22px 12px 8px;
+  margin-top: var(--space-section);
+  padding: 0 12px 8px;
   text-align: center;
   color: var(--body);
 }
@@ -1040,32 +1101,30 @@ button.link-button:disabled {
   .hero-panel {
     grid-template-columns: minmax(0, 1fr);
     gap: 32px;
-    padding: 34px 24px 40px;
+    padding: 32px 24px 36px;
     border-radius: 34px;
   }
 
   .hero-photo {
-    max-width: 380px;
-  }
-
-  .float-card {
-    left: -8px;
-    bottom: 22px;
+    justify-self: center;
+    max-width: 360px;
   }
 
   .photo-cards,
   .small-steps {
     grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
   }
 
   .quote-card {
-    padding: 52px 26px 84px;
+    flex-wrap: wrap;
+    gap: 14px 24px;
+    padding: 26px 28px;
   }
 
-  .quote-mark {
-    left: 18px;
-    top: -8px;
-    font-size: 96px;
+  .continue-current {
+    border-radius: 28px;
+    padding: 14px 16px 14px 22px;
   }
 
   .start-form {
@@ -1114,11 +1173,11 @@ button.link-button:disabled {
 
   .appnav-landing .appnav-links {
     order: 2;
-    gap: 4px 10px;
+    gap: 2px;
   }
 
   .appnav-landing .appnav-links a {
-    padding-inline: 2px;
+    padding-inline: 6px;
     font-size: 15px;
   }
 
@@ -1137,6 +1196,47 @@ button.link-button:disabled {
   .industry-card {
     width: 100%;
     height: 220px;
+  }
+
+  /* Small text-like buttons still get a 44px tall tap area on a phone. */
+  button.link-button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .continue-current {
+    padding: 12px 14px 12px 20px;
+  }
+
+  .continue-current p {
+    font-size: 17px;
+  }
+
+  .quote-card {
+    padding: 22px 22px 20px;
+  }
+
+  .quote-card blockquote p {
+    font-size: 20px;
+  }
+
+  .float-card {
+    padding: 10px 16px;
+  }
+
+  .float-card-number {
+    font-size: 24px;
+  }
+
+  .float-card-label {
+    font-size: 14px;
+  }
+
+  .coffee-cup {
+    width: 44px;
+    height: 38px;
+    margin-left: auto;
   }
 }
 

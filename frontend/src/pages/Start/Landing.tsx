@@ -46,7 +46,9 @@ export function Landing() {
       <section className="hero-panel" aria-labelledby="hero-title">
         <div className="hero-copy reveal">
           <p className="hero-slogan">Better decisions today. A stronger tomorrow.</p>
-          <h1 id="hero-title">Your business. A little more predictable.</h1>
+          <h1 id="hero-title">
+            <span className="hero-line">Your business.</span> <span className="hero-line">A little more predictable.</span>
+          </h1>
           <p className="hero-lead">
             Try a change on paper before you make it, and see what could happen to your profit, cash and customers. In plain words.
           </p>
@@ -104,13 +106,17 @@ export function Landing() {
 
       <section className="landing-section" aria-label="A note from the team">
         <figure className="quote-card reveal">
-          <span className="quote-mark" aria-hidden="true">
-            “
-          </span>
-          <blockquote>
-            <p>We built this so that after your first change you can say: I understand my numbers, and I know what I'm choosing.</p>
-          </blockquote>
-          <figcaption>The Business Time Machine team</figcaption>
+          <div className="quote-body">
+            <blockquote>
+              <p>
+                <span className="quote-mark" aria-hidden="true">
+                  “
+                </span>
+                We built this so that after your first change you can say: I understand my numbers, and I know what I'm choosing.
+              </p>
+            </blockquote>
+            <figcaption>The Business Time Machine team</figcaption>
+          </div>
           <CoffeeCup />
         </figure>
       </section>
