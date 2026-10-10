@@ -12,6 +12,7 @@ from .explain import (month_one_summary, profit_breakdown, key_moments, build_fa
                       format_money, round_display)
 from .quickstart import QuickStart, answers_from_baseline, quick_baseline, sample_assumed
 from .sketch import SKETCH_HORIZON, SKETCH_ITERATIONS, SKETCH_TYPES, preview_change, sketch_decision
+from .startup import AnswerError, build_plan, guide_quick_start, parse_answers, simulator_inputs, validate_data
 from .templates import TEMPLATES, get_template, list_industries
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     "month_one_summary", "profit_breakdown", "key_moments", "build_facts", "build_today_facts", "describe_decision", "format_money", "round_display",
     "QuickStart", "answers_from_baseline", "quick_baseline", "sample_assumed",
     "SKETCH_HORIZON", "SKETCH_ITERATIONS", "SKETCH_TYPES", "preview_change", "sketch_decision",
+    "AnswerError", "build_plan", "guide_quick_start", "parse_answers", "simulator_inputs", "validate_data",
     "TEMPLATES", "get_template", "list_industries",
 ]

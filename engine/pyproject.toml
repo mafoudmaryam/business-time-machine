@@ -13,3 +13,6 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 include = ["btm_engine*"]
+
+[tool.setuptools.package-data]
+btm_engine = ["data/*.json"]

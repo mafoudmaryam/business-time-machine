@@ -1,0 +1,1357 @@
+{
+  "version": "2026-10-10.1",
+  "reviewed": "2026-10-10",
+  "about": "Every number used by the start-up guide lives in this file. A fact row has a source (see 'sources'); an assumption row is our own named choice with a rationale and no source. Rows that nobody has read must have status 'needs_hand_check' on their source, and the calculator then ignores them. Checklist and struggle texts contain no digits: numbers appear only through {{row-id}} placeholders.",
+  "countries": {
+    "US": {
+      "name": "United States",
+      "currency": "USD",
+      "mode": "full"
+    },
+    "UK": {
+      "name": "United Kingdom",
+      "currency": "GBP",
+      "mode": "own_numbers"
+    },
+    "CN": {
+      "name": "China",
+      "currency": "CNY",
+      "mode": "own_numbers"
+    },
+    "OTHER": {
+      "name": "Somewhere else",
+      "currency": "USD",
+      "mode": "checklist_only"
+    }
+  },
+  "sources": {
+    "koronapos-coffee": {
+      "name": "KORONA POS, \"How Much Does It Cost to Open a Coffee Shop in 2026?\"",
+      "type": "vendor_guide",
+      "url": "https://koronapos.com/blog/how-much-does-it-cost-to-open-a-coffee-shop/",
+      "published": "2026-02-02",
+      "accessed": "2026-10-10",
+      "status": "verified",
+      "sells_to_restaurants": true,
+      "note": "KORONA sells point-of-sale (till) software to shops and restaurants, so it has an interest in this topic."
+    },
+    "zenbusiness-bakery": {
+      "name": "ZenBusiness Editorial Team, \"Costs to start a bakery\"",
+      "type": "vendor_guide",
+      "url": "https://www.zenbusiness.com/cost-open-bakery",
+      "published": "2026-09-02",
+      "accessed": "2026-10-10",
+      "status": "verified",
+      "sells_to_restaurants": true,
+      "note": "ZenBusiness sells company-formation services to new businesses, so it has an interest in this topic. Its own FAQ gives a lower permit range than its table."
+    },
+    "bls-cooks": {
+      "name": "US Bureau of Labor Statistics, Occupational Outlook Handbook: Cooks (May 2025 data)",
+      "type": "government",
+      "url": "https://www.bls.gov/ooh/food-preparation-and-serving/cooks.htm",
+      "published": null,
+      "accessed": "2026-10-10",
+      "status": "verified",
+      "data_period": "May 2025"
+    },
+    "bls-serving": {
+      "name": "US Bureau of Labor Statistics, Occupational Outlook Handbook: Food and Beverage Serving and Related Workers (May 2025 data)",
+      "type": "government",
+      "url": "https://www.bls.gov/ooh/food-preparation-and-serving/food-and-beverage-serving-and-related-workers.htm",
+      "published": null,
+      "accessed": "2026-10-10",
+      "status": "verified",
+      "data_period": "May 2025"
+    },
+    "gov-uk-nmw": {
+      "name": "GOV.UK, National Minimum Wage and National Living Wage rates (from 1 April 2026)",
+      "type": "government",
+      "url": "https://www.gov.uk/national-minimum-wage-rates",
+      "published": null,
+      "accessed": "2026-10-10",
+      "status": "verified",
+      "note": "These are legal minimums, not typical pay.",
+      "effective_from": "2026-04-01"
+    },
+    "nbs-wages-2024": {
+      "name": "National Bureau of Statistics of China, average annual wage of urban employees in 2024 (released 2025-05-16)",
+      "type": "statistics_office",
+      "url": "https://www.stats.gov.cn/sj/zxfb/202505/t20250516_1959826.html",
+      "published": "2025-05-16",
+      "accessed": "2026-10-10",
+      "status": "verified"
+    },
+    "nra-food-cost": {
+      "name": "National Restaurant Association, Restaurant Operations Data Abstract 2025 (2024 data, 900+ operators), reported in its Economic Insights article on food cost",
+      "type": "trade_association",
+      "url": "https://restaurant.org/research-and-media/research/restaurant-economic-insights/analysis-commentary/restaurant-operators-kept-food-cost-ratios-in-check-in-2024/",
+      "published": "2025-09-10",
+      "accessed": "2026-10-10",
+      "status": "verified",
+      "note": "The association says these figures are not intended to represent standards or goals for individual restaurants."
+    },
+    "nra-labor-cost": {
+      "name": "National Restaurant Association, Restaurant Operations Data Abstract 2025 (2024 data, 900+ operators), reported in its Economic Insights article on labor cost",
+      "type": "trade_association",
+      "url": "https://restaurant.org/research-and-media/research/restaurant-economic-insights/analysis-commentary/elevated-labor-costs-had-a-significant-impact-on-restaurant-profitability-in-2024/",
+      "published": "2025-10-08",
+      "accessed": "2026-10-10",
+      "status": "verified",
+      "note": "Pay and benefits as a share of sales: the median, and the medians of profitable and loss-making operators."
+    },
+    "sba-startup": {
+      "name": "US Small Business Administration, Calculate your startup costs",
+      "type": "government",
+      "url": "https://www.sba.gov/business-guide/plan-your-business/calculate-your-startup-costs",
+      "published": null,
+      "accessed": "2026-10-10",
+      "status": "verified"
+    },
+    "sba-licences": {
+      "name": "US Small Business Administration, Apply for licenses and permits",
+      "type": "government",
+      "url": "https://www.sba.gov/business-guide/launch-your-business/apply-licenses-permits",
+      "published": null,
+      "accessed": "2026-10-10",
+      "status": "verified"
+    },
+    "sba-local": {
+      "name": "US Small Business Administration, find local assistance (SBDCs, SCORE, Women's Business Centers)",
+      "type": "government",
+      "url": "https://www.sba.gov/local-assistance",
+      "published": null,
+      "accessed": "2026-10-10",
+      "status": "verified"
+    },
+    "fda-food-code": {
+      "name": "US Food and Drug Administration, Food Code",
+      "type": "government",
+      "url": "https://www.fda.gov/food/retail-food-protection/fda-food-code",
+      "published": null,
+      "accessed": "2026-10-10",
+      "status": "verified"
+    },
+    "bls-survival": {
+      "name": "US Bureau of Labor Statistics, The Economics Daily: 1-year survival rates for new business establishments (2024-03-04)",
+      "type": "government",
+      "url": "https://www.bls.gov/opub/ted/2024/1-year-survival-rates-for-new-business-establishments-by-year-and-location.htm",
+      "published": "2024-03-04",
+      "accessed": "2026-10-10",
+      "status": "verified",
+      "note": "All private-sector industries together, not food service."
+    },
+    "gov-uk-food": {
+      "name": "GOV.UK, Starting a food business",
+      "type": "government",
+      "url": "https://www.gov.uk/guidance/starting-a-food-business",
+      "published": null,
+      "accessed": "2026-10-10",
+      "status": "verified",
+      "note": "Applies to England, Northern Ireland and Wales."
+    },
+    "gov-uk-setup": {
+      "name": "GOV.UK, Set up a business",
+      "type": "government",
+      "url": "https://www.gov.uk/set-up-business",
+      "published": null,
+      "accessed": "2026-10-10",
+      "status": "verified"
+    },
+    "cn-samr-order78": {
+      "name": "State Administration for Market Regulation, Order No. 78: Measures for the Administration of Food Business Licensing and Filing (食品经营许可和备案管理办法), in force 2023-12-01",
+      "type": "government",
+      "url": "https://www.gov.cn/gongbao/2023/issue_10606/202307/content_6894763.html",
+      "published": "2023-06-15",
+      "accessed": "2026-10-10",
+      "status": "verified"
+    }
+  },
+  "rows": [
+    {
+      "id": "cafe-us-buildout",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ],
+        "premises": [
+          "fit_out"
+        ]
+      },
+      "label": "Build-out and renovations",
+      "low": 30000,
+      "high": 150000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "koronapos-coffee"
+    },
+    {
+      "id": "cafe-us-equipment",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Equipment (espresso machine, grinders)",
+      "low": 15000,
+      "high": 40000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "koronapos-coffee"
+    },
+    {
+      "id": "cafe-us-licences",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Licences and permits",
+      "low": 500,
+      "high": 5000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "koronapos-coffee"
+    },
+    {
+      "id": "cafe-us-stock",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "First stock",
+      "low": 5000,
+      "high": 15000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "koronapos-coffee"
+    },
+    {
+      "id": "cafe-us-marketing",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Marketing and branding",
+      "low": 2000,
+      "high": 10000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "koronapos-coffee"
+    },
+    {
+      "id": "cafe-us-pos",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Till (point-of-sale) system",
+      "low": 1000,
+      "high": 5000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "koronapos-coffee"
+    },
+    {
+      "id": "cafe-us-hiring",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Hiring and training staff",
+      "low": 10000,
+      "high": 25000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "koronapos-coffee"
+    },
+    {
+      "id": "cafe-us-tiny-total",
+      "group": "startup_total",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe"
+      ],
+      "applies_when": {
+        "format": [
+          "tiny"
+        ]
+      },
+      "label": "Coffee cart, truck or kiosk, all costs together",
+      "low": 25000,
+      "high": 100000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "koronapos-coffee",
+      "note": "The guide gives a mobile cart or truck as 25,000 to 85,000 and a kiosk or stand as 50,000 to 100,000; this row spans both."
+    },
+    {
+      "id": "cafe-us-seated-crosscheck",
+      "group": "cross_check",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "The guide's own total for a seated coffee shop",
+      "low": 80000,
+      "high": 275000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "koronapos-coffee"
+    },
+    {
+      "id": "cafe-us-rent",
+      "group": "rent_guide",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Monthly rent (the guide's range)",
+      "low": 2000,
+      "high": 12000,
+      "unit": "per_month",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "koronapos-coffee"
+    },
+    {
+      "id": "bakery-us-permits",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "bakery"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Permits and licences",
+      "low": 1500,
+      "high": 3500,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "zenbusiness-bakery",
+      "note": "The same guide's FAQ gives a lower permit range, 200 to 1,000."
+    },
+    {
+      "id": "bakery-us-insurance",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "bakery"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Insurance",
+      "low": 2000,
+      "high": 2000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "single_value",
+      "source_id": "zenbusiness-bakery"
+    },
+    {
+      "id": "bakery-us-deposit",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "bakery"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ],
+        "premises": [
+          "ready",
+          "fit_out"
+        ]
+      },
+      "label": "Rent deposit",
+      "low": 5000,
+      "high": 5000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "single_value",
+      "source_id": "zenbusiness-bakery"
+    },
+    {
+      "id": "bakery-us-construction",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "bakery"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ],
+        "premises": [
+          "fit_out"
+        ]
+      },
+      "label": "Building work and furniture",
+      "low": 5000,
+      "high": 25000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "zenbusiness-bakery",
+      "note": "The guide writes 5,000 to 25,000 and more, so the top of this range is a floor, not a ceiling."
+    },
+    {
+      "id": "bakery-us-equipment",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "bakery"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Equipment and cookware",
+      "low": 20000,
+      "high": 20000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "single_value",
+      "source_id": "zenbusiness-bakery"
+    },
+    {
+      "id": "bakery-us-stock",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "bakery"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "First stock",
+      "low": 5500,
+      "high": 5500,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "single_value",
+      "source_id": "zenbusiness-bakery"
+    },
+    {
+      "id": "bakery-us-staff",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "bakery"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Employees",
+      "low": 8000,
+      "high": 13000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "zenbusiness-bakery"
+    },
+    {
+      "id": "bakery-us-branding",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "bakery"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Branding and logo",
+      "low": 4000,
+      "high": 4000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "single_value",
+      "source_id": "zenbusiness-bakery"
+    },
+    {
+      "id": "bakery-us-advertising",
+      "group": "startup_cost",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "bakery"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Advertising and website",
+      "low": 9000,
+      "high": 9000,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "single_value",
+      "source_id": "zenbusiness-bakery"
+    },
+    {
+      "id": "bakery-us-home-total",
+      "group": "startup_total",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "bakery"
+      ],
+      "applies_when": {
+        "format": [
+          "tiny"
+        ]
+      },
+      "label": "Home bakery, all costs together",
+      "low": 15500,
+      "high": 23500,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "zenbusiness-bakery",
+      "note": "The guide describes a home kitchen. It has no figure for a stall or cart."
+    },
+    {
+      "id": "bakery-us-shop-crosscheck",
+      "group": "cross_check",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "bakery"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "The guide's own total for a bakery with a shop",
+      "low": 62500,
+      "high": 77500,
+      "unit": "one_off",
+      "currency": "USD",
+      "basis": "range",
+      "source_id": "zenbusiness-bakery"
+    },
+    {
+      "id": "bakery-us-rent",
+      "group": "rent_guide",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "bakery"
+      ],
+      "applies_when": {
+        "format": [
+          "shop"
+        ]
+      },
+      "label": "Monthly rent (the guide's example)",
+      "low": 2500,
+      "high": 2500,
+      "unit": "per_month",
+      "currency": "USD",
+      "basis": "single_value",
+      "source_id": "zenbusiness-bakery"
+    },
+    {
+      "id": "wage-us-serving",
+      "group": "wage",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe"
+      ],
+      "applies_when": {},
+      "label": "Median pay, food and beverage serving workers",
+      "low": 15.24,
+      "high": 15.24,
+      "unit": "per_hour",
+      "currency": "USD",
+      "basis": "median",
+      "source_id": "bls-serving"
+    },
+    {
+      "id": "wage-us-cook",
+      "group": "wage",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Median pay, cooks",
+      "low": 17.62,
+      "high": 17.62,
+      "unit": "per_hour",
+      "currency": "USD",
+      "basis": "median",
+      "source_id": "bls-cooks"
+    },
+    {
+      "id": "wage-uk-nlw",
+      "group": "wage",
+      "kind": "fact",
+      "country": "UK",
+      "business_types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "National Living Wage (age 21 and over), the legal minimum",
+      "low": 12.71,
+      "high": 12.71,
+      "unit": "per_hour",
+      "currency": "GBP",
+      "basis": "legal_minimum",
+      "source_id": "gov-uk-nmw"
+    },
+    {
+      "id": "wage-cn-catering",
+      "group": "wage",
+      "kind": "fact",
+      "country": "CN",
+      "business_types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Average yearly pay in accommodation and catering, urban units (private units to non-private units)",
+      "low": 54042,
+      "high": 60240,
+      "unit": "per_year",
+      "currency": "CNY",
+      "basis": "average",
+      "source_id": "nbs-wages-2024"
+    },
+    {
+      "id": "share-us-food-fs",
+      "group": "cost_share",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "restaurant"
+      ],
+      "applies_when": {},
+      "label": "Food and non-alcoholic drink cost, full-service restaurants",
+      "low": 32.0,
+      "high": 32.0,
+      "unit": "percent_of_sales",
+      "currency": null,
+      "basis": "median",
+      "source_id": "nra-food-cost"
+    },
+    {
+      "id": "share-us-food-ls",
+      "group": "cost_share",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Food and non-alcoholic drink cost, limited-service restaurants",
+      "low": 32.4,
+      "high": 32.4,
+      "unit": "percent_of_sales",
+      "currency": null,
+      "basis": "median",
+      "source_id": "nra-food-cost"
+    },
+    {
+      "id": "share-us-labor-fs",
+      "group": "cost_share_check",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "restaurant"
+      ],
+      "applies_when": {},
+      "label": "Pay and benefits, full-service restaurants (profitable to loss-making operators; the overall median is 36.5)",
+      "low": 34.2,
+      "high": 42.9,
+      "median": 36.5,
+      "unit": "percent_of_sales",
+      "currency": null,
+      "basis": "median",
+      "source_id": "nra-labor-cost"
+    },
+    {
+      "id": "share-us-labor-ls",
+      "group": "cost_share_check",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Pay and benefits, limited-service restaurants (profitable to loss-making operators; the overall median is 31.7)",
+      "low": 30.0,
+      "high": 34.1,
+      "median": 31.7,
+      "unit": "percent_of_sales",
+      "currency": null,
+      "basis": "median",
+      "source_id": "nra-labor-cost"
+    },
+    {
+      "id": "breakeven-cushion",
+      "group": "rule",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Extra cushion to add to a break-even figure",
+      "low": 10,
+      "high": 10,
+      "unit": "percent",
+      "currency": null,
+      "basis": "single_value",
+      "source_id": "sba-startup",
+      "note": "The SBA suggests adding something like this to cover costs you cannot predict."
+    },
+    {
+      "id": "rule-uk-register-days",
+      "group": "rule",
+      "kind": "fact",
+      "country": "UK",
+      "business_types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Register a food business at least this many days before you start trading (it is free)",
+      "low": 28,
+      "high": 28,
+      "unit": "days",
+      "currency": null,
+      "basis": "single_value",
+      "source_id": "gov-uk-food"
+    },
+    {
+      "id": "stat-us-survival-1y",
+      "group": "statistic",
+      "kind": "fact",
+      "country": "US",
+      "business_types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Share of new US private-sector businesses (all industries, 2022 start) still open a year later, by region",
+      "low": 74.4,
+      "high": 78.6,
+      "unit": "percent",
+      "currency": null,
+      "basis": "range",
+      "source_id": "bls-survival"
+    },
+    {
+      "id": "hours-per-month",
+      "group": "assumption",
+      "kind": "assumption",
+      "country": null,
+      "business_types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Paid hours per person per month",
+      "low": 173.333333,
+      "high": 173.333333,
+      "unit": "hours_per_month",
+      "currency": null,
+      "rationale": "40 hours a week x 52 weeks / 12 months. It turns an hourly wage into a monthly cost. Real rotas differ; you can change staff costs later in the simulator."
+    },
+    {
+      "id": "other-fixed-share",
+      "group": "assumption",
+      "kind": "assumption",
+      "country": null,
+      "business_types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Other fixed bills (utilities, insurance, other) as a share of rent",
+      "low": 0.333333,
+      "high": 0.333333,
+      "unit": "fraction",
+      "currency": null,
+      "rationale": "The same rough rule the simulator already uses and shows. It is our choice, not a source."
+    },
+    {
+      "id": "days-open",
+      "group": "assumption",
+      "kind": "assumption",
+      "country": null,
+      "business_types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Days open in a month",
+      "low": 28,
+      "high": 28,
+      "unit": "days",
+      "currency": null,
+      "rationale": "The simulator's value for all three industries, so the plan and the simulator agree."
+    },
+    {
+      "id": "contingency",
+      "group": "assumption",
+      "kind": "assumption",
+      "country": null,
+      "business_types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Contingency added to the start-up cost",
+      "low": 10,
+      "high": 20,
+      "unit": "percent",
+      "currency": null,
+      "rationale": "A cushion for costs you cannot foresee. The low end borrows the SBA's 10% break-even cushion; applying it to start-up costs, and the 20% upper end, are our own choices and not from a source."
+    },
+    {
+      "id": "buffer-months",
+      "group": "assumption",
+      "kind": "assumption",
+      "country": null,
+      "business_types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Cash buffer, in months of running costs",
+      "low": 3,
+      "high": 6,
+      "unit": "months",
+      "currency": null,
+      "rationale": "A rule of thumb for how long a new place can run on savings while sales build. It is our choice, not a standard. Ask an accountant."
+    },
+    {
+      "id": "marketing-share",
+      "group": "assumption",
+      "kind": "assumption",
+      "country": null,
+      "business_types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Marketing as a share of sales",
+      "low": null,
+      "high": null,
+      "unit": "percent_of_sales",
+      "currency": null,
+      "rationale": "The share the simulator's industry template uses (the same rule as the four-question start). It is a typical estimate, not a sourced figure."
+    },
+    {
+      "id": "segment-mapping",
+      "group": "assumption",
+      "kind": "assumption",
+      "country": "US",
+      "business_types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "applies_when": {},
+      "label": "Which published figures stand in for your business",
+      "low": null,
+      "high": null,
+      "unit": "text",
+      "currency": null,
+      "rationale": "Cafes and bakeries use the limited-service restaurant figures; a restaurant uses the full-service figures. For pay, a cafe uses food and beverage serving workers; a restaurant or bakery uses cooks. The closest listed job is not your job, so real pay will differ."
+    }
+  ],
+  "gaps": [
+    {
+      "id": "gap-us-restaurant-startup",
+      "text": "No start-up total for a restaurant in the United States: the guides we found could not be opened by our checks, so we do not use them."
+    },
+    {
+      "id": "gap-uk-cn-startup",
+      "text": "No start-up costs for the United Kingdom or China: we found no reliable published figures. Ask two or three local suppliers and agents for quotes."
+    },
+    {
+      "id": "gap-rent",
+      "text": "Rent depends on your street, so outside the United States cafe and bakery guides we have no figure: use your own quote."
+    },
+    {
+      "id": "gap-cost-shares",
+      "text": "No ingredient-cost share outside the United States: use your own estimate (ask a supplier what the ingredients for your best-seller cost)."
+    },
+    {
+      "id": "gap-alcohol",
+      "text": "No alcohol-licence cost: it depends on your state or council."
+    },
+    {
+      "id": "gap-misc",
+      "text": "No figures for insurance (except one bakery guide), utilities, accounting fees, equipment leasing, delivery-app commissions, food waste, seasons, or how long a new place takes to build up regular customers."
+    }
+  ],
+  "checklist": [
+    {
+      "id": "premises",
+      "title": "Find your premises",
+      "do": [
+        "Decide what rent you can carry each month before you look at places.",
+        "Ask local commercial property agents what is available, and what a deposit and a lease usually involve where you are.",
+        "Have someone who knows leases read yours before you sign."
+      ],
+      "cost_rows": [
+        "cafe-us-rent",
+        "bakery-us-rent",
+        "bakery-us-deposit"
+      ],
+      "where_kinds": [
+        "commercial property agents",
+        "listing sites for commercial space in your area",
+        "your local small-business support office"
+      ],
+      "where_sources": {
+        "US": [
+          "sba-local"
+        ],
+        "UK": [],
+        "CN": [],
+        "OTHER": []
+      }
+    },
+    {
+      "id": "licences",
+      "title": "Licences, permits and registration",
+      "do": [
+        "Find out which licences and permits your city or council asks for before you spend on fit-out.",
+        "Ask the office that issues them how long they take.",
+        "Keep a list of renewal dates."
+      ],
+      "cost_rows": [
+        "cafe-us-licences",
+        "bakery-us-permits",
+        "rule-uk-register-days"
+      ],
+      "where_kinds": [
+        "your local health or food-safety office",
+        "the office that issues business licences where you live"
+      ],
+      "where_sources": {
+        "US": [
+          "sba-licences",
+          "fda-food-code"
+        ],
+        "UK": [
+          "gov-uk-food"
+        ],
+        "CN": [
+          "cn-samr-order78"
+        ],
+        "OTHER": []
+      },
+      "cant": {
+        "US": "We can't tell you which licences you need or what they cost: that depends on your city, county and state. Start with the SBA page, then ask your local health department.",
+        "UK": "We can't register your business for you. Registering a food business with your local council is free, and the official page says to do it at least {{rule-uk-register-days}} days before you start trading. That page applies to England, Northern Ireland and Wales; for Scotland, check the official guidance for Scotland.",
+        "CN": "We can't handle licences for you. The rule is set out in the State Administration for Market Regulation's measures on food business licensing and filing (食品经营许可和备案管理办法): catering needs a food business licence (食品经营许可). Ask your local Administration for Market Regulation office (市场监督管理局) which documents your city wants.",
+        "OTHER": "We can't tell you which licences apply where you live. Ask the local office that licenses food businesses."
+      }
+    },
+    {
+      "id": "equipment",
+      "title": "Equipment",
+      "do": [
+        "List what you need to make your first menu, and nothing more.",
+        "Ask dealers for new, used and leased prices side by side.",
+        "Check that your power, water and ventilation can run it."
+      ],
+      "cost_rows": [
+        "cafe-us-equipment",
+        "bakery-us-equipment",
+        "cafe-us-pos"
+      ],
+      "where_kinds": [
+        "new restaurant-equipment dealers",
+        "used-equipment dealers and restaurant auctions",
+        "leasing companies"
+      ],
+      "where_sources": {
+        "US": [],
+        "UK": [],
+        "CN": [],
+        "OTHER": []
+      }
+    },
+    {
+      "id": "suppliers",
+      "title": "Suppliers",
+      "do": [
+        "Ask two or three suppliers for price lists in writing.",
+        "Find out minimum orders, delivery days and payment terms.",
+        "Taste and test before you commit."
+      ],
+      "cost_rows": [
+        "cafe-us-stock",
+        "bakery-us-stock"
+      ],
+      "where_kinds": [
+        "wholesale and cash-and-carry suppliers",
+        "local producers and markets",
+        "your equipment dealer's recommendations"
+      ],
+      "where_sources": {
+        "US": [],
+        "UK": [],
+        "CN": [],
+        "OTHER": []
+      }
+    },
+    {
+      "id": "menu",
+      "title": "Menu and pricing",
+      "do": [
+        "Work out what the ingredients for each item cost.",
+        "Compare your ingredient share of sales with the published medians on this page.",
+        "Try a price change in the simulator before you print a menu."
+      ],
+      "cost_rows": [
+        "share-us-food-ls",
+        "share-us-food-fs"
+      ],
+      "where_kinds": [
+        "your suppliers' price lists",
+        "a costing spreadsheet"
+      ],
+      "where_sources": {
+        "US": [],
+        "UK": [],
+        "CN": [],
+        "OTHER": []
+      }
+    },
+    {
+      "id": "staff",
+      "title": "Staff",
+      "do": [
+        "Decide who you need for opening hours, and who is part-time.",
+        "Check the pay rules where you live before you set pay.",
+        "Compare your pay bill as a share of sales with the published figures on this page."
+      ],
+      "cost_rows": [
+        "wage-us-serving",
+        "wage-us-cook",
+        "wage-uk-nlw",
+        "wage-cn-catering",
+        "share-us-labor-ls",
+        "share-us-labor-fs",
+        "cafe-us-hiring",
+        "bakery-us-staff"
+      ],
+      "where_kinds": [
+        "your local labour or employment office"
+      ],
+      "where_sources": {
+        "US": [
+          "bls-serving",
+          "bls-cooks"
+        ],
+        "UK": [
+          "gov-uk-nmw"
+        ],
+        "CN": [
+          "nbs-wages-2024"
+        ],
+        "OTHER": []
+      }
+    },
+    {
+      "id": "marketing",
+      "title": "Marketing",
+      "do": [
+        "Start with your neighbours: a sign, a social page, a tasting.",
+        "Decide a monthly amount and stick to it for a while before judging it.",
+        "Ask every new customer how they heard of you."
+      ],
+      "cost_rows": [
+        "cafe-us-marketing",
+        "bakery-us-branding",
+        "bakery-us-advertising"
+      ],
+      "where_kinds": [
+        "local sign makers and printers",
+        "social media and local listing sites",
+        "local business groups"
+      ],
+      "where_sources": {
+        "US": [],
+        "UK": [],
+        "CN": [],
+        "OTHER": []
+      }
+    },
+    {
+      "id": "bookkeeping",
+      "title": "Bookkeeping and tax",
+      "do": [
+        "Choose how you will register the business and pay tax.",
+        "Keep every receipt from day one.",
+        "Ask a qualified local accountant to set up simple books."
+      ],
+      "cost_rows": [],
+      "where_kinds": [
+        "a qualified local accountant",
+        "your tax office"
+      ],
+      "where_sources": {
+        "US": [
+          "sba-licences"
+        ],
+        "UK": [
+          "gov-uk-setup"
+        ],
+        "CN": [],
+        "OTHER": []
+      },
+      "cant": {
+        "US": "We can't give tax advice. The SBA page says an EIN (your federal tax ID) is free to apply for, and not to use websites that charge a fee for it.",
+        "UK": "We can't give tax advice. The GOV.UK page explains the choice between sole trader and limited company; ask a qualified accountant what it means for you.",
+        "CN": "We can't give tax advice. Ask a qualified local accountant, or your local tax office (税务局).",
+        "OTHER": "We can't give tax advice. Ask a qualified local accountant."
+      }
+    },
+    {
+      "id": "insurance",
+      "title": "Insurance",
+      "do": [
+        "Ask a broker which cover your landlord, lender and local rules expect.",
+        "Compare at least two quotes.",
+        "Re-check cover when you add staff, equipment or delivery."
+      ],
+      "cost_rows": [
+        "bakery-us-insurance"
+      ],
+      "where_kinds": [
+        "an insurance broker",
+        "your trade body or local business group"
+      ],
+      "where_sources": {
+        "US": [],
+        "UK": [],
+        "CN": [],
+        "OTHER": []
+      },
+      "cant": {
+        "US": "We can't tell you what cover you need or what it costs. Ask a broker.",
+        "UK": "We can't tell you what cover you need or what it costs. Ask a broker.",
+        "CN": "We can't tell you what cover you need or what it costs. Ask a broker.",
+        "OTHER": "We can't tell you what cover you need or what it costs. Ask a broker."
+      }
+    }
+  ],
+  "struggles": [
+    {
+      "id": "cash",
+      "title": "Cash running short",
+      "what": "Bills arrive before sales build up. A place can be busy and still run out of money.",
+      "watch": "Keep a cash buffer and look at it every week. The plan above shows a suggested buffer; the simulator's cash line shows what happens to it.",
+      "rows": [],
+      "types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ]
+    },
+    {
+      "id": "rent",
+      "title": "Rent that is too heavy",
+      "what": "Rent is paid every month whether it is busy or quiet.",
+      "watch": "Work out the customers you need to cover rent and other fixed bills before you sign. The break-even figure above does that.",
+      "rows": [],
+      "types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ]
+    },
+    {
+      "id": "waste",
+      "title": "Food waste",
+      "what": "Food you prepare but do not sell is money thrown away. Bakeries feel it most because bread and cakes do not keep.",
+      "watch": "Track what you throw away for the first weeks. We have no published figure for it, so ask a local supplier or a baker what is normal.",
+      "rows": [],
+      "types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ]
+    },
+    {
+      "id": "staffing",
+      "title": "Staffing costs and turnover",
+      "what": "Pay is usually the biggest cost after ingredients, and good people are hard to keep.",
+      "watch": "Compare your pay bill with the published share of sales: {{share-us-labor-ls}} percent for limited-service places and {{share-us-labor-fs}} percent for full-service ones, from profitable to loss-making operators (United States).",
+      "rows": [
+        "share-us-labor-ls",
+        "share-us-labor-fs"
+      ],
+      "types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "watch_generic": "Compare your pay bill with your sales every month, and ask other local owners what share of sales is normal for pay where you are."
+    },
+    {
+      "id": "pricing",
+      "title": "Prices that are too low or too high",
+      "what": "Prices set by guesswork can leave too little after ingredients, or push regulars away.",
+      "watch": "Know your ingredient cost for each item and compare it with the published median of {{share-us-food-ls}} or {{share-us-food-fs}} percent of sales. Try a change in the simulator first.",
+      "rows": [
+        "share-us-food-ls",
+        "share-us-food-fs"
+      ],
+      "types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "watch_generic": "Know your ingredient cost for each item, and ask a local supplier what share of sales ingredients usually take. Try a change in the simulator first."
+    },
+    {
+      "id": "slow",
+      "title": "Slow months",
+      "what": "Sales are rarely the same every month. Weather, holidays and local events change them.",
+      "watch": "Ask other owners nearby which months are quiet. The simulator does not model seasons, so plan extra cash for slow stretches yourself.",
+      "rows": [],
+      "types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ]
+    },
+    {
+      "id": "survival",
+      "title": "Many new businesses close early",
+      "what": "Across all industries in the United States, most new businesses are still open a year later, but a real share are not. The source does not list food service separately.",
+      "watch": "By region, {{stat-us-survival-1y}} percent of the newest group of US businesses the source reports on (all industries) were still open a year later. Treat that as context, not a forecast for you.",
+      "rows": [
+        "stat-us-survival-1y"
+      ],
+      "types": [
+        "cafe",
+        "restaurant",
+        "bakery"
+      ],
+      "countries": [
+        "US"
+      ]
+    }
+  ]
+}
