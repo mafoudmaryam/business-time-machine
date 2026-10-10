@@ -11,7 +11,7 @@ cd $HOME\projects\business-time-machine\engine
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-python -m pytest            # 29 tests: levels 1-3 of the validation plan, plus per-template checks
+python -m pytest            # the engine tests (see the README at the project root for the current count)
 python examples\demo.py     # writes a chart and CSVs into examples\output
 ```
 
@@ -62,8 +62,13 @@ café's uncertainty ranges pending real calibration.
 | `btm_engine/model.py` | The monthly equations, vectorised over Monte Carlo runs, plus the steady-state calibration |
 | `btm_engine/montecarlo.py` | Latin hypercube sampling, common random numbers, percentile bands, risk flags |
 | `btm_engine/sensitivity.py` | One-at-a-time ±20% sensitivity analysis (tornado chart data) |
+| `btm_engine/explain.py` | Facts for the coach: the profit breakdown (seven drivers that add up exactly), key moments, money formatting, plain descriptions of decisions, `build_facts` and `build_today_facts` |
+| `btm_engine/quickstart.py` | Four answers (customers a day, average spend, rent, people) turned into a full baseline, with a list of every value it assumed |
+| `btm_engine/sketch.py` | One slider position turned into a quick 12-month answer ("just a sketch", 300 Monte Carlo runs) |
+| `btm_engine/journal.py` | A real month set against the expected range (plain arithmetic: below, inside or above) |
 | `tests/test_engine.py` | Verification, extreme-condition and behaviour tests (café) |
 | `tests/test_templates.py` | Per-industry checks: steady-state margin, price direction, long-run elasticity, waste |
+| `tests/test_explain.py`, `test_quickstart.py`, `test_sketch.py`, `test_journal.py` | The facts, the four-question start, the sketch and the journal arithmetic |
 | `examples/demo.py` | Baseline and three scenarios, chart, summary CSV, deterministic CSV for the spreadsheet cross-check |
 
 ## Design choices worth defending

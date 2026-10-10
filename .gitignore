@@ -5,11 +5,19 @@ examples/output/
 *.egg-info/
 *.db
 .env
+.env.*
+!.env.example
 node_modules/
 .dev-pids.json
 frontend/.photo-candidates/
 
-# database backups (they contain real data)
-*.db.backup
-*.db.bak
+# databases and database backups (they contain real data, so they must never be committed)
+*.db
+*.db-*
+*.db.backup*
+*.db.bak*
+backend/*.db.backup*
+backend/*.db-*
+*.sqlite
+*.sqlite3
 frontend/.photo-originals/

@@ -1,15 +1,10 @@
-# Frontend redesign plan (on hold, SUPERSEDED)
+# Frontend redesign plan (SUPERSEDED, kept for history only)
 
-> **Superseded 2026-10-03** by `docs/beginner-journey-plan.md`. The new top navigation (`AppNav`) replaces the header/nav described here. The hero bands, scenario cards, "recipe" sidebar and 3-column setup are dropped (the setup is replaced by the four-question start screen; the old form stays under Advanced). Kept only for the design tokens and history.
+> **Superseded 2026-10-03** by `docs/beginner-journey-plan.md`. The new top navigation (`AppNav`) replaces the header/nav described here. The hero bands, scenario cards, "recipe" sidebar and 3-column setup are dropped (the setup is replaced by the four-question start screen; the old form stays under Advanced). Kept only for history. **The café-house palette and the Playfair / Montserrat / Great Vibes fonts described below are no longer used:** the app now uses the "direction B" look (cream, green, amber, charcoal; Nunito, Inter, Patrick Hand), defined in `frontend/src/theme.css` and recorded in `CLAUDE.md` and the README.
 
-Status: **approved, on hold** pending the multi-industry task (café / restaurant /
-bakery). Do not implement until that task lands and this doc has been revisited for
-industry-specific details (see "Open questions for the industries task" at the
-bottom). Visual/UX only — no changes to `api.ts`, the engine, the backend, or any
-existing pure function's behavior (`decisionSummary`, `riskAlert`,
-`friendlyErrorMessage`). Existing Vitest tests only cover pure functions, not
-rendered markup, so they stay green untouched; new pure formatting helpers added
-here get their own new tests.
+Status: **superseded. Do not implement.** The original status line said "approved, on hold"; the original constraints of the plan are kept here for history:
+
+> Visual/UX only — no changes to `api.ts`, the engine, the backend, or any existing pure function's behavior (`decisionSummary`, `riskAlert`, `friendlyErrorMessage`). Existing Vitest tests only cover pure functions, not rendered markup, so they stay green untouched; new pure formatting helpers added here get their own new tests.
 
 ## Decisions locked in (from the plan review)
 

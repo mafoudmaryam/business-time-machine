@@ -1,6 +1,6 @@
 # Beginner journey redesign: plan (awaiting approval)
 
-Status: **approved 2026-10-03. Phase 1 built (see the decisions below); Phases 2-4 not built.** Written 2026-10-03 after reading `CLAUDE.md`, the engine
+Status: **approved 2026-10-03. Phases 1 to 4 are all built, and so is the new look (see section 14 at the end). This file is the ORIGINAL plan, kept for the reasoning; where the built app differs, `CLAUDE.md` and the README are right.** Written 2026-10-03 after reading `CLAUDE.md`, the engine
 (`params.py`, `decisions.py`, `explain.py`), the backend (`models.py`, `schemas.py`, routers,
 `engine_bridge.py`) and the frontend routes/components. Where a request does not match the code,
 it is called out under "Corrections" so you can decide before anything is built.
@@ -32,7 +32,7 @@ it is called out under "Corrections" so you can decide before anything is built.
 |---|---|
 | Engine, all decision types, Monte Carlo, `explain.py` | **Kept.** Two additions only: `quickstart.py` and `build_today_facts` |
 | Safety rules: confirm every step, grounding, claim check, `confirmed_via`, `ai_interactions` | **Kept**, extended (new `confirmed_via` value, new log kinds) |
-| Café-house look (tokens in `index.css`, fonts, photos) | **Kept** |
+| Café-house look (tokens in `index.css`, fonts, photos) | **Replaced** by the "direction B" look (`frontend/src/theme.css`, 2026-10); the industry photos stay |
 | `CoachCard`, `AskCoach`, `coach/summary.py` tiles | **Reused**. `CoachCard` gets a `showAsk` prop; Ask moves behind an "Ask a question" link (dialog) |
 | `DescribeBox`, `DecisionList`, `decisionSummary`, `interpretView` | **Reused** inside "say it in your own words" and the confirm step |
 | `NumberField`, `InfoTip`, `friendlyError`, `riskAlert`, `format.ts`, `images.ts` | **Reused** |
@@ -40,7 +40,7 @@ it is called out under "Corrections" so you can decide before anything is built.
 | Setup wizard (`/setup`), Scenario builder (`/scenarios`), Compare (`/compare`), Run history (`/history`) | **Hidden under "Advanced", routes unchanged** (no broken links, existing tests keep passing) |
 | `docs/redesign-plan.md` (header/nav, hero bands, scenario cards, recipe sidebar, 3-column setup) | **Superseded.** Its header/nav is replaced by `AppNav`; the rest is dropped. I will mark it "superseded" |
 
-New routes: `/start`, `/today`, `/try`, `/try/:type`, `/watch/:runId`, `/journal`, `/plan/:runId/print`.
+New routes as planned: `/start`, `/today`, `/try`, `/try/:type`, `/watch/:runId`, `/journal`, `/plan/:runId/print`. **As built:** `/` and `/start` (start), `/today`, `/try`, `/timeline` (the 12-month view), `/how`, `/journal`, `/share`, plus the old `/setup`, `/scenarios`, `/compare`, `/history` under "Advanced".
 `/` redirects to `/today` if a business is remembered, otherwise to `/start`.
 
 ## 2. PHASE 1: simple start, and the coach speaks first
@@ -99,7 +99,7 @@ Three skippable steps in one dialog (what Today shows, how to try a change, wher
 Focus-trapped, Esc skips, "Don't show again". Remembered in `localStorage` (convenience) and logged as an event.
 
 ### 2.6 Navigation
-`AppNav`: **Today / Try a change / My journal / Advanced**. Advanced is a menu: Compare, Scenario builder,
+`AppNav`: **Today / Try a change / My journal / Advanced** (on the start page the bar offers How it works / What you get / Get started instead). Advanced is a menu: Compare, Scenario builder,
 Run history, Full business setup. On phones: bottom tab bar with the three main items plus "More".
 
 ### 2.7 Phase 1 data/API

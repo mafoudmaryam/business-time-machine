@@ -1,32 +1,40 @@
-# React + TypeScript + Vite
+# Business Time Machine: frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The app people see: React, TypeScript, Vite and Recharts. The project overview, setup steps and screenshots are in the
+[README at the project root](../README.md); this page is only a map of this folder.
 
-Currently, two official plugins are available:
+## Run it
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Start both servers from the **project root** with `.\start.ps1` (see the root README). To work on the frontend alone:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```powershell
+cd frontend
+npm install
+npm run dev        # http://localhost:5173 (needs the backend on port 8000 for real data)
+npm test           # Vitest and Testing Library, including vitest-axe accessibility checks
+npm run lint       # oxlint
+npm run build      # type-checks, then builds to dist/
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Where things are
+
+| Path | What it is |
+|---|---|
+| `src/api.ts` | The one typed client for the backend |
+| `src/pages/` | One folder per page (Start, Today, Try, Timeline, Journal, How, Share, and the older Advanced pages) |
+| `src/components/` | Shared pieces: top bar, Back button, dialogs, coach card, empty and error states |
+| `src/lib/` | Plain functions (formatting, wording, geometry) and their tests |
+| `src/theme.css` | **The single place for colours, fonts, shapes and spacing** |
+| `src/redesign.css` | The look, loaded last and organised page by page (table of contents at the top) |
+| `src/chartTheme.ts` | The one colour system shared by every chart |
+| `public/fonts/` | Nunito, Inter and Patrick Hand, served from the app itself |
+| `public/images/` | Industry photos and the four start-page photos, with `CREDITS.md` |
+| `scripts/make-redesign-images.py` | Turns the four start-page photos into small WebP files (needs Pillow) |
+
+## Rules to keep
+
+- Never write a raw colour outside `theme.css`; a test fails on any old-look colour.
+- Amber is for fills, underlines and rings, never for text.
+- Confetti only after the owner saves something that succeeded.
+- All motion switches off under `prefers-reduced-motion`, and the Share page prints plain black on white.
+- Tap targets are at least 44 pixels and nothing scrolls sideways at 390 pixels wide.

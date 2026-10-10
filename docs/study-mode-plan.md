@@ -255,7 +255,7 @@ Four ways it can happen, and the fix for each:
   - the study router is **not mounted** (`/study/*` returns 404), the study tables stay empty;
   - `GET /config` returns `study_mode: false`; the frontend registers no study routes and shows no link to them;
   - `coach_enabled_for` behaves exactly as today;
-  - the existing tests (278 engine, 619 backend, 673 frontend) pass unchanged. A test asserts the study routes 404 and `coach_enabled_for` is unaffected when the switch is off.
+  - the existing tests (see the README, "Quality", for the current counts) pass unchanged. A test asserts the study routes 404 and `coach_enabled_for` is unaffected when the switch is off.
 - With it on: the frontend redirects **every** route that is not `/study/*` to `/study` (no Advanced, no switcher, no way out of the participant's task), and the backend requires the db guard of section 7.1.
 - The switch is an environment variable, not something a user can toggle in the UI.
 
