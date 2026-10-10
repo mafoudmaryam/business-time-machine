@@ -9,7 +9,7 @@ from .model import METRICS, simulate
 from .montecarlo import ENGINE_VERSION, RunResult, ScenarioResult, run_deterministic, run_scenarios
 from .sensitivity import one_at_a_time
 from .explain import (month_one_summary, profit_breakdown, key_moments, build_facts, build_today_facts, describe_decision,
-                      format_money, round_display)
+                      format_money, round_display, currency_marks)
 from .quickstart import QuickStart, answers_from_baseline, quick_baseline, sample_assumed
 from .sketch import SKETCH_HORIZON, SKETCH_ITERATIONS, SKETCH_TYPES, preview_change, sketch_decision
 from .startup import AnswerError, build_plan, guide_quick_start, parse_answers, simulator_inputs, validate_data
@@ -19,7 +19,7 @@ __all__ = [
     "BusinessBaseline", "IndustryTemplate", "Draws", "Decision", "DECISION_TYPES", "DECISIONS_JSON_SCHEMA",
     "build_timeline", "METRICS", "simulate", "ENGINE_VERSION", "RunResult", "ScenarioResult",
     "run_deterministic", "run_scenarios", "one_at_a_time",
-    "month_one_summary", "profit_breakdown", "key_moments", "build_facts", "build_today_facts", "describe_decision", "format_money", "round_display",
+    "month_one_summary", "profit_breakdown", "key_moments", "build_facts", "build_today_facts", "describe_decision", "format_money", "round_display", "currency_marks",
     "QuickStart", "answers_from_baseline", "quick_baseline", "sample_assumed",
     "SKETCH_HORIZON", "SKETCH_ITERATIONS", "SKETCH_TYPES", "preview_change", "sketch_decision",
     "AnswerError", "build_plan", "guide_quick_start", "parse_answers", "simulator_inputs", "validate_data",

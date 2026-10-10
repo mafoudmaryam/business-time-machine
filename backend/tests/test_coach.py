@@ -184,7 +184,7 @@ def test_idea_simulated_on_same_seed_matches_the_run(client, run, use_provider):
 
 
 def test_ungrounded_number_triggers_one_retry(client, run, use_provider):
-    bad = good_reply(headline="You will make 987,654 EUR more.")
+    bad = good_reply(headline="You will make 987,654 more.")
     fake = use_provider(bad, good_reply())
     body = final(client, run)
     assert body["mode"] == "ollama" and body["fallback"] is False
@@ -194,8 +194,26 @@ def test_ungrounded_number_triggers_one_retry(client, run, use_provider):
     assert second.grounding["passed"] is True and second.attempt == 2
 
 
+def test_an_amount_in_the_wrong_currency_triggers_one_retry_and_is_logged(client, run, use_provider):
+    bad = good_reply(headline="You would keep £4,000 more.")        # the test business uses dollars
+    fake = use_provider(bad, good_reply())
+    body = final(client, run)
+    assert body["mode"] == "ollama" and body["fallback"] is False
+    assert len(fake.calls) == 2 and "wrong currency" in fake.calls[1][1]
+    first, second = interactions()
+    assert first.grounding["passed"] is False and "£" in first.error and first.error.startswith("currency check")
+    assert second.grounding["passed"] is True
+
+
+def test_two_replies_in_the_wrong_currency_fall_back_to_template(client, run, use_provider):
+    bad = good_reply(why="That is $5 in USD and €7.")
+    use_provider(bad, bad)
+    body = final(client, run)
+    assert body["mode"] == "template" and body["fallback"] is True and "€" not in json.dumps(body)
+
+
 def test_two_ungrounded_replies_fall_back_to_template(client, run, use_provider):
-    bad = good_reply(why="That adds up to 7,777,777 EUR.")
+    bad = good_reply(why="That adds up to 7,777,777 in total.")
     fake = use_provider(bad, bad)
     body = final(client, run)
     assert body["mode"] == "template" and body["fallback"] is True
@@ -491,6 +509,28 @@ def test_a_question_lost_to_a_restart_keeps_its_instant_answer(client, run):
     db.close()
     body = client.get(f"/asks/{ask_id}").json()
     assert (body["ai_status"], body["answer"], body["fallback"]) == ("failed", "instant", True)
+
+
+def test_a_poll_that_read_pending_just_before_the_job_finished_never_overwrites_the_finished_answer(client, run):
+    """The old race: the poll loaded the row as "pending", the job then committed "done" and left the active list, and the
+    poll (seeing 'not active') wrote "failed" over the finished answer. Done in a fixed order, no threads or sleeps."""
+    from sqlalchemy.orm import Session
+    db = next(app.dependency_overrides[get_db]())
+    row = models.CoachAnswer(simulation_run_id=run["id"], question="q", answer="instant", mode="template",
+                             answered=True, fallback=False, ai_status="pending")
+    db.add(row)
+    db.commit()
+    ask_id = row.id
+    assert db.get(models.CoachAnswer, ask_id).ai_status == "pending"            # the poll's session has read "pending"
+    with Session(db.get_bind()) as job:                                        # the job finishes in its own session
+        done = job.get(models.CoachAnswer, ask_id)
+        done.answer, done.mode, done.ai_status = "the AI answer", "ollama", "done"
+        job.commit()
+    try:
+        out = service.read_ask(db, ask_id)                                     # the poll now checks the active list
+    finally:
+        db.close()
+    assert (out["ai_status"], out["answer"], out["mode"]) == ("done", "the AI answer", "ollama")
 
 
 def test_unknown_ask_is_404_and_empty_question_is_422(client, run):

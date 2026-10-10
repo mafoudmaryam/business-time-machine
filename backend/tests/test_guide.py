@@ -187,9 +187,28 @@ def test_the_practice_business_is_made_with_the_usual_flow_and_linked_back(clien
     how = client.get(f"/businesses/{business['id']}/how").json()
     assert how["setup_source"] == "guide"
     told = {i["key"] for i in how["told"]}
-    assert {"customers_per_day", "avg_spend", "monthly_rent", "staff"} <= told
+    # 120 hoped-for customers is above the plan's own break-even number, so the practice business starts at OUR number
+    # and says so under "What we assumed" instead of listing it as something the person told us.
+    assert {"avg_spend", "monthly_rent", "staff"} <= told and "customers_per_day" not in told
     assumed_text = " ".join(a["rule"] for a in how["assumed"])
     assert "Bureau of Labor Statistics" in assumed_text
+    assert "break-even number" in assumed_text
+
+
+def test_customers_at_or_below_the_plans_break_even_are_kept_and_listed_as_told(client):
+    out = make_plan(client, customers_per_day=90)
+    business, sim = create_practice_business(client, out["id"])
+    assert sim["quick"]["baseline"]["customers"] > 0 and not any("hoped for" in n for n in sim["notes"])
+    how = client.get(f"/businesses/{business['id']}/how").json()
+    assert "customers_per_day" in {i["key"] for i in how["told"]}
+
+
+def test_hoped_for_customers_far_above_break_even_are_capped_and_the_person_is_told(client):
+    out = make_plan(client, customers_per_day=150)
+    sim = client.get(f"/guide/plans/{out['id']}/simulator").json()
+    assert any("You hoped for about 150 customers a day" in n for n in sim["notes"])
+    p = sim["quick"]["preview"]
+    assert 0 < p["profit"] / p["sales"] < 0.20
 
 
 def test_link_business_only_accepts_a_business_made_from_a_plan(client):

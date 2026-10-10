@@ -158,6 +158,11 @@ _SYMBOLS = {
 }
 
 
+def currency_marks() -> dict[str, str]:
+    """Currency code -> the symbol the app writes before an amount (CNY -> CN¥). A code with no entry is written as the code."""
+    return dict(_SYMBOLS)
+
+
 def format_money(value: float, currency: str) -> str:
     """Whole-number money the way an owner reads it: $27,900, €1,200, or CHF 4,500 when the
     currency has no common symbol. Negative amounts get a leading minus sign."""

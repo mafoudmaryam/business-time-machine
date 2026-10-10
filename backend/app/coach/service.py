@@ -20,7 +20,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .. import engine_bridge, models, settings
-from . import consistency, grounding, prompts, template
+from . import consistency, currency, grounding, prompts, template
 from .ideas import areas_of, choose_diverse, drop_repeated_opening, is_repeat, limit_sentences
 from .summary import build_summary
 from .providers import Provider, ProviderError, make_provider
@@ -135,6 +135,15 @@ def _generate(db: Session, run: models.SimulationRun, kind: str, provider: Provi
             row.grounding = {"passed": False, "unmatched": []}
             db.commit()
             note = "\n\nYour previous reply was not valid JSON in the requested format. Reply with the JSON object only."
+            continue
+
+        wrong = currency.foreign_currency(texts_of(parsed), facts["business"]["currency"])
+        if wrong is not None:                    # an amount in another currency: retry once, then the rule-based text stays
+            row.error = "currency check: " + wrong
+            row.grounding = {"passed": False, "unmatched": [], "currency_reason": wrong}
+            db.commit()
+            note = ("\n\nYour previous answer wrote an amount in the wrong currency. Copy every amount exactly as it is "
+                    "written in the FACTS, with its own symbol.")
             continue
 
         allowed = grounding.allowed_numbers(facts, extra_numbers(parsed))
@@ -310,9 +319,13 @@ def read_coach(db: Session, run: models.SimulationRun) -> Optional[dict]:
         # Written before the card had its summary: keep the old text, add the summary from the run's data.
         payload = _upgrade_old_payload(db, run, payload)
     if payload.get("ai_status") == "pending" and run.id not in _active:
-        # The server restarted while the AI was writing: keep the rule-based version.
-        payload = {**payload, "ai_status": "failed", "fallback": True}
-        _save(db, run.id, payload)
+        # The job is not running. Either the server restarted while the AI was writing, or the job finished a moment
+        # after this row was read: read it again before deciding, so a finished answer is never overwritten.
+        db.refresh(row)
+        payload = row.payload
+        if payload.get("ai_status") == "pending":
+            payload = {**payload, "ai_status": "failed", "fallback": True}     # keep the rule-based version
+            _save(db, run.id, payload)
     return _public(payload)
 
 
@@ -457,6 +470,8 @@ def read_ask(db: Session, ask_id: int) -> Optional[dict]:
     if not settings.coach_enabled_for(run.business if run is not None else None):
         raise CoachDisabled()
     if row.ai_status == "pending" and ask_id not in _ask_active:
-        row.ai_status, row.fallback = "failed", True
-        db.commit()
+        db.refresh(row)           # the job may have finished a moment after this row was read; never overwrite its answer
+        if row.ai_status == "pending":
+            row.ai_status, row.fallback = "failed", True
+            db.commit()
     return _ask_out(row)

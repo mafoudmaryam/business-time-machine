@@ -12,7 +12,7 @@ from jsonschema import ValidationError, validate as jsonschema_validate
 from sqlalchemy.orm import Session
 
 from btm_engine import (AnswerError, BusinessBaseline, DECISIONS_JSON_SCHEMA, Decision as EngineDecision,
-                        answers_from_baseline, build_facts, build_today_facts, describe_decision, format_money, get_template, list_industries,
+                        answers_from_baseline, build_facts, build_today_facts, describe_decision, format_money, currency_marks, get_template, list_industries,
                         month_one_summary, preview_change, quick_baseline, run_scenarios, sample_assumed)
 from btm_engine import startup as _startup
 from btm_engine import ENGINE_VERSION as _ENGINE_VERSION
@@ -172,7 +172,7 @@ def build_run_facts(db: Session, run: models.SimulationRun) -> tuple[dict, dict[
     tpl = get_template(business.industry)
     decisions = _run_decisions(db, run)
     summaries = {r.scenario_name: r.summary for r in run.results}
-    facts = build_facts(base, tpl, decisions, summaries, run.horizon, business.currency)
+    facts = mark_practice(build_facts(base, tpl, decisions, summaries, run.horizon, business.currency), business)
     raw = {name: [decision_to_flat(d) for d in decs] for name, decs in decisions.items()}
     return facts, raw
 
@@ -238,7 +238,16 @@ def build_today_run_facts(db: Session, run: models.SimulationRun) -> dict:
     base = to_baseline(_baseline_at_run_time(business, run))
     tpl = get_template(business.industry)
     baseline = next(r for r in run.results if r.scenario_name == "baseline")
-    return build_today_facts(base, tpl, baseline.summary, baseline.bands, run.horizon, business.currency)
+    facts = build_today_facts(base, tpl, baseline.summary, baseline.bands, run.horizon, business.currency)
+    return mark_practice(facts, business)
+
+
+def mark_practice(facts: dict, business: models.Business) -> dict:
+    """A business made from the start-up guide does not exist yet: the coach talks about it as a practice business.
+    Only the wording changes; no number in the facts is touched."""
+    if business.setup_source == "guide":
+        facts["business"]["practice"] = True
+    return facts
 
 
 BASELINE_FIELDS = tuple(BusinessBaseline().to_dict())

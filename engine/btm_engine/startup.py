@@ -743,6 +743,18 @@ def simulator_inputs(plan: dict) -> dict:
             notes.append("You were not sure how many customers to expect, so the practice business uses the number you would need to break even.")
         else:
             missing.append("customers_per_day")
+    hoped = customers if not from_break_even else None
+    capped = False
+    if hoped is not None and be.get("available"):
+        # A practice business should start close to the plan's own break-even picture. A hoped-for number far above the
+        # number the plan says is needed (with its cushion) would start the practice business at a profit no sourced
+        # figure supports, so it starts at the plan's own number instead. A hoped-for number below it is kept as typed.
+        cap = max(1.0, math.ceil(be["per_day_with_cushion"]["middle"]))
+        if hoped > cap:
+            customers, capped = cap, True
+            notes.append(
+                f"You hoped for about {hoped:g} customers a day. The plan needs about {cap:g} a day to cover its costs with a cushion, "
+                f"so the practice business starts at {cap:g}, a careful starting picture. You can raise it later with the Change button on Today.")
     rent = a["rent"]
     if rent is None:
         if running.get("rent_from") == "guide":
@@ -753,6 +765,7 @@ def simulator_inputs(plan: dict) -> dict:
         else:
             missing.append("rent")
     out: dict[str, Any] = {"ready": not missing, "missing": missing, "notes": notes, "from_break_even": from_break_even,
+                           "hoped_customers_per_day": hoped, "capped_to_break_even": capped,
                            "customers_per_day": customers, "avg_spend": a["avg_spend"], "monthly_rent": rent, "staff": a["people"],
                            "wage_per_fte": None, "cogs_ratio": None, "cash": None, "rules": {}}
     if running.get("per_person_monthly"):
@@ -797,4 +810,13 @@ def guide_quick_start(industry: str, inputs: dict) -> QuickStart:
     for entry in q.assumed:
         rule = inputs.get("rules", {}).get(entry["field"])
         assumed.append({"field": entry["field"], "rule": rule or entry["rule"]})
+    if inputs.get("capped_to_break_even") or inputs.get("from_break_even"):
+        # The customer number is ours, not the person's: say so on "What we assumed" and keep it out of "what you told us".
+        why = ("the plan's own break-even number with its cushion (you hoped for more, far above what the plan needs)"
+               if inputs.get("capped_to_break_even") else "the plan's own break-even number with its cushion (you were not sure)")
+        rule = f"{why}, about {inputs['customers_per_day']:g} customers a day, split into regulars and walk-ins like a typical small {tpl.display_name.lower()}"
+        for entry in assumed:
+            if entry["field"] in ("customers", "walk_in_visits"):
+                entry["rule"] = rule
+        assumed.append({"field": "customers_per_day", "rule": rule})
     return QuickStart(baseline=draft, assumed=assumed, warnings=list(q.warnings) + list(inputs.get("notes", [])))

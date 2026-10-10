@@ -78,8 +78,28 @@ class TodayFacts:
         self.has_risk = self.cash_risk_in_plans or self.loss_in_plans
 
 
+# A practice business (made from the start-up guide) does not exist yet, so a Today note must not praise it.
+_PRAISE = re.compile(
+    r"\b(?:doing (?:well|great|fine|good)|on track|good year|great year|healthy|thriving|successful|strong start|"
+    r"going well|congrat\w*|well done|off to a (?:good|great|flying) start)\b", re.IGNORECASE)
+
+
+def _practice_problem(texts: list[str], facts: dict) -> Optional[str]:
+    word = str(facts["business"].get("customers_word", "")).strip().lower()
+    for text in texts:
+        if _PRAISE.search(str(text)):
+            return "praises a practice business that does not exist yet"
+        if word and re.search(rf"\b{re.escape(word)}\b", str(text), re.IGNORECASE):
+            return f"talks about {word} of a practice business that does not exist yet"
+    return None
+
+
 def check(texts: list[str], facts: dict) -> Optional[str]:
     """None when the AI's risk claims agree with the facts, otherwise a short plain reason for rejecting the text."""
+    if facts.get("business", {}).get("practice") and "today" in facts and not facts.get("scenarios"):
+        problem = _practice_problem(texts, facts)
+        if problem:
+            return problem
     if facts.get("scenarios"):
         f = Facts(facts)
     elif "today" in facts:

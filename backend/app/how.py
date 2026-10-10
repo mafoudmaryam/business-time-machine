@@ -34,7 +34,9 @@ def told_by_owner(business: models.Business) -> list[schemas.HowItem]:
     if business.setup_source in ("quick", "guide") and snapshot.assumed_fields:
         answers = engine_bridge.quick_answers(snapshot)
         if _CUSTOMER_PARTS <= assumed:                       # still the numbers the four answers made
-            items.append(_item("customers_per_day", "Customers on a normal day", answers["customers_per_day"], "count"))
+            # A practice business whose customer number is the guide's own break-even number is OUR number, not "told".
+            if "customers_per_day" not in assumed:
+                items.append(_item("customers_per_day", "Customers on a normal day", answers["customers_per_day"], "count"))
             handled |= {"customers", "walk_in_visits", "visits_per_regular"}
         if "avg_ticket" not in assumed:
             items.append(_item("avg_spend", "Average spend per customer", answers["avg_spend"], "money"))

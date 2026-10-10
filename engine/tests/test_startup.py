@@ -7,6 +7,8 @@ import pytest
 
 from btm_engine import AnswerError, build_plan, guide_quick_start, parse_answers, simulator_inputs
 from btm_engine.startup import load_data
+from btm_engine.explain import month_one_summary
+from btm_engine.templates import get_template
 
 CAFE_US = dict(business_type="cafe", country="US", budget=200000, premises="fit_out", rent=4000, size="small", menu="simple",
                alcohol="no", people=3, customers_per_day=120, avg_spend=7, timeline="6m")
@@ -310,7 +312,7 @@ def test_unsure_answers_are_allowed_and_the_currency_follows_the_country():
 def test_practice_business_uses_the_guides_pay_ingredient_share_and_remaining_cash():
     plan = ask()
     inputs = simulator_inputs(plan)
-    assert inputs["ready"] and inputs["customers_per_day"] == 120 and inputs["monthly_rent"] == 4000 and inputs["staff"] == 3
+    assert inputs["ready"] and inputs["customers_per_day"] == 112 and inputs["monthly_rent"] == 4000 and inputs["staff"] == 3
     q = guide_quick_start("cafe", inputs)
     b = q.baseline
     assert b.wage_per_fte == pytest.approx(15.24 * 173.333333, abs=0.01)
@@ -320,6 +322,34 @@ def test_practice_business_uses_the_guides_pay_ingredient_share_and_remaining_ca
     assert "Bureau of Labor Statistics" in rules["wage_per_fte"] and "National Restaurant Association" in rules["cogs_ratio"]
     assert "budget" in rules["cash"]
     assert rules["churn_rate"].startswith("typical share of regulars")       # untouched rules stay as they were
+
+
+def test_hoped_for_customers_far_above_break_even_start_the_practice_business_at_the_plans_own_number():
+    plan = ask(customers_per_day=150)
+    cap = math.ceil(plan["break_even"]["per_day_with_cushion"]["middle"])
+    inputs = simulator_inputs(plan)
+    assert inputs["capped_to_break_even"] is True and inputs["hoped_customers_per_day"] == 150 and inputs["customers_per_day"] == cap
+    assert any("You hoped for about 150 customers a day" in n for n in inputs["notes"])
+    q = guide_quick_start("cafe", inputs)
+    month1 = month_one_summary(q.baseline, get_template("cafe"))
+    assert month1["profit"] / month1["sales"] < 0.20                          # close to break-even, not a 40-50% margin
+    fields = {a["field"]: a["rule"] for a in q.assumed}
+    assert "break-even" in fields["customers"] and "customers_per_day" in fields    # shown as OUR number, never "told"
+
+
+def test_hoped_for_customers_at_or_below_break_even_are_kept_as_typed():
+    plan = ask(customers_per_day=90)
+    inputs = simulator_inputs(plan)
+    assert inputs["capped_to_break_even"] is False and inputs["customers_per_day"] == 90
+    assert "customers_per_day" not in {a["field"] for a in guide_quick_start("cafe", inputs).assumed}
+
+
+def test_a_china_practice_business_starts_near_the_plans_own_break_even_picture():
+    plan = ask(country="CN", currency="CNY", rent=8000, avg_spend=40, ingredient_share=35, customers_per_day=150, budget=300_000)
+    inputs = simulator_inputs(plan)
+    assert inputs["capped_to_break_even"] and inputs["customers_per_day"] == math.ceil(plan["break_even"]["per_day_with_cushion"]["middle"])
+    m = month_one_summary(guide_quick_start("cafe", inputs).baseline, get_template("cafe"))
+    assert 0 < m["profit"] / m["sales"] < 0.20
 
 
 def test_a_budget_below_the_middle_starts_the_practice_business_with_no_cash_and_says_so():

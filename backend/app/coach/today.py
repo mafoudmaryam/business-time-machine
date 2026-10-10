@@ -40,7 +40,14 @@ def build_note(facts: dict) -> str:
     cur = facts["business"]["currency"]
     m = lambda x: _money(x, cur)           # noqa: E731
 
-    if t["profit_a_month"] >= 0:
+    practice = bool(facts["business"].get("practice"))
+    if practice:
+        # Made from the start-up guide: it does not exist yet. Calm wording, no praise, nothing about regulars.
+        verb = "keep" if t["profit_a_month"] >= 0 else "lose"
+        intro = "This is a practice business built from your rough plan, so nothing here has happened yet."
+        first = (f"In a typical month it would take in about {m(t['sales_a_month'])} and spend about "
+                 f"{m(t['costs_a_month'])}, so it would {verb} about {m(t['profit_a_month'])}.")
+    elif t["profit_a_month"] >= 0:
         first = (f"In a typical month you take in about {m(t['sales_a_month'])} and spend about "
                  f"{m(t['costs_a_month'])}, so you keep about {m(t['profit_a_month'])}.")
     else:
@@ -61,6 +68,8 @@ def build_note(facts: dict) -> str:
 
     third = (f"A bad month could mean you {_keep(t['profit_a_month_bad_case'], cur)}, and a good one you "
              f"{_keep(t['profit_a_month_good_case'], cur)}.")
+    if practice:
+        return " ".join([intro, first, second, third])
     fourth = "Pick “Try a change” to see what a decision would do before you commit to it."
     return " ".join([first, second, third, fourth])
 
@@ -88,8 +97,11 @@ def read_note(db: Session, run: models.SimulationRun) -> Optional[dict]:
         return None
     payload = row.payload
     if payload.get("ai_status") == "pending" and run.id not in _active:
-        payload = {**payload, "ai_status": "failed", "fallback": True}     # the server restarted mid-job
-        _save(db, run.id, payload)
+        db.refresh(row)           # the job may have finished a moment after this row was read; never overwrite its note
+        payload = row.payload
+        if payload.get("ai_status") == "pending":
+            payload = {**payload, "ai_status": "failed", "fallback": True}     # the server restarted mid-job
+            _save(db, run.id, payload)
     return dict(payload)
 
 

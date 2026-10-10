@@ -220,3 +220,15 @@ def test_moments_give_the_now_and_later_numbers_for_the_card():
     assert m["monthly_profit_end"] > m["monthly_profit_now"]
     assert m["cash_end"] > m["cash_end_baseline"]
     assert nothing["cash_end"] == pytest.approx(nothing["cash_end_baseline"])
+
+
+def test_currency_marks_match_how_money_is_written_and_cover_no_decimal_currencies():
+    from btm_engine import currency_marks, format_money
+    marks = currency_marks()
+    assert marks["CNY"] == "CN¥" and marks["GBP"] == "£" and marks["USD"] == "$" and marks["JPY"] == "¥" and marks["KRW"] == "₩"
+    for code, mark in marks.items():
+        assert format_money(1234, code) == f"{mark}1,234"
+    assert format_money(1234, "CHF") == "CHF 1,234"              # no symbol: the code, never a dollar sign
+    assert format_money(1234.56, "JPY") == "¥1,235"              # whole amounts, no decimal point
+    marks["USD"] = "x"
+    assert currency_marks()["USD"] == "$"                         # a copy, not the live table

@@ -49,7 +49,8 @@ busy owner who is not a finance expert.
 HARD RULES
 - Use ONLY numbers that appear in the FACTS. Never calculate, add up, average or convert anything yourself.
   If you want to mention a number that is not in the FACTS, describe it in words instead.
-- Copy money exactly as it is written in the FACTS, for example $27,900 (never add a currency code or change the format).
+- Copy money exactly as it is written in the FACTS, for example {money_example} (never add a currency code, never swap
+  the currency symbol for another one such as $, and never change the format).
 - Describe changes in {customers_word} with the count ("about 27 fewer {customers_word}") or the whole percent
   from the FACTS. Never write decimals like 3.01%.
 - Talk about uncertainty as "in X of 10 futures" using the *_of_10 numbers. Never promise anything:
@@ -105,31 +106,55 @@ If the FACTS do not contain the answer, say honestly that you cannot tell from t
 running a new simulation to find out. Reply as JSON: {{"answer": "..."}}."""
 
 
+_KEEP = set("¥£€₹₩₪₱₫")      # currency symbols are part of an amount; dropping them made the AI invent a "$"
+
+
 def _ascii(text: str) -> str:
-    """Small local models garble accents ("Café" -> "caf?"), so the prompt uses plain letters."""
-    return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    """Small local models garble accents ("Café" -> "caf?"), so the prompt uses plain letters.
+    Currency symbols stay, because "CN¥168,000" must not turn into "CN168,000"."""
+    out = []
+    for ch in unicodedata.normalize("NFKD", text):
+        out.append(ch if ch in _KEEP or ord(ch) < 128 else "")
+    return "".join(out)
 
 
 def _fill(text: str, facts: dict) -> str:
     b = facts["business"]
     return text.format(industry=_ascii(b["industry"]).lower(), currency=b["currency"], customers_word=b["customers_word"],
-                       staff_word=b["staff_word"], months=b["months"])
+                       staff_word=b["staff_word"], months=b["months"],
+                       money_example=engine_bridge.format_money(27900, b["currency"]))
+
+
+PRACTICE_RULES = """
+
+THIS IS A PRACTICE BUSINESS. It was built from the owner's rough start-up plan and does not exist yet, so nothing in the
+FACTS has happened. Say so plainly and calmly in your first sentence (for example "This is a practice business built from
+your rough plan."). Describe the numbers as what WOULD happen ("would take in", "would keep"). Do not praise it: never say it
+is doing well, on track, healthy, strong or a good year. Do not talk about {customers_word} or about customers coming or
+staying away; the number of {customers_word} is only a starting guess."""
+
+
+def _style(facts: dict) -> str:
+    text = _fill(_STYLE, facts)
+    if facts["business"].get("practice"):
+        text += _fill(PRACTICE_RULES, facts)
+    return text
 
 
 def coach_prompt(facts: dict) -> tuple[str, str]:
-    system = _fill(_STYLE, facts) + _fill(COACH_INSTRUCTIONS, facts)
+    system = _style(facts) + _fill(COACH_INSTRUCTIONS, facts)
     user = "FACTS:\n" + _ascii(json.dumps(facts_for_prompt(facts), ensure_ascii=False))
     return system, user
 
 
 def today_prompt(facts: dict) -> tuple[str, str]:
-    system = _fill(_STYLE, facts) + _fill(TODAY_INSTRUCTIONS, facts)
+    system = _style(facts) + _fill(TODAY_INSTRUCTIONS, facts)
     user = "FACTS:\n" + _ascii(json.dumps(facts_for_prompt(facts), ensure_ascii=False))
     return system, user
 
 
 def ask_prompt(facts: dict, question: str) -> tuple[str, str]:
-    system = _fill(_STYLE, facts) + _fill(ASK_INSTRUCTIONS, facts)
+    system = _style(facts) + _fill(ASK_INSTRUCTIONS, facts)
     user = "FACTS:\n" + _ascii(json.dumps(facts_for_prompt(facts), ensure_ascii=False)) + "\n\nQUESTION: " + _ascii(question)
     return system, user
 
