@@ -11,7 +11,7 @@ import { industryWord } from "../../lib/todayView";
 
 function Loaded({ how }: { how: HowOut }) {
   const noun = industryWord(how.industry);
-  const dollars = how.currency !== "USD" && how.assumed.some((a) => a.unit === "money");
+  const dollars = how.currency !== "USD" && how.setup_source !== "guide" && how.assumed.some((a) => a.unit === "money");
 
   useEffect(() => {
     track("screen_view", "how", { sample: how.is_sample });

@@ -37,7 +37,7 @@ How it stays honest:
 - **Countries:** the **United States** has the full plan (sourced pay and cost figures). The **United Kingdom** and **China (mainland)** are "bring your own numbers": we show the official pay figures and the official licensing pointer, but you type your own rent and ingredient share, and there is no start-up cost total. **Anywhere else** gets the checklist only, with no cost numbers. A US restaurant has no start-up total either, because no source could be read.
 - **Where we cannot help we say so**, with a link to the official page. No named suppliers and no affiliate links. We are not affiliated with the sites we link to.
 
-Limits: only some countries, start-up cost lines for a US café and a US bakery only, and a rough model that assumes you are already trading. A link checker (`engine/scripts/check_links.py`, run by hand, not part of the tests) last ran on 2026-10-10: 13 of 16 links worked and 3 (fda.gov, gov.cn, stats.gov.cn) could not be verified from the author's machine because of a certificate error there. They are kept, marked as not verified, and each page says "Links may change; last checked <date>."
+The practice business starts at the plan's own break-even customers a day (with its cushion) when you hoped for more, so it begins as a careful picture rather than an unrealistically profitable one; the plan page and "What we assumed" say so. Limits: only some countries, start-up cost lines for a US café and a US bakery only, and a rough model that assumes you are already trading. A link checker (`engine/scripts/check_links.py`, run by hand, not part of the tests) last ran on 2026-10-10: 13 of 16 links worked and 3 (fda.gov, gov.cn, stats.gov.cn) could not be verified from the author's machine because of a certificate error there. They are kept, marked as not verified, and each page says "Links may change; last checked <date>."
 
 ## The golden rule
 
@@ -139,9 +139,9 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 
 ```powershell
 # from the project root; all three use the backend's virtual environment
-cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 352 tests
-cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 646 tests
-cd ..\frontend; npm test                                        # 778 tests
+cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
+cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 679 tests
+cd ..\frontend; npm test                                        # 781 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -189,9 +189,9 @@ Measured on 2026-10-10, running the suites one after another on a quiet machine:
 
 | Check | Result |
 |---|---|
-| Engine tests (pytest) | 352 passed |
-| Backend tests (pytest) | 645 passed; one timing test (`test_the_request_returns_at_once_while_the_ai_is_slow`) fails at random, also on older code, and passes when run alone |
-| Frontend tests (Vitest, 55 files) | 778 passed |
+| Engine tests (pytest) | 356 passed |
+| Backend tests (pytest) | 679 (678 passed in the last full run; the one failure was fixed and its file re-run: 70 passed. The full run was not repeated after that fix) |
+| Frontend tests (Vitest, 55 files) | 781 passed |
 | TypeScript check | clean |
 | Lint (oxlint) | no errors, 2 old warnings |
 | Production build (Vite) | succeeds |

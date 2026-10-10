@@ -162,6 +162,7 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
         industryName={industryName}
         assumptions={today.assumptions}
         isSample={today.is_sample}
+        fromGuide={today.setup_source === "guide"}
         onChanged={reload}
       />
 

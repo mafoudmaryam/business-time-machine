@@ -3,6 +3,13 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## Bug-fix pass: practice businesses and the coach (Oct 2026)
+
+- **Coach used the wrong currency.** A café in yuan read "$168,000" in the coach's words. The prompt was stripping the currency symbol; it now keeps it, and a new check rejects any AI text with another currency's symbol or code (the rule-based text then stays).
+- **Practice businesses.** The Today coach says plainly that it is a practice business built from a rough plan, with no praise and nothing about regulars. The practice business now starts at the plan's own break-even customers when you hoped for more (a China café went from a 49% profit margin to about 9%).
+- **Layout.** "You haven't tried a change yet" is full width like the other cards; the chart's CN¥0 label no longer touches the first month; the "US dollars" notice is not shown for practice businesses.
+- **A real race fixed.** A poll could overwrite a finished AI answer with "failed" (the cause of a flaky test); it now re-reads the row first. Test added without threads or sleeps.
+
 ## "I don't have a business yet" start-up guide (Oct 2026)
 
 - **New.** Nine questions and a rough, sourced start-up plan: cost lines with sources and a wide total, running costs, break-even, a starting budget with named assumptions, a first-year checklist with official pointers, and what you will probably struggle with. The United States has the full plan, the United Kingdom and China bring your own numbers, other countries get the checklist only. A button makes a practice business to try in the simulator. Saved on your computer only; edit and delete with Undo; prints black on white.

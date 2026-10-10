@@ -50,6 +50,12 @@ describe("the 2026 look", () => {
     expect(block).toMatch(/\.confetti-layer[^}]*display:\s*none/);
   });
 
+  it("a compact empty state is a full-width card inside a page, not the narrow centred box", () => {
+    const css = read("redesign.css");
+    const rule = css.slice(css.lastIndexOf(".empty-state-compact {"));
+    expect(rule.slice(0, rule.indexOf("}"))).toMatch(/max-width:\s*none/);
+  });
+
   it("prints the start-up plan in plain black on white, with every checklist card readable", () => {
     const css = read("redesign.css");
     const print = css.slice(css.lastIndexOf("@media print"));

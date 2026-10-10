@@ -43,9 +43,9 @@ export function TodayChart({ today }: { today: TodayOut }) {
         aria-label={`${tab.label}, month by month. Most likely ${money(first.p50)} in ${first.label} and ${money(last.p50)} in ${last.label}. Bad case ${money(last.p10)}, good case ${money(last.p90)} by ${last.label}.`}
       >
         <ResponsiveContainer width="100%" height={280}>
-          <ComposedChart data={rows} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
+          <ComposedChart data={rows} margin={{ top: 8, right: 16, left: 8, bottom: 16 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} />
-            <XAxis dataKey="label" interval="preserveStartEnd" minTickGap={24} />
+            <XAxis dataKey="label" interval="preserveStartEnd" minTickGap={24} tickMargin={10} padding={{ left: 28, right: 12 }} />
             <YAxis tickFormatter={money} width={84} />
             <Tooltip
               formatter={(value, name) => {

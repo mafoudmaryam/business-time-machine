@@ -2200,10 +2200,22 @@ summary {
   flex-wrap: wrap;
 }
 
+/* A compact empty state sits inside a page like the other cards: full width, not the narrow centred box. */
 .empty-state-compact {
+  max-width: none;
   padding: 18px 22px;
   margin: 16px 0;
   text-align: left;
+  border-left-width: 1px;
+}
+
+.empty-state-compact .empty-text {
+  margin: 0 0 14px;
+  max-width: none;
+}
+
+.empty-state-compact .empty-actions {
+  justify-content: flex-start;
 }
 
 .empty-action-quiet,

@@ -280,6 +280,20 @@ describe("Today: what we assumed", () => {
     expect(await screen.findByText(/are US dollars\. Please change them to your own amounts in EUR/)).toBeTruthy();
   });
 
+  it("does not call a practice business's amounts US dollars: its numbers are in its own currency", async () => {
+    vi.mocked(api.getToday).mockResolvedValue(makeToday({ currency: "CNY", setup_source: "guide" }));
+    mount();
+    await screen.findByRole("heading", { name: "What we assumed" });
+    expect(screen.queryByText(/are US dollars/)).toBeNull();
+  });
+
+  it("shows the full-width empty card for a business with nothing saved", async () => {
+    vi.mocked(api.getBusinessImpact).mockResolvedValue({ scenarios: 0, runs: 0 });
+    mount();
+    const card = (await screen.findByText("You haven't tried a change yet")).closest(".empty-state");
+    expect(card?.classList.contains("empty-state-compact")).toBe(true);
+  });
+
   it("is not shown when the owner typed every number", async () => {
     vi.mocked(api.getToday).mockResolvedValue(makeToday({ assumptions: [], assumed_by_app: false }));
     mount();

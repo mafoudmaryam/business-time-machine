@@ -10,11 +10,13 @@ interface Props {
   industryName: string;
   assumptions: Assumption[];
   isSample: boolean;
+  /** A practice business from the start-up guide has local-currency numbers, so the "US dollars" notice does not apply. */
+  fromGuide?: boolean;
   onChanged: () => void;
 }
 
 /** "What we assumed": every number the app guessed for this owner, in plain words, each one editable. */
-export function Assumptions({ businessId, currency, industryName, assumptions, isSample, onChanged }: Props) {
+export function Assumptions({ businessId, currency, industryName, assumptions, isSample, fromGuide = false, onChanged }: Props) {
   const [editing, setEditing] = useState<string | null>(null);
   const [value, setValue] = useState(NaN);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function Assumptions({ businessId, currency, industryName, assumptions, i
   if (assumptions.length === 0) return null;
   const main = assumptions.filter((a) => a.important);
   const rest = assumptions.filter((a) => !a.important);
-  const dollars = currency !== "USD";
+  const dollars = currency !== "USD" && !fromGuide;
 
   function start(a: Assumption) {
     setEditing(a.field);
