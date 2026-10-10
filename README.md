@@ -22,6 +22,22 @@ Most small food businesses make big choices on instinct: raise prices, hire a ba
 2. **See good, likely and bad cases for the next 12 months.** Profit, cash and customers, with a range instead of one magic number, compared with "if you change nothing".
 3. **Get a coach that explains in plain words.** It says what happens, why, and what to watch out for. It starts with a short rule-based text and can add a fuller one from an AI.
 4. **Keep a journal.** Write down what really happened each month and see how close the forecast was.
+5. **No business yet? Start with a rough plan.** "I don't have a business yet" asks nine short questions and gives a rough start-up plan (see the next section).
+
+## The start-up guide ("I don't have a business yet")
+
+![The start-up guide plan page for a small café in the United States: the short version, then start-up cost shown line by line with the source of every line](docs/images/startup-guide/plan-us-1440.png)
+
+For someone who is only thinking about opening a café, restaurant or bakery. It asks nine questions, one per screen (what to open, country, budget, premises, size, menu, people, customers and spend, timeline) and then shows a **rough plan** on its own page: what it might cost to start (line by line, never one headline number), running costs a month, how many customers a day you need to break even, a starting budget with a cushion, a nine-item first-year checklist with "where to find it" pointers, and what you will probably struggle with. A button sets up a practice business from the answers so you can try changes in the simulator. Plans are saved on your computer only, can be edited, and can be deleted with Undo.
+
+How it stays honest:
+- **Every number has a source.** The numbers live in one data file (`engine/btm_engine/data/startup_ranges.json`), each with a source name, link and the date it was read; a test refuses a number without them. Our own rules (for example the contingency of 10% to 20%) are marked as **assumptions** with a reason, and shown on the plan page under "How we worked it out" next to every fact used. No AI writes anything on the plan page.
+- **Wide on purpose.** Published guides disagree, so start-up cost is shown as labelled lines with their source and then a wide total range, explained in words. Vendor-written cost guides are shown as "published guides say" and named as coming from a company that sells to shops and restaurants.
+- **Banner:** "This is a starting picture. It assumes your business is open and running smoothly." Everything says "A rough estimate, not advice."
+- **Countries:** the **United States** has the full plan (sourced pay and cost figures). The **United Kingdom** and **China (mainland)** are "bring your own numbers": we show the official pay figures and the official licensing pointer, but you type your own rent and ingredient share, and there is no start-up cost total. **Anywhere else** gets the checklist only, with no cost numbers. A US restaurant has no start-up total either, because no source could be read.
+- **Where we cannot help we say so**, with a link to the official page. No named suppliers and no affiliate links. We are not affiliated with the sites we link to.
+
+Limits: only some countries, start-up cost lines for a US café and a US bakery only, and a rough model that assumes you are already trading. A link checker (`engine/scripts/check_links.py`, run by hand, not part of the tests) last ran on 2026-10-10: 13 of 16 links worked and 3 (fda.gov, gov.cn, stats.gov.cn) could not be verified from the author's machine because of a certificate error there. They are kept, marked as not verified, and each page says "Links may change; last checked <date>."
 
 ## The golden rule
 
@@ -123,9 +139,9 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 
 ```powershell
 # from the project root; all three use the backend's virtual environment
-cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 278 tests
-cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 619 tests
-cd ..\frontend; npm test                                        # 712 tests
+cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 352 tests
+cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 646 tests
+cd ..\frontend; npm test                                        # 778 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -173,9 +189,9 @@ Measured on 2026-10-10, running the suites one after another on a quiet machine:
 
 | Check | Result |
 |---|---|
-| Engine tests (pytest) | 278 passed |
-| Backend tests (pytest) | 619 passed |
-| Frontend tests (Vitest, 52 files) | 712 passed |
+| Engine tests (pytest) | 352 passed |
+| Backend tests (pytest) | 645 passed; one timing test (`test_the_request_returns_at_once_while_the_ai_is_slow`) fails at random, also on older code, and passes when run alone |
+| Frontend tests (Vitest, 55 files) | 778 passed |
 | TypeScript check | clean |
 | Lint (oxlint) | no errors, 2 old warnings |
 | Production build (Vite) | succeeds |
@@ -211,10 +227,12 @@ What does exist for this: the coach can be switched off (`COACH_ENABLED=false`),
 - [x] How we worked it out, a print or PDF summary, friendly empty and error states
 - [x] My journal (pilot)
 - [x] The new look on every page
+- [x] Start-up guide for people with no business yet (US full; UK and China bring your own numbers; elsewhere checklist only)
 
 **Next**
 - [ ] Study mode and a possible small test with real owners (only a possible idea for now; the open questions are in `docs/study-mode-plan.md`, and it needs the owners' consent)
 - [ ] A fresh, held-out test set for the plain-language parser
+- [ ] More countries for the start-up guide, once a source can be read for each
 - [ ] A more realistic model (calibrating marketing and word of mouth, seasons)
 - [ ] Online deployment, user accounts and PostgreSQL (sketched in `CLAUDE.md`, not started)
 - [ ] Streaming explanations

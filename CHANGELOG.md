@@ -3,6 +3,11 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## "I don't have a business yet" start-up guide (Oct 2026)
+
+- **New.** Nine questions and a rough, sourced start-up plan: cost lines with sources and a wide total, running costs, break-even, a starting budget with named assumptions, a first-year checklist with official pointers, and what you will probably struggle with. The United States has the full plan, the United Kingdom and China bring your own numbers, other countries get the checklist only. A button makes a practice business to try in the simulator. Saved on your computer only; edit and delete with Undo; prints black on white.
+- **Behind it.** One sourced data file with a test that refuses any number without a source, link and date; a hand-run link checker; a `startup_plans` table (migration not yet run on the real database).
+
 ## Start page polish (Oct 2026)
 
 - **Quote card.** New wording from the team ("We can't promise the future. We can help you see what might happen before you decide."), a round sage badge with a coffee cup on the left, the words on the right, a short amber bar above the attribution, and a stacked layout on a phone.
