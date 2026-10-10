@@ -11,9 +11,11 @@ from typing import Optional
 from jsonschema import ValidationError, validate as jsonschema_validate
 from sqlalchemy.orm import Session
 
-from btm_engine import (BusinessBaseline, DECISIONS_JSON_SCHEMA, Decision as EngineDecision,
+from btm_engine import (AnswerError, BusinessBaseline, DECISIONS_JSON_SCHEMA, Decision as EngineDecision,
                         answers_from_baseline, build_facts, build_today_facts, describe_decision, format_money, get_template, list_industries,
                         month_one_summary, preview_change, quick_baseline, run_scenarios, sample_assumed)
+from btm_engine import startup as _startup
+from btm_engine import ENGINE_VERSION as _ENGINE_VERSION
 
 from btm_engine.journal import accuracy_summary, compare_month, months_between
 
@@ -257,3 +259,48 @@ def sketch_change(business: models.Business, kind: str, amount: float, start_mon
 def quick_answers(snapshot: models.BusinessSnapshot) -> dict:
     """The four answers behind a quick-start business, read back from its numbers ("what you told us")."""
     return answers_from_baseline(to_baseline(snapshot))
+
+
+# ---------- the "I don't have a business yet" guide ----------
+
+GuideAnswerError = AnswerError
+
+
+def engine_version() -> str:
+    return _ENGINE_VERSION
+
+
+def guide_options() -> dict:
+    """Countries (with their mode), the data version and the standing words, for the question screens."""
+    data = _startup.load_data()
+    return {"data_version": data["version"], "engine_version": engine_version(),
+            "countries": [{"id": k, **v} for k, v in data["countries"].items()],
+            "business_types": [{"id": t.id, "name": t.display_name} for t in list_industries()
+                               if t.id in _startup.BUSINESS_TYPES]}
+
+
+def guide_clean_answers(raw: dict) -> dict:
+    """The answers as they are stored (checked, without the derived bits). Raises GuideAnswerError (plain words)."""
+    parsed = _startup.parse_answers(raw)
+    return {k: v for k, v in parsed.items() if k not in ("format", "notes")}
+
+
+def guide_plan(answers: dict) -> dict:
+    return _startup.build_plan(answers)
+
+
+def guide_data_version() -> str:
+    return _startup.data_version()
+
+
+def guide_simulator(plan: dict) -> dict:
+    """What "Try it in the simulator" sets up: the same shape as quick_start, plus what is missing. Never invents a number."""
+    inputs = _startup.simulator_inputs(plan)
+    out = {"ready": inputs["ready"], "missing": inputs["missing"], "notes": inputs["notes"], "quick": None}
+    if inputs["ready"]:
+        industry = plan["business_type"]
+        tpl = get_template(industry)
+        q = _startup.guide_quick_start(industry, inputs)
+        out["quick"] = {"baseline": q.baseline.to_dict(), "assumed": q.assumed, "warnings": q.warnings,
+                        "preview": month_one_summary(q.baseline, tpl)}
+    return out

@@ -10,7 +10,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import beginner, businesses, coach, deletions, how, journal, sketch, industries, interpret, scenarios, simulations
+from .routers import beginner, businesses, coach, deletions, guide, how, journal, sketch, industries, interpret, scenarios, simulations
 
 app = FastAPI(
     title="Business Time Machine API",
@@ -41,6 +41,7 @@ app.include_router(scenarios.router)
 app.include_router(simulations.router)
 app.include_router(coach.router)
 app.include_router(interpret.router)
+app.include_router(guide.router)
 app.include_router(beginner.router)
 app.include_router(deletions.router)
 app.include_router(sketch.router)

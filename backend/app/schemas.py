@@ -67,7 +67,7 @@ class BusinessCreate(BaseModel):
     # None means "use this industry's default baseline" -- see routers/businesses.py.
     baseline: Optional[BaselineIn] = None
     # How the numbers were gathered, and which of them the app filled in (quick start only).
-    setup_source: Literal["full", "quick"] = "full"
+    setup_source: Literal["full", "quick", "guide"] = "full"
     assumed_fields: Optional[list[AssumedFieldIn]] = None
 
     @field_validator("currency")
@@ -647,7 +647,7 @@ class DeletedOut(BaseModel):
     """DELETE /... -- what was hidden, so the front end can say so and offer "Undo"."""
 
     id: int
-    kind: Literal["business", "scenario", "run", "journal"]
+    kind: Literal["business", "scenario", "run", "journal", "plan"]
     name: str
     deleted_at: dt.datetime
 
@@ -754,3 +754,55 @@ class HowOut(BaseModel):
     told: list[HowItem]                 # the owner's own numbers
     assumed: list[AssumptionOut]        # the numbers we filled in, each with its rule
     run: HowRun
+
+
+# ---------- "I don't have a business yet": the start-up guide ----------
+
+class GuideAnswersIn(BaseModel):
+    """The nine screens' answers. Words are checked by the engine (btm_engine.startup.parse_answers), which answers in plain
+    sentences, so here everything is loose and optional: a missing or odd answer becomes a 422 with that sentence."""
+
+    business_type: Optional[str] = None
+    country: Optional[str] = None
+    currency: Optional[str] = None
+    budget: Optional[float] = None
+    premises: Optional[str] = None
+    rent: Optional[float] = None
+    size: Optional[str] = None
+    menu: Optional[str] = None
+    alcohol: Optional[str] = None
+    people: Optional[float] = None
+    customers_per_day: Optional[float] = None
+    avg_spend: Optional[float] = None
+    ingredient_share: Optional[float] = None
+    timeline: Optional[str] = None
+
+
+class GuidePlanOut(BaseModel):
+    id: int
+    created_at: dt.datetime
+    business_id: Optional[int] = None
+    data_version: str                  # the version of the data file the plan below was worked out with
+    data_changed: bool                 # the person last saw an older version of the data file
+    plan: dict[str, Any]
+
+
+class GuidePlanSummary(BaseModel):
+    id: int
+    created_at: dt.datetime
+    country: str
+    business_type: str
+    business_id: Optional[int] = None
+
+
+class GuideSimulatorOut(BaseModel):
+    """What "Try it in the simulator" would set up (same shape as the quick start), or what is still missing."""
+
+    ready: bool
+    missing: list[str]
+    notes: list[str]
+    quick: Optional[QuickStartOut] = None
+
+
+class GuideLinkIn(BaseModel):
+    business_id: int

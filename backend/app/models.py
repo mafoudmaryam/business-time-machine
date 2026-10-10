@@ -257,6 +257,30 @@ class JournalEntry(Base):
     business = relationship("Business")
 
 
+class StartupPlan(Base):
+    """One run of the "I don't have a business yet" guide: the nine answers (categories and numbers, never free text).
+
+    The plan itself is NOT stored: it is worked out again from the answers and the engine's data file whenever it is
+    shown, so a number can never disagree with the data. `data_version` remembers which version of the data file the
+    person last saw. `business_id` is set when they use "Try it in the simulator"."""
+
+    __tablename__ = "startup_plans"
+
+    id = Column(Integer, primary_key=True)
+    answers = Column(JSON, nullable=False)
+    country = Column(String, nullable=False)
+    business_type = Column(String, nullable=False)
+    currency = Column(String, nullable=False)
+    data_version = Column(String, nullable=False)
+    engine_version = Column(String, nullable=False)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=True, index=True)
+    created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
+    deleted_at = Column(DateTime, nullable=True)           # soft delete, with Undo, like everything else
+
+    business = relationship("Business")
+
+
 class UiEvent(Base):
     """One thing the person did in the app (screen opened, tour skipped, ...), for the study. No free text."""
 

@@ -38,6 +38,8 @@ def purge(db: Session, older_than: dt.timedelta, now: Optional[dt.datetime] = No
         (m.JournalEntry.deleted_at.isnot(None) & (m.JournalEntry.deleted_at <= cutoff))
         | (m.JournalEntry.business_id.in_(business_ids) if business_ids else False))
 
+    plan_q = db.query(m.StartupPlan).filter(m.StartupPlan.deleted_at.isnot(None), m.StartupPlan.deleted_at <= cutoff)
+
     def count(query) -> int:
         return query.count()
 
@@ -52,6 +54,7 @@ def purge(db: Session, older_than: dt.timedelta, now: Optional[dt.datetime] = No
         "runs": len(run_list),
         "run_results": count(db.query(m.SimulationResult).filter(m.SimulationResult.simulation_run_id.in_(run_list))) if run_list else 0,
         "journal_entries": count(journal_q),
+        "startup_plans": count(plan_q),
         "coach_results": count(db.query(m.CoachResult).filter(m.CoachResult.simulation_run_id.in_(run_list))) if run_list else 0,
         "ai_logs_kept": len({row.id for q in (ai_run, ai_biz, ai_int) if q is not None for row in q}),
     }
@@ -85,6 +88,14 @@ def purge(db: Session, older_than: dt.timedelta, now: Optional[dt.datetime] = No
         db.query(m.Scenario).filter(m.Scenario.id.in_(scenario_list)).update({m.Scenario.parent_scenario_id: None}, synchronize_session=False)
         db.query(m.Decision).filter(m.Decision.scenario_id.in_(scenario_list)).delete(synchronize_session=False)
         db.query(m.Scenario).filter(m.Scenario.id.in_(scenario_list)).delete(synchronize_session=False)
+
+    # 3b. Start-up plans removed long ago go; plans that pointed at a purged practice business just lose the link.
+    for row in plan_q.all():
+        db.delete(row)
+    db.flush()
+    if business_ids:
+        db.query(m.StartupPlan).filter(m.StartupPlan.business_id.in_(business_ids)).update(
+            {m.StartupPlan.business_id: None}, synchronize_session=False)
 
     # 4. Journal entries removed long ago, and all entries of purged businesses; then the businesses themselves.
     for row in journal_q.all():

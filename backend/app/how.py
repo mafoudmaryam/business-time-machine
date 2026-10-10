@@ -31,7 +31,7 @@ def told_by_owner(business: models.Business) -> list[schemas.HowItem]:
     items: list[schemas.HowItem] = []
     handled: set[str] = set()
 
-    if business.setup_source == "quick" and snapshot.assumed_fields:
+    if business.setup_source in ("quick", "guide") and snapshot.assumed_fields:
         answers = engine_bridge.quick_answers(snapshot)
         if _CUSTOMER_PARTS <= assumed:                       # still the numbers the four answers made
             items.append(_item("customers_per_day", "Customers on a normal day", answers["customers_per_day"], "count"))
@@ -50,7 +50,7 @@ def told_by_owner(business: models.Business) -> list[schemas.HowItem]:
     for field in ORDER:
         if field in assumed or field in handled:
             continue
-        if business.setup_source == "quick" and field == "open_days" and _CUSTOMER_PARTS <= assumed:
+        if business.setup_source in ("quick", "guide") and field == "open_days" and _CUSTOMER_PARTS <= assumed:
             continue
         items.append(_item(field, labels[field], float(getattr(snapshot, field)), _UNITS[field]))
     return items

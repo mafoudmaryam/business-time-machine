@@ -33,6 +33,11 @@ def run(db: Session, run_id: Optional[int]) -> Optional[models.SimulationRun]:
     return row
 
 
+def plan(db: Session, plan_id: Optional[int]) -> Optional[models.StartupPlan]:
+    row = db.get(models.StartupPlan, plan_id) if plan_id is not None else None
+    return row if row is not None and row.deleted_at is None else None
+
+
 def free_scenario_name(db: Session, business_id: int, name: str, keep_id: Optional[int] = None) -> None:
     """Names are unique per business, deleted scenarios included. Before a scenario takes `name`, any DELETED scenario
     holding it is renamed "name (deleted #id)" so the unique rule cannot trip over something the owner cannot see."""
