@@ -31,7 +31,7 @@ const STEPS = [
 
 function CoffeeCup() {
   return (
-    <svg className="coffee-cup" viewBox="0 0 64 56" width="64" height="56" aria-hidden="true" focusable="false">
+    <svg className="coffee-cup" viewBox="0 0 64 56" width="44" height="38" aria-hidden="true" focusable="false">
       <path d="M20 8c-3 4 3 6 0 10M30 6c-3 4 3 6 0 10M40 8c-3 4 3 6 0 10" fill="none" stroke="var(--amber-ink)" strokeWidth="2.4" strokeLinecap="round" />
       <path d="M10 24h40v12a16 16 0 0 1-16 16h-8A16 16 0 0 1 10 36V24Z" fill="var(--white)" stroke="var(--amber-ink)" strokeWidth="2.6" strokeLinejoin="round" />
       <path d="M50 28h4a6 6 0 0 1 0 12h-5" fill="none" stroke="var(--amber-ink)" strokeWidth="2.6" strokeLinecap="round" />
@@ -106,18 +106,21 @@ export function Landing() {
 
       <section className="landing-section" aria-label="A note from the team">
         <figure className="quote-card reveal">
+          <div className="quote-badge" aria-hidden="true">
+            <CoffeeCup />
+          </div>
           <div className="quote-body">
             <blockquote>
               <p>
                 <span className="quote-mark" aria-hidden="true">
                   “
                 </span>
-                We built this so that after your first change you can say: I understand my numbers, and I know what I'm choosing.
+                We can’t promise the future. We can help you see what might happen before you decide.
               </p>
             </blockquote>
+            <span className="quote-rule" aria-hidden="true" />
             <figcaption>The Business Time Machine team</figcaption>
           </div>
-          <CoffeeCup />
         </figure>
       </section>
     </>

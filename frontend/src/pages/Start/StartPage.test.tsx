@@ -309,7 +309,9 @@ describe("StartPage: the welcome text", () => {
       expect(screen.getByRole("heading", { name: title })).toBeTruthy();
     }
     expect(screen.getByRole("heading", { name: "Three small steps" })).toBeTruthy();
-    expect(screen.getByText(/after your first change you can say: I understand my numbers/)).toBeTruthy();
+    const quote = screen.getByText(/We can’t promise the future\. We can help you see what might happen before you decide\./);
+    expect(quote.textContent).toContain("can’t"); // a proper apostrophe, not a straight one
+    expect(screen.queryByText(/after your first change you can say/)).toBeNull();
     expect(screen.getByText("The Business Time Machine team")).toBeTruthy();
     expect(screen.getByText("Scenarios, not forecasts. Built from typical numbers and the ones you give us. Not financial advice.")).toBeTruthy();
   });

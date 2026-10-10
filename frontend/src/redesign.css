@@ -666,20 +666,35 @@ button.link-button:disabled {
   font-weight: 800;
 }
 
-/* The team's note: compact, the quote mark inline at the start of the words, the cup beside them. */
+/* The team's note: a round sage badge with the cup on the left, the words on the right, both centred in the card. */
 .quote-card {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 32px;
+  gap: 36px;
   margin: 0;
-  padding: 30px 44px;
+  padding: 40px 48px;
   border-radius: var(--radius-card);
   background: var(--amber-soft);
 }
 
+.quote-badge {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--sage);
+}
+
+.coffee-cup {
+  width: 44px;
+  height: 38px;
+}
+
 .quote-body {
-  max-width: 60ch;
+  flex: 1;
+  min-width: 0;
 }
 
 .quote-card blockquote {
@@ -689,29 +704,35 @@ button.link-button:disabled {
 .quote-card blockquote p {
   margin: 0;
   font-family: var(--font-heading);
-  font-size: clamp(21px, 2.4vw, 26px);
+  font-size: clamp(22px, 2.4vw, 30px);
   font-weight: 700;
-  line-height: 1.4;
+  line-height: 1.35;
+  text-wrap: balance;
   color: var(--charcoal);
 }
 
 .quote-mark {
   display: inline-block;
   margin-right: 6px;
-  font-size: 2.6em;
+  font-size: 2.2em;
   line-height: 0;
-  vertical-align: -0.32em;
+  vertical-align: -0.3em;
   color: var(--amber-ink);
+}
+
+/* A short amber bar between the words and who said them. */
+.quote-rule {
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin: 18px 0 12px;
+  border-radius: 3px;
+  background: var(--amber);
 }
 
 .quote-card figcaption {
-  margin-top: 12px;
   font-weight: 600;
   color: var(--amber-ink);
-}
-
-.coffee-cup {
-  flex: none;
 }
 
 .start-form {
@@ -1135,9 +1156,8 @@ button.link-button:disabled {
   }
 
   .quote-card {
-    flex-wrap: wrap;
-    gap: 14px 24px;
-    padding: 26px 28px;
+    gap: 24px;
+    padding: 32px 36px;
   }
 
   .continue-current {
@@ -1231,12 +1251,22 @@ button.link-button:disabled {
     font-size: 17px;
   }
 
+  /* Phone: the badge sits above the words and everything is left-aligned. */
   .quote-card {
-    padding: 22px 22px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 28px;
   }
 
-  .quote-card blockquote p {
-    font-size: 20px;
+  .quote-badge {
+    width: 64px;
+    height: 64px;
+  }
+
+  .coffee-cup {
+    width: 34px;
+    height: 30px;
   }
 
   .float-card {
@@ -1251,11 +1281,6 @@ button.link-button:disabled {
     font-size: 14px;
   }
 
-  .coffee-cup {
-    width: 44px;
-    height: 38px;
-    margin-left: auto;
-  }
 }
 
 /* =====================================================================================================================
