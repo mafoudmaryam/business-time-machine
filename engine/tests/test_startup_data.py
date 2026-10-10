@@ -156,3 +156,15 @@ def test_the_calculator_module_has_no_ai_and_no_randomness():
     source = resources.files("btm_engine").joinpath("startup.py").read_text(encoding="utf-8").lower()
     for banned in ("anthropic", "openai", "ollama", "import random", "numpy", "default_rng"):
         assert banned not in source
+
+
+def test_the_link_check_has_been_run_for_every_address_and_nothing_is_broken():
+    import json
+    status = json.loads(resources.files("btm_engine").joinpath("data", "link_status.json").read_text(encoding="utf-8"))
+    data = load_data()
+    for source in data["sources"].values():
+        entry = status["results"].get(source["url"])
+        assert entry, f"no link-check result for {source['url']}: run engine/scripts/check_links.py"
+        assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", entry["checked"])
+        assert entry["result"] in ("ok", "redirect", "blocked", "certificate"), f"{source['url']} is {entry['result']}"
+        assert entry["result"] != "redirect", f"{source['url']} moved to {entry['final_url']}: update the data file"

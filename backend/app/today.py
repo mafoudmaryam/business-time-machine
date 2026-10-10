@@ -120,7 +120,7 @@ def build_today(db: Session, business: models.Business, with_note: bool = True) 
     snapshot = business.baseline
     return schemas.TodayOut(
         business_id=business.id, name=business.name, industry=business.industry, currency=business.currency,
-        is_sample=business.is_sample, run_id=run.id, horizon=run.horizon, engine_version=run.engine_version,
+        is_sample=business.is_sample, setup_source=business.setup_source, run_id=run.id, horizon=run.horizon, engine_version=run.engine_version,
         seed=run.seed, iterations=run.iterations, month_labels=labels,
         tiles=schemas.TodayTilesOut(
             profit_a_month=t["profit_a_month"], profit_a_month_bad_case=t["profit_a_month_bad_case"],

@@ -259,9 +259,32 @@ def parse_answers(raw: dict, data: Optional[dict] = None) -> dict:
 
 # ---------- helpers on the data ----------
 
+KIND_TEXT = {
+    "vendor_guide": "from a company that sells to shops, restaurants and new businesses",
+    "government": "from a government source",
+    "statistics_office": "from a national statistics office",
+    "trade_association": "from a restaurant trade association's survey",
+}
+
+
+@lru_cache(maxsize=1)
+def _link_status() -> dict:
+    """What scripts/check_links.py last found for each address (optional: the file may not exist yet)."""
+    path = resources.files("btm_engine").joinpath("data", "link_status.json")
+    try:
+        return json.loads(path.read_text(encoding="utf-8")).get("results", {})
+    except (FileNotFoundError, ValueError):
+        return {}
+
+
 def _source_out(data: dict, sid: str) -> dict:
     s = data["sources"][sid]
-    return {"id": sid, **{k: s.get(k) for k in ("name", "type", "url", "published", "accessed", "status", "note", "sells_to_restaurants", "data_period", "effective_from")}}
+    out = {"id": sid, **{k: s.get(k) for k in ("name", "type", "url", "published", "accessed", "status", "note", "sells_to_restaurants", "data_period", "effective_from")}}
+    out["kind_text"] = KIND_TEXT[s["type"]]
+    checked = _link_status().get(s["url"])
+    out["last_checked"] = checked["checked"] if checked else None
+    out["link_result"] = checked["result"] if checked else None
+    return out
 
 
 def _row_ok(data: dict, row: dict) -> bool:
@@ -391,9 +414,29 @@ def build_plan(raw_answers: dict, data: Optional[dict] = None) -> dict:
     plan["gaps"] = _gaps(data, a, startup, plan["running"])
     plan["assumptions"] = assumptions
     plan["sources"] = list(used_sources.values())
+    plan["facts_used"] = _facts_used(plan)
     plan["selling_note"] = ("Some of the published guides behind these numbers are written by companies that sell to "
                             "restaurants and new businesses. We say so next to each one.")
     return plan
+
+
+def _facts_used(plan: dict) -> list[dict]:
+    """Every sourced fact the plan shows, once each, so the page can list them with their sources and dates."""
+    found: dict[str, dict] = {}
+
+    def walk(node) -> None:
+        if isinstance(node, dict):
+            if {"id", "label", "low", "high", "unit"} <= node.keys() and node.get("source"):
+                found.setdefault(node["id"], {k: node.get(k) for k in ("id", "label", "low", "high", "median", "unit", "currency", "basis", "note", "source")})
+            for key, value in node.items():
+                if key != "source":
+                    walk(value)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value)
+    for key in ("startup", "running", "break_even", "checklist", "struggles"):
+        walk(plan.get(key))
+    return list(found.values())
 
 
 def _startup(data: dict, a: dict, mode: str, note_source) -> dict:
@@ -414,6 +457,10 @@ def _startup(data: dict, a: dict, mode: str, note_source) -> dict:
     out.update(available=True, lines=lines, low=_r(low), high=_r(high), middle=_r(_mid(low, high)),
                sources_count=len({l["source"]["id"] for l in lines}))
     out["one_guide_only"] = out["sources_count"] == 1
+    out["label"] = "Published guides say"
+    out["why_wide"] = "This range is wide because published guides disagree, and costs depend a lot on your city and choices."
+    if out["one_guide_only"]:
+        out["why_wide"] += " These figures come from one published guide."
     cross = _usable(data, a, "cross_check")
     if cross:
         out["cross_check"] = _line(data, cross[0])
@@ -556,7 +603,9 @@ def _break_even(data: dict, a: dict, running: dict, use_assumption, note_source)
         return out
     days, _ = use_assumption("days-open")
     cushion_low, _ = _value(data, "breakeven-cushion")
-    note_source(_row_by_id(data, "breakeven-cushion")["source_id"])
+    cushion_row = _row_by_id(data, "breakeven-cushion")
+    note_source(cushion_row["source_id"])
+    out["cushion_row"] = _line(data, cushion_row)
     fixed_low, fixed_high = running["fixed_low"], running["fixed_high"]
     month_low, month_high = fixed_low / per_customer, fixed_high / per_customer
     day_low, day_high = month_low / days, month_high / days
@@ -634,7 +683,7 @@ def _checklist(data: dict, a: dict, note_source) -> list[dict]:
             if data["sources"][sid]["status"] == "verified":
                 sources.append(_source_out(data, sid))
                 note_source(sid)
-        cant = item.get("cant", {}).get(a["country"])
+        cant = item.get("cant", {}).get(a["country"]) or item.get("cant_all")
         items.append({"id": item["id"], "title": item["title"], "do": item["do"], "costs": costs, "where_kinds": item["where_kinds"],
                       "where_sources": sources, "cant": _fill(data, a, cant) if cant else None})
     if a["timeline"] in ("3m", "6m"):

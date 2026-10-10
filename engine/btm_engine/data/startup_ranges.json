@@ -100,28 +100,31 @@
       "note": "Pay and benefits as a share of sales: the median, and the medians of profitable and loss-making operators."
     },
     "sba-startup": {
-      "name": "US Small Business Administration, Calculate your startup costs",
+      "name": "US Small Business Administration, Plan your business: Calculate your startup costs",
       "type": "government",
-      "url": "https://www.sba.gov/business-guide/plan-your-business/calculate-your-startup-costs",
+      "url": "https://www.sba.gov/counseling/plan-your-business/",
       "published": null,
       "accessed": "2026-10-10",
-      "status": "verified"
+      "status": "verified",
+      "note": "The SBA moved this guide to a new address; the formula and the 10% suggestion were re-read there on 2026-10-10."
     },
     "sba-licences": {
-      "name": "US Small Business Administration, Apply for licenses and permits",
+      "name": "US Small Business Administration, Launch your business: Apply for licenses and permits",
       "type": "government",
-      "url": "https://www.sba.gov/business-guide/launch-your-business/apply-licenses-permits",
+      "url": "https://www.sba.gov/counseling/launch-your-business/",
       "published": null,
       "accessed": "2026-10-10",
-      "status": "verified"
+      "status": "verified",
+      "note": "The SBA moved this guide to a new address; the passages on local rules for restaurants and the free EIN were re-read there on 2026-10-10."
     },
     "sba-local": {
       "name": "US Small Business Administration, find local assistance (SBDCs, SCORE, Women's Business Centers)",
       "type": "government",
-      "url": "https://www.sba.gov/local-assistance",
+      "url": "https://www.sba.gov/counseling/local-assistance/",
       "published": null,
       "accessed": "2026-10-10",
-      "status": "verified"
+      "status": "verified",
+      "note": "The SBA moved this page to a new address; re-read there on 2026-10-10."
     },
     "fda-food-code": {
       "name": "US Food and Drug Administration, Food Code",
@@ -1025,7 +1028,8 @@
         "UK": [],
         "CN": [],
         "OTHER": []
-      }
+      },
+      "cant_all": "We can't find or price premises for you. Ask local commercial property agents, and have someone who knows leases read yours before you sign."
     },
     {
       "id": "licences",
@@ -1087,7 +1091,8 @@
         "UK": [],
         "CN": [],
         "OTHER": []
-      }
+      },
+      "cant_all": "We can't recommend or price equipment suppliers. Ask two or three local dealers for written quotes, new, used and leased."
     },
     {
       "id": "suppliers",
@@ -1111,7 +1116,8 @@
         "UK": [],
         "CN": [],
         "OTHER": []
-      }
+      },
+      "cant_all": "We can't recommend suppliers. Ask two or three local wholesalers or producers for written price lists."
     },
     {
       "id": "menu",
@@ -1134,7 +1140,8 @@
         "UK": [],
         "CN": [],
         "OTHER": []
-      }
+      },
+      "cant_all": "We can't price your menu. Work out your own ingredient costs from your suppliers' price lists."
     },
     {
       "id": "staff",
@@ -1169,7 +1176,8 @@
           "nbs-wages-2024"
         ],
         "OTHER": []
-      }
+      },
+      "cant_all": "We can't tell you what your staff must be paid or what rules apply. Check the official pay page for your country, or ask your local labour office."
     },
     {
       "id": "marketing",
@@ -1194,7 +1202,8 @@
         "UK": [],
         "CN": [],
         "OTHER": []
-      }
+      },
+      "cant_all": "We can't recommend marketing services. Start with what is close to you: a sign, a social page, a tasting."
     },
     {
       "id": "bookkeeping",

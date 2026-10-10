@@ -348,3 +348,64 @@ def test_uk_practice_business_uses_the_persons_own_ingredient_share_and_the_lega
 
 def test_data_version_is_in_every_plan():
     assert ask()["data_version"] == load_data()["version"]
+
+
+# ---------- Stage B: wide totals, labels, facts used, China ----------
+
+def test_start_up_total_is_explained_as_wide_and_labelled_as_what_guides_say():
+    s = ask()["startup"]
+    assert s["label"] == "Published guides say"
+    assert s["why_wide"].startswith("This range is wide because published guides disagree, and costs depend a lot on your city and choices.")
+    assert "one published guide" in s["why_wide"]
+    kinds = {l["source"]["kind_text"] for l in s["lines"]}
+    assert kinds == {"from a company that sells to shops, restaurants and new businesses"}
+
+
+def test_every_fact_the_plan_shows_is_listed_once_with_its_source_and_date():
+    p = ask()
+    ids = [f["id"] for f in p["facts_used"]]
+    assert len(ids) == len(set(ids))
+    assert {"cafe-us-buildout", "share-us-food-ls", "wage-us-serving", "breakeven-cushion"} <= set(ids)
+    assert all(f["source"]["url"].startswith("https://") and f["source"]["accessed"] for f in p["facts_used"])
+    assert all(f["source"]["kind_text"] for f in p["facts_used"])
+
+
+def test_bakery_shows_the_sum_of_the_lines_and_the_guides_own_total():
+    s = ask(business_type="bakery", premises="fit_out")["startup"]
+    assert (s["low"], s["high"]) == (60_000, 87_000)
+    assert (s["cross_check"]["low"], s["cross_check"]["high"]) == (62_500, 77_500)
+
+
+def test_every_checklist_item_says_what_we_cannot_do_in_every_country():
+    for country in ("US", "UK", "CN", "OTHER"):
+        plan = ask(country=country, ingredient_share=30)
+        for item in plan["checklist"]:
+            if item["id"] in ("licences", "bookkeeping", "insurance"):
+                continue
+            assert item["cant"] and item["cant"].startswith("We can't"), (country, item["id"])
+        for item in plan["checklist"]:
+            assert item["cant"], (country, item["id"])
+
+
+def test_china_is_a_proper_country_with_its_own_mode_rows_and_glosses():
+    data = load_data()
+    assert data["countries"]["CN"] == {"name": "China", "currency": "CNY", "mode": "own_numbers"}
+    cn_rows = [r["id"] for r in data["rows"] if r.get("country") == "CN"]
+    assert cn_rows == ["wage-cn-catering"]
+    plan = ask(country="CN", rent=8000, ingredient_share=35, avg_spend=40, customers_per_day=100)
+    assert plan["country"]["name"] == "China" and plan["mode"] == "own_numbers" and plan["currency"] == "CNY"
+    licences = next(i for i in plan["checklist"] if i["id"] == "licences")
+    # Chinese names always come with an English gloss next to them
+    assert "food business licence (食品经营许可)" in licences["cant"]
+    assert "Administration for Market Regulation office (市场监督管理局)" in licences["cant"]
+    assert next(i for i in plan["checklist"] if i["id"] == "bookkeeping")["cant"].count("(税务局)") == 1
+    assert {s["id"] for s in licences["where_sources"]} == {"cn-samr-order78"}
+    assert plan["startup"]["available"] is False and plan["running"]["available"] is True
+    for need in ("rent", "ingredient_share"):
+        assert need in ask(country="CN", rent=None, ingredient_share=None)["running"]["needs"]
+
+
+def test_sources_carry_the_date_their_link_was_last_checked_when_the_check_has_been_run():
+    sources = ask()["sources"]
+    assert all("last_checked" in s and "link_result" in s for s in sources)
+    assert any(s["last_checked"] for s in sources)

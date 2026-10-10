@@ -1,0 +1,125 @@
+{
+  "checked": "2026-10-10",
+  "summary": {
+    "ok": 13,
+    "redirect": 0,
+    "blocked": 0,
+    "certificate": 3,
+    "broken": 0,
+    "error": 0
+  },
+  "results": {
+    "https://koronapos.com/blog/how-much-does-it-cost-to-open-a-coffee-shop/": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://koronapos.com/blog/how-much-does-it-cost-to-open-a-coffee-shop/",
+      "note": "",
+      "checked": "2026-10-10"
+    },
+    "https://restaurant.org/research-and-media/research/restaurant-economic-insights/analysis-commentary/elevated-labor-costs-had-a-significant-impact-on-restaurant-profitability-in-2024/": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://restaurant.org/research-and-media/research/restaurant-economic-insights/analysis-commentary/elevated-labor-costs-had-a-significant-impact-on-restaurant-profitability-in-2024/",
+      "note": "",
+      "checked": "2026-10-10"
+    },
+    "https://restaurant.org/research-and-media/research/restaurant-economic-insights/analysis-commentary/restaurant-operators-kept-food-cost-ratios-in-check-in-2024/": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://restaurant.org/research-and-media/research/restaurant-economic-insights/analysis-commentary/restaurant-operators-kept-food-cost-ratios-in-check-in-2024/",
+      "note": "",
+      "checked": "2026-10-10"
+    },
+    "https://www.bls.gov/ooh/food-preparation-and-serving/cooks.htm": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://www.bls.gov/ooh/food-preparation-and-serving/cooks.htm",
+      "note": "",
+      "checked": "2026-10-10"
+    },
+    "https://www.bls.gov/ooh/food-preparation-and-serving/food-and-beverage-serving-and-related-workers.htm": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://www.bls.gov/ooh/food-preparation-and-serving/food-and-beverage-serving-and-related-workers.htm",
+      "note": "",
+      "checked": "2026-10-10"
+    },
+    "https://www.bls.gov/opub/ted/2024/1-year-survival-rates-for-new-business-establishments-by-year-and-location.htm": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://www.bls.gov/opub/ted/2024/1-year-survival-rates-for-new-business-establishments-by-year-and-location.htm",
+      "note": "",
+      "checked": "2026-10-10"
+    },
+    "https://www.fda.gov/food/retail-food-protection/fda-food-code": {
+      "status": null,
+      "result": "certificate",
+      "final_url": "https://www.fda.gov/food/retail-food-protection/fda-food-code",
+      "note": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1082)>",
+      "checked": "2026-10-10"
+    },
+    "https://www.gov.cn/gongbao/2023/issue_10606/202307/content_6894763.html": {
+      "status": null,
+      "result": "certificate",
+      "final_url": "https://www.gov.cn/gongbao/2023/issue_10606/202307/content_6894763.html",
+      "note": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1082)>",
+      "checked": "2026-10-10"
+    },
+    "https://www.gov.uk/guidance/starting-a-food-business": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://www.gov.uk/guidance/starting-a-food-business",
+      "note": "",
+      "checked": "2026-10-10"
+    },
+    "https://www.gov.uk/national-minimum-wage-rates": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://www.gov.uk/national-minimum-wage-rates",
+      "note": "",
+      "checked": "2026-10-10"
+    },
+    "https://www.gov.uk/set-up-business": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://www.gov.uk/set-up-business",
+      "note": "",
+      "checked": "2026-10-10"
+    },
+    "https://www.sba.gov/counseling/launch-your-business/": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://www.sba.gov/counseling/launch-your-business/",
+      "note": "",
+      "checked": "2026-10-10"
+    },
+    "https://www.sba.gov/counseling/local-assistance/": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://www.sba.gov/counseling/local-assistance/",
+      "note": "",
+      "checked": "2026-10-10"
+    },
+    "https://www.sba.gov/counseling/plan-your-business/": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://www.sba.gov/counseling/plan-your-business/",
+      "note": "",
+      "checked": "2026-10-10"
+    },
+    "https://www.stats.gov.cn/sj/zxfb/202505/t20250516_1959826.html": {
+      "status": null,
+      "result": "certificate",
+      "final_url": "https://www.stats.gov.cn/sj/zxfb/202505/t20250516_1959826.html",
+      "note": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1082)>",
+      "checked": "2026-10-10"
+    },
+    "https://www.zenbusiness.com/cost-open-bakery": {
+      "status": 200,
+      "result": "ok",
+      "final_url": "https://www.zenbusiness.com/cost-open-bakery/",
+      "note": "",
+      "checked": "2026-10-10"
+    }
+  }
+}

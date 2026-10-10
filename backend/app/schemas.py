@@ -486,6 +486,7 @@ class TodayOut(BaseModel):
     industry: str
     currency: str
     is_sample: bool
+    setup_source: str = "full"          # "guide": made from the start-up guide, so Today shows the starting-picture banner
     run_id: int
     horizon: int
     engine_version: str
