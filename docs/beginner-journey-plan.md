@@ -73,7 +73,7 @@ Let `t0` be the industry's `default_baseline`, `days = t0.open_days` (28 in all 
 Rejected input: D, P <= 0; S, R < 0 (friendly message). Not rejected but warned: if the engine's month 1
 shows a loss, the screen says "With these numbers you'd lose about X a month. Is that right?".
 `assumed_fields` is stored on the snapshot, so the "what we assumed" note, the "How did we work this out?"
-page and the thesis data all come from one source. As today, wage/marketing/cash defaults are US-dollar
+page and the logged data all come from one source. As today, wage/marketing/cash defaults are US-dollar
 scale; for other currencies the existing highlight notice appears on those assumed lines.
 
 ### 2.3 Sample business
@@ -164,7 +164,7 @@ Run history, Full business setup. On phones: bottom tab bar with the three main 
 - Predicted vs actual: a plain sentence ("You made about 5,900; we expected 4,800 to 7,300, so it landed
   inside the range") and a small chart. Profit is defined in plain words on the form (sales minus the same
   costs the app uses) with an `InfoTip`.
-- Thesis outputs: `GET /journal/accuracy` (per check-in error, % error, coverage of p10-p90, direction) and
+- Outputs for later analysis: `GET /journal/accuracy` (per check-in error, % error, coverage of p10-p90, direction) and
   later CSV export.
 - **Honest limit:** a study session lasts minutes, but this needs real months to pass. I suggest treating
   prediction accuracy as a pilot/longitudinal measure, and measuring understanding and confidence in the
@@ -256,7 +256,7 @@ I stop after each commit for your review before starting the next phase.
 - **Q4** "Other fixed costs = one third of rent": acceptable, or ask a fifth question / choose another rule?
 - **Q5** Staff question: count part-timers as half, and does the owner count as staff?
 - **Q6** Currency on the start screen: keep it only inside the assumptions note, with US-scale wage/marketing/cash defaults flagged for non-USD?
-- **Q7** Journal framed as a pilot/longitudinal measure for the thesis?
+- **Q7** Journal framed as a pilot/longitudinal measure?
 - **Q8** Study: do you need a consent screen and a participant-code step in the first release, or later?
 - **Q9** Keep old URLs (`/setup`, `/scenarios`, `/compare`, `/history`) under "Advanced" unchanged?
 - **Q10** OK to add `vitest-axe` (dev dependency) for accessibility tests?

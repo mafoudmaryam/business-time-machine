@@ -1,6 +1,6 @@
 # Business Time Machine: simulation engine (small food-service businesses)
 
-A standalone Python library that projects a small food-service business's customers, revenue, profit and cash month by month and compares decisions under uncertainty. Three industries ship today -- café, restaurant, bakery -- sharing one model with per-industry defaults and wording. It has no web dependencies, so it can be tested and validated on its own. That validation becomes a thesis chapter.
+A standalone Python library that projects a small food-service business's customers, revenue, profit and cash month by month and compares decisions under uncertainty. Three industries ship today -- café, restaurant, bakery -- sharing one model with per-industry defaults and wording. It has no web dependencies, so it can be tested and validated on its own. Its validation plan is written up in the model spec.
 
 The LLM layer never computes numbers. It only produces `Decision` objects, and every number comes from this engine.
 

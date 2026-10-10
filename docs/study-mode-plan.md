@@ -2,7 +2,7 @@
 
 Status: **plan only, nothing built.** Written 2026-10-08 after reading `CLAUDE.md`, `docs/beginner-journey-plan.md`
 and the code study mode will touch (`settings.py`, `coach/service.py`, `coach/today.py`, `models.py`, `routers/beginner.py`,
-`ConfigProvider`/`config.ts`, `start.ps1`, `.gitignore`). Ethics approval is **not yet confirmed**, so the rule for the whole
+`ConfigProvider`/`config.ts`, `start.ps1`, `.gitignore`). This is a personal project and nothing has been collected from anyone, so the rule for the whole
 plan is: *collect the least personal data that still answers the research question.*
 
 Research question: do an AI-assisted simulation, and an AI coach explaining it, help non-expert small-business
@@ -39,7 +39,7 @@ same step (section 7). The participant is never shown the words "condition", "gr
 | # | Step | What the person sees | What is saved |
 |---|---|---|---|
 | 0 | **Welcome** | One screen: what the study is (in plain words), about 20 minutes, no names or emails collected, you can stop any time. Button "Continue". | nothing |
-| 1 | **Consent** | The consent text (wording from the ethics application, versioned: `consent_version`). Two tick boxes: "I have read this" and "I agree to take part". "I do not agree" ends the session politely. States what is stored (section 2), that AI text comes from an AI provider, that they should **not type personal information**, and how to withdraw. | consent version + time (only after both boxes are ticked) |
+| 1 | **Consent** | The consent text (plain wording, versioned: `consent_version`). Two tick boxes: "I have read this" and "I agree to take part". "I do not agree" ends the session politely. States what is stored (section 2), that AI text comes from an AI provider, that they should **not type personal information**, and how to withdraw. | consent version + time (only after both boxes are ticked) |
 | 2 | **Participant code** | "Enter the code you were given" (e.g. `K7M4-9QXT`). A researcher-issued code, not chosen by the participant. | code marked used |
 | 3 | **Assignment** (no screen) | Instant and silent. Next unclaimed slot of a **pre-generated balanced list** (section 2.4) decides coach on / off. The scripted business is created for this participant. | condition, business |
 | 4 | **Background questionnaire** | 5 coarse questions, about 1 minute (list in section 2.2). No age, gender, country, name. | answers |
@@ -62,10 +62,10 @@ screen recordings, free text typed into the app (except the optional ones in Q6 
 
 How "no IP" is actually enforced (the app itself never records one, but the web server does by default):
 - uvicorn writes the client IP in its **access log**. Study mode starts the backend with `--no-access-log` (done by `start.ps1 -Study`), and the plan forbids request-body logging.
-- If the study is ever hosted (not on your laptop), the host's proxy logs IPs too. That is why Q1 (where sessions run) matters for the ethics form.
+- If the study is ever hosted (not on your laptop), the host's proxy logs IPs too. That is why Q1 (where sessions run) matters for what the consent text must say.
 - `ui_events` has no IP column and `/events` ignores the request address; a test asserts that nothing request-derived but the participant's own session id is stored.
 
-Data is **pseudonymous**, not anonymous, if you keep a list that links codes to people (for example "code K7M4 = the café owner I met on Tuesday"). Keep that list outside this project, off the computer the data lives on, and decide in the ethics form whether a list exists at all. If participants are given codes by lot (a slip of paper from a bag) and you never record who got which, the data is effectively anonymous but withdrawal after the session becomes impossible; that is the ethics trade-off in Q3.
+Data is **pseudonymous**, not anonymous, if you keep a list that links codes to people (for example "code K7M4 = the café owner I met on Tuesday"). Keep that list outside this project, off the computer the data lives on, and decide in the consent text whether a list exists at all. If participants are given codes by lot (a slip of paper from a bag) and you never record who got which, the data is effectively anonymous but withdrawal after the session becomes impossible; that is the consent trade-off in Q3.
 
 ### 2.2 Stored (all keyed by the participant code only)
 
@@ -126,7 +126,7 @@ Rule: **the server decides, the browser only follows.** A participant who edits 
 - Every coach element is already behind `useConfig().coachEnabled` for Today; `CoachCard` and the ask link on Compare / run results get the same guard. The off state renders **nothing and reserves no space** (no empty box, no "coach is off" message that would tell the participant what they are missing).
 - A snapshot test per page and per condition: with the coach off, the page contains no coach text and no placeholder.
 - **Identical-numbers guarantee:** the scripted task uses a fixed seed and iteration count taken from the task file (not `1000 + business id`, which differs per business), so every participant sees the same numbers. A backend test requests Today and Compare for a coach participant and a no-coach participant and asserts the payloads are **equal once the coach fields are removed**.
-- The "describe it in your own words" box (AI interpretation) is **not part of the study task** (the task is a closed set of preset options so that the decision can be scored). It is hidden for both groups, which keeps the groups equal and sends no participant free text to the AI provider. This narrows the thesis claim to "the coach", and the thesis must say so (Q7).
+- The "describe it in your own words" box (AI interpretation) is **not part of the study task** (the task is a closed set of preset options so that the decision can be scored). It is hidden for both groups, which keeps the groups equal and sends no participant free text to the AI provider. This narrows what any result can claim to "the coach", and the write-up must say so (Q7).
 
 **One free-text exception:** the coach group's "Ask the coach" box lets people type a question. That question is stored (`coach_answers`) and sent to the AI provider. Options (Q6): keep it with a one-line warning ("Please don't write names or personal details") and a 200-character limit, or allow only the three chip questions in the study. Recommended: keep it with the warning, and exclude the text from the default CSV export.
 
@@ -161,11 +161,11 @@ Primary outcome: **`Score` of the final choice** (0 to 1). Secondary outcomes, a
 - `chose_trap` = 1 if the final choice is the tempting-but-risky option.
 - `changes_of_mind` = number of picks before the final one.
 
-The thresholds and the definition of "best" are **written down before the pilot data are seen** (suggested: pre-register the plan in a dated note or the thesis appendix).
+The thresholds and the definition of "best" are **written down before the pilot data are seen** (suggested: write the plan down in a dated note in the repo).
 
 The values `V(o)`, `G(o)`, cash-out share, plus `engine_version`, seed and iterations are produced by `backend/scripts/study_score_options.py` (goes through `engine_bridge`, so the engine stays standalone) and **committed as `task_v1.scores.json`**. A test recomputes them and fails if the engine changes the numbers, which forces a re-score and a `task_version` bump (golden rule 4: reproducibility). `study_participants` stores `task_version` and `engine_version`.
 
-### 4.4 Honest limits (they belong in the thesis)
+### 4.4 Honest limits (write them down with any result)
 - "Best" means best **inside the model**. The coach explains that same model, so a higher score shows the participant understood and used the model's output better, not that the choice is better in the real world. Secondary measures (confidence, SUS, and the optional comprehension questions in Q10) help separate understanding from agreement.
 - A small, closed option set cannot test whether the coach's *new ideas* help; it tests whether the coach helps people read results and pick well.
 - Confidence is not accuracy. Report both, and the **gap** between them (a confident wrong choice is a finding).
@@ -239,14 +239,14 @@ Four ways it can happen, and the fix for each:
 - **Shared computer, previous participant's state:** every study page checks the token; "Start next participant" clears `sessionStorage`; the researcher guide says to use a fresh private window per person. Nothing in `localStorage` is written in study mode.
 - **Editing the URL or calling the API:** coach text is withheld by the server (section 3), and every study request carries a token that `lookup.py` ties to **that participant's own business only**; any other business, run or scenario id returns 404. This also keeps participants from seeing each other's runs.
 - **Wording that reveals the condition:** no "coach is off" message, no empty reserved space, no condition in URLs, page titles, `/study/me` output, or console messages (a test greps the study API responses for the words `no_coach`, `condition`, `control`).
-- **Side-by-side screens or talking afterwards:** the researcher guide asks for separate screens or sessions, and the debrief asks participants not to discuss it. Residual risk is recorded in the thesis limitations. The JavaScript bundle contains the coach components for both groups (a very technical participant could read the code); the server-side switch makes that harmless.
+- **Side-by-side screens or talking afterwards:** the researcher guide asks for separate screens or sessions, and the debrief asks participants not to discuss it. Residual risk is recorded as a limitation. The JavaScript bundle contains the coach components for both groups (a very technical participant could read the code); the server-side switch makes that harmless.
 
 ### 7.5 Other risks
 - **AI provider differs between participants or changes mid-study:** one provider and model for the whole study, recorded on each participant row (Q2).
 - **Slow local model makes the coach arrive after the decision:** logged (`coach_ai_arrived`, `coach_version_at_choice`), and reported as a limitation; prefer a faster provider for the study.
 - **Coach text contradicts the facts:** the grounding and claim checks already protect this and fall back to the rule-based text; the study logs how often (fell-back rate per participant).
 - **Study mode visible to normal users:** see section 8.
-- **Pressure to add more measures:** each extra questionnaire lengthens the session and the data you must justify to ethics. Keep to the list above unless Q10 says otherwise.
+- **Pressure to add more measures:** each extra questionnaire lengthens the session and the data you must justify to participants in the consent text. Keep to the list above unless Q10 says otherwise.
 - **Underpowered sample:** decide the target group size now (Q4); a small sample means reporting effect sizes and confidence intervals, not only p-values.
 
 ## 8. The study-mode switch (off by default)
@@ -261,11 +261,11 @@ Four ways it can happen, and the fix for each:
 
 ## 9. Effort estimate
 
-Working days of focused building, in the style of the earlier phases (each ends with tests green and a pause for review). Calendar time is longer; recruitment and ethics are yours.
+Working days of focused building, in the style of the earlier phases (each ends with tests green and a pause for review). Calendar time is longer; recruitment and consent wording are yours.
 
 | Phase | Content | Estimate |
 |---|---|---|
-| **S0 Decisions** | Answer the questions below; fix consent wording with the ethics text; choose the task business and options | 1 day (yours + mine) |
+| **S0 Decisions** | Answer the questions below; fix the consent wording; choose the task business and options | 1 day (yours + mine) |
 | **S1 Foundation** | `STUDY_MODE` switch, db guard + `start.ps1 -Study`, migration + tables, codes/allocation scripts, participant/token API, `lookup.py` scoping, `coach_enabled_for` + the two leak fixes, no-IP logging, tests | 3 days |
 | **S2 Participant flow** | `/study` shell and redirects, consent, code, background, brief, confidence, decision, SUS, thank-you, resume, acknowledged-write queue, per-condition frontend guards on every coach element, accessibility checks | 4 days |
 | **S3 Task and scoring** | `task_v1.json`, tuning with the engine, scoring script + committed scores + tests, options page, fixed-seed override, "numbers identical" test | 3 days |
@@ -280,11 +280,11 @@ Cut list if time is short: drop the admin progress page (keep CSV), drop `ai.csv
 
 1. **Where do sessions run?** In person on your laptop (simplest, no IP problem, no connection problem), or online with a link (needs hosting, HTTPS, host logs without IPs, bad-connection handling, a different CORS setup)?
 2. **Which AI for the study?** One provider for everyone: Anthropic API (fast, sends only the fictional business's facts), local Ollama (free, but 50 to 80 seconds a call here), or the rule-based coach only (not "AI"). It must not change mid-study.
-3. **Ethics: what is allowed?** Do you give codes by hand and keep a list linking codes to people (pseudonymous, withdrawal possible) or hand them out by lot (effectively anonymous, withdrawal impossible)? Which consent text, contact email on the thank-you page, how long is the data kept, and where?
+3. **Consent and privacy: what will you promise?** Do you give codes by hand and keep a list linking codes to people (pseudonymous, withdrawal possible) or hand them out by lot (effectively anonymous, withdrawal impossible)? Which consent text, contact email on the thank-you page, how long is the data kept, and where?
 4. **Sample:** how many people per group, and who are they (real owners, or students playing the owner)? This changes the background questions and how much weight the results carry.
 5. **The scripted business and options:** which industry and currency, and are you happy that "best" means the model's best with a tempting-but-risky trap option? Do you want to choose the options yourself?
 6. **What is "the coach"?** Is it right that the "off" group keeps the plain numbers and charts but loses everything inside the coach card (verdict, tiles, why bars, ideas) and the Today note? And should "Ask the coach" allow typed questions (with a warning, 200 characters) or only the three chips?
-7. **Is the "describe it in your own words" box left out of the study for both groups?** (My recommendation: yes. The thesis then claims "the coach", not "natural-language input".)
+7. **Is the "describe it in your own words" box left out of the study for both groups?** (My recommendation: yes. The claim then covers "the coach", not "natural-language input".)
 8. **Assign before or after the background questions?** After lets me balance on experience (better with a small sample); before matches the order you wrote.
 9. **Language:** English only for the screens, consent and SUS? (A translated SUS needs a validated translation.)
 10. **Extras?** Optional short comprehension questions (for example "In how many of 10 futures does option C run out of cash?") to separate understanding from guessing; a few coach-trust items for the coach group only; a free-text "why did you choose this?" (I advise against it: it invites personal details). Anything not on your list stays out.

@@ -10,7 +10,7 @@ An AI-assisted decision simulator for small food-service businesses: cafés, res
 
 </div>
 
-> **Status:** a master's thesis project, still in development. The repository is private, so these steps are for the owner and collaborators. The photo above is an AI-generated image (see [Credits](#credits)).
+> **Status:** a personal project, still in development. The repository is private, so these steps are for the owner and collaborators. The photo above is an AI-generated image (see [Credits](#credits)).
 
 ---
 
@@ -191,15 +191,13 @@ Measured on 2026-10-10, running the suites one after another on a quiet machine:
 - **The journal is a pilot.** A few months of figures cannot prove a forecast right or wrong.
 - **Pictures.** The photo in the hero is an AI-generated image. The other start-page photos' sources and licences are **not yet confirmed**; see `frontend/public/images/CREDITS.md`.
 
-## Research context
+## Why I built this
 
-This is a master's thesis project. The question it investigates:
+This is a personal project. Small food-business owners make big choices (prices, hiring, opening hours) on instinct, and spreadsheets are slow to build and easy to get wrong. I wanted a simulator that lets an owner try a decision on paper first, see a good, likely and bad case, and have it explained in plain words, without ever letting an AI make up a number.
 
-> Does AI-assisted simulation help non-expert owners compare the consequences of decisions before committing?
+**A possible small test.** One day I may ask a few real owners to try the app, some with the coach and some without, and then tell me how confident they felt (a 1 to 7 score) and how easy it was to use (the System Usability Scale, a standard 10-question form). That would only happen with their consent and with as little personal data as possible. The idea is written down in `docs/study-mode-plan.md`. **None of it is built, and no test has been run: no owners have been asked and no data has been collected.**
 
-**A user study is planned but not started.** The plan (`docs/study-mode-plan.md`) is to compare a group that sees the coach with a group that does not, measuring confidence (1 to 7) and the System Usability Scale (SUS), and exporting the results to a CSV file. **Study mode is not built, ethics approval has not been confirmed, and no study data has been collected.** Nothing may be collected from real participants until ethics approval is in place.
-
-What does exist for the research: the coach can be switched off (`COACH_ENABLED=false`), and every AI call, retry and fallback, plus how each parsed step was confirmed or edited, is logged in the database.
+What does exist for this: the coach can be switched off (`COACH_ENABLED=false`), and every AI call, retry and fallback, plus how each parsed step was confirmed or edited, is logged in the local database.
 
 ## Roadmap
 
@@ -215,7 +213,7 @@ What does exist for the research: the coach can be switched off (`COACH_ENABLED=
 - [x] The new look on every page
 
 **Next**
-- [ ] Study mode and the user study (needs your answers to the questions in `docs/study-mode-plan.md` and ethics approval first)
+- [ ] Study mode and a possible small test with real owners (only a possible idea for now; the open questions are in `docs/study-mode-plan.md`, and it needs the owners' consent)
 - [ ] A fresh, held-out test set for the plain-language parser
 - [ ] A more realistic model (calibrating marketing and word of mouth, seasons)
 - [ ] Online deployment, user accounts and PostgreSQL (sketched in `CLAUDE.md`, not started)
@@ -227,7 +225,7 @@ See [CHANGELOG.md](CHANGELOG.md) for what changed and when.
 
 - **Stored on your computer.** In the default setup everything lives in a local SQLite file, `backend/btm.db`. Nothing is sent anywhere, and the app loads no outside fonts or scripts. If you switch on the **cloud AI coach**, the engine's facts and any text you type into the "say it in your own words" or "Ask the coach" boxes are sent to that provider; the local Ollama mode keeps everything on your machine.
 - **Your real database is protected.** Test and demo data never goes in `backend/btm.db`: use `.\start.ps1 -TempDb`, and automated tests use their own temporary databases. Databases and database backups are ignored by Git, so they cannot be committed by accident.
-- **Delete is reversible.** Deleting a scenario, a result, a journal month or a business only hides it, and an Undo message stays for 8 seconds. Nothing is erased for good by itself. To erase old deleted items on purpose: `cd backend; .\.venv\Scripts\python.exe scripts\purge_deleted.py` shows what would go; add `--older-than-days 30 --yes` to really delete. The AI logs are kept even then, as thesis data.
+- **Delete is reversible.** Deleting a scenario, a result, a journal month or a business only hides it, and an Undo message stays for 8 seconds. Nothing is erased for good by itself. To erase old deleted items on purpose: `cd backend; .\.venv\Scripts\python.exe scripts\purge_deleted.py` shows what would go; add `--older-than-days 30 --yes` to really delete. The AI logs are kept even then, as logged data.
 - **The journal's CSV download** is made in your browser from what is on screen.
 - **No accounts and no tracking of who you are.** The app records anonymous usage events (which screen, which button) in your own database, with no free text.
 

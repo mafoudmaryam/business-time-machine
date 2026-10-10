@@ -39,4 +39,4 @@ git-ignored `frontend/.photo-originals/`).
 | `redesign/notes-632.webp` (from `notes.jpg`) | Start page card "Keep a journal" | to be confirmed by the project owner | to be confirmed by the project owner | |
 
 No photographer names or licences are written here on purpose: they are not known yet and must not be guessed. Until the
-project owner confirms them, treat these three photos as "source unknown" and do not publish the app outside the thesis.
+project owner confirms them, treat these three photos as "source unknown" and do not publish the app publicly.
