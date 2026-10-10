@@ -62,3 +62,13 @@ export function journalWords(monthLabel: string): DeleteWords {
     lines: ["This removes what you wrote down for that month, including your note.", "Nothing else is affected: your forecast and your other months stay as they are."],
   };
 }
+
+export function planWords(name: string): DeleteWords {
+  return {
+    title: `Delete ${name}?`,
+    lines: [
+      "This removes the plan and the answers you gave for it.",
+      "A practice business you already made from it is not deleted.",
+    ],
+  };
+}

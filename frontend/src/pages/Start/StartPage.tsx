@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   createQuickBusiness,
   createSampleBusiness,
@@ -150,6 +150,15 @@ export function StartPage() {
         </section>
       )}
       {step === 0 && <Landing />}
+      {step === 0 && (
+        <section className="guide-entry" aria-labelledby="guide-entry-title">
+          <div>
+            <h2 id="guide-entry-title">Not open yet?</h2>
+            <p>Answer nine short questions and get a rough start-up plan, with a checklist of what to sort out and where to look.</p>
+          </div>
+          <Link to="/guide" className="btn btn-secondary">I don’t have a business yet</Link>
+        </section>
+      )}
 
       <section id="start-here" className="start-form" aria-labelledby="start-heading" tabIndex={-1}>
       <Heading id="start-heading">{step === 0 ? "What kind of business do you run?" : step === 1 ? `Tell us about your ${noun}` : "Here is what we worked out"}</Heading>

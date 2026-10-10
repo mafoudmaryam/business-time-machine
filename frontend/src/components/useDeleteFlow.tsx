@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   deleteBusiness,
+  deleteGuidePlan,
   deleteJournalEntry,
   deleteRun,
   deleteScenario,
   getBusinessImpact,
   getScenarioImpact,
   restoreBusiness,
+  restoreGuidePlan,
   restoreJournalEntry,
   restoreRun,
   restoreScenario,
@@ -14,7 +16,7 @@ import {
   type ScenarioImpact,
 } from "../api";
 import { track } from "../lib/events";
-import { businessWords, journalWords, runWords, scenarioWords, type DeleteWords } from "../lib/deleteText";
+import { businessWords, journalWords, planWords, runWords, scenarioWords, type DeleteWords } from "../lib/deleteText";
 import { Modal } from "./Modal";
 import { useUndo } from "./undo";
 
@@ -23,7 +25,8 @@ export type DeleteTarget =
   | { kind: "scenario"; id: number; name: string; onDone?: () => void; onUndone?: () => void }
   | { kind: "run"; id: number; scenarioNames: string[]; onDone?: () => void; onUndone?: () => void }
   | { kind: "business"; id: number; name: string; onDone?: () => void; onUndone?: () => void }
-  | { kind: "journal"; id: number; businessId: number; month: string; name: string; onDone?: () => void; onUndone?: () => void };
+  | { kind: "journal"; id: number; businessId: number; month: string; name: string; onDone?: () => void; onUndone?: () => void }
+  | { kind: "plan"; id: number; name: string; onDone?: () => void; onUndone?: () => void };
 
 function label(t: DeleteTarget): string {
   if (t.kind === "journal") return `your ${t.name} figures`;
@@ -48,7 +51,7 @@ export function useDeleteFlow(): { ask: (target: DeleteTarget) => void; dialog: 
 
   // The box opens at once with a general sentence; it becomes exact when the numbers arrive.
   useEffect(() => {
-    if (!target || target.kind === "run" || target.kind === "journal") return;
+    if (!target || target.kind === "run" || target.kind === "journal" || target.kind === "plan") return;
     let cancelled = false;
     const { kind, id } = target;
     const load = kind === "scenario" ? getScenarioImpact(id) : getBusinessImpact(id);
@@ -58,13 +61,15 @@ export function useDeleteFlow(): { ask: (target: DeleteTarget) => void; dialog: 
     };
   }, [target]);
 
-  const known = target && target.kind !== "journal" && impact && impact.kind === target.kind && impact.id === target.id ? impact.data : null;
+  const known = target && target.kind !== "journal" && target.kind !== "plan" && impact && impact.kind === target.kind && impact.id === target.id ? impact.data : null;
   const words: DeleteWords | null = !target
     ? null
     : target.kind === "run"
       ? runWords(target.id, target.scenarioNames)
       : target.kind === "journal"
         ? journalWords(target.name)
+        : target.kind === "plan"
+        ? planWords(target.name)
         : target.kind === "scenario"
         ? scenarioWords(target.name, known as ScenarioImpact | null)
         : businessWords(target.name, known as BusinessImpact | null);
@@ -77,6 +82,7 @@ export function useDeleteFlow(): { ask: (target: DeleteTarget) => void; dialog: 
       if (target.kind === "scenario") await deleteScenario(target.id);
       else if (target.kind === "run") await deleteRun(target.id);
       else if (target.kind === "journal") await deleteJournalEntry(target.businessId, target.month);
+      else if (target.kind === "plan") await deleteGuidePlan(target.id);
       else await deleteBusiness(target.id);
     } catch (err) {
       setProblem(err instanceof Error ? err.message : "We couldn't delete that just now.");
@@ -94,6 +100,7 @@ export function useDeleteFlow(): { ask: (target: DeleteTarget) => void; dialog: 
         if (done.kind === "scenario") await restoreScenario(done.id);
         else if (done.kind === "run") await restoreRun(done.id);
         else if (done.kind === "journal") await restoreJournalEntry(done.businessId, done.month);
+        else if (done.kind === "plan") await restoreGuidePlan(done.id);
         else await restoreBusiness(done.id);
         track("delete_undone", "delete", { kind: done.kind });
         done.onUndone?.();

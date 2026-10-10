@@ -1,5 +1,7 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
+import { GuidePage } from "./pages/Guide/GuidePage";
+import { PlanPage } from "./pages/Guide/PlanPage";
 import { HowPage } from "./pages/How/HowPage";
 import { JournalPage } from "./pages/Journal/JournalPage";
 import { BusinessSetupPage } from "./pages/BusinessSetup/BusinessSetupPage";
@@ -32,6 +34,8 @@ export function App() {
         <Route path="/how" element={<HowPage />} />
         <Route path="/journal" element={<JournalPage />} />
         <Route path="/share" element={<SharePage />} />
+        <Route path="/guide" element={<GuidePage />} />
+        <Route path="/guide/plan/:id" element={<PlanPage />} />
         {/* The earlier pages keep their addresses; they now live under "Advanced". */}
         <Route path="/setup" element={<BusinessSetupPage />} />
         <Route path="/scenarios" element={<ScenarioBuilderPage />} />

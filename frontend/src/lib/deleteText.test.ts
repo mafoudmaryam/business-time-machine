@@ -60,3 +60,13 @@ describe("journalWords", () => {
     expect(w.lines.join(" ")).toMatch(/Nothing else is affected/);
   });
 });
+
+describe("planWords", () => {
+  it("says what goes and that a practice business is not deleted", async () => {
+    const { planWords } = await import("./deleteText");
+    const w = planWords("your start-up plan for a café");
+    expect(w.title).toBe("Delete your start-up plan for a café?");
+    expect(w.lines.join(" ")).toMatch(/answers you gave/);
+    expect(w.lines.join(" ")).toMatch(/not deleted/);
+  });
+});

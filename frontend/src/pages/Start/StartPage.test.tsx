@@ -60,6 +60,16 @@ function mount() {
   return { user, ...view };
 }
 
+describe("the start-up guide entry", () => {
+  it("offers a slim card for people who have no business yet, linking to the guide", async () => {
+    mount();
+    const links = await screen.findAllByRole("link", { name: "I don’t have a business yet" });
+    expect(links).toHaveLength(2); // under "Start your journey" and in the slim card above the form
+    for (const link of links) expect(link.getAttribute("href")).toBe("/guide");
+    expect(screen.getByRole("heading", { name: "Not open yet?" })).toBeTruthy();
+  });
+});
+
 async function fillAnswers(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/Customers on a normal day/), "150");
   await user.type(screen.getByLabelText(/Average spend per customer/), "7.5");

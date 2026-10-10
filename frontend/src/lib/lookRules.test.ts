@@ -50,6 +50,13 @@ describe("the 2026 look", () => {
     expect(block).toMatch(/\.confetti-layer[^}]*display:\s*none/);
   });
 
+  it("prints the start-up plan in plain black on white, with every checklist card readable", () => {
+    const css = read("redesign.css");
+    const print = css.slice(css.lastIndexOf("@media print"));
+    expect(print).toMatch(/\.guide-plan/);
+    expect(print).toMatch(/\.guide-plan a\[href\^="http"\]::after/);
+  });
+
   it("ends with a print block that is plain black on white, with no decoration", () => {
     const css = read("redesign.css");
     const print = css.slice(css.lastIndexOf("@media print"));

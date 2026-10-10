@@ -20,6 +20,11 @@ describe("parentPath", () => {
     }
   });
 
+  it("the start-up guide goes back to the start screen, and a plan back to the guide", () => {
+    expect(parentPath("/guide")).toBe("/");
+    expect(parentPath("/guide/plan/7")).toBe("/guide");
+  });
+
   it("anything else goes to Today", () => {
     expect(parentPath("/no/such/page")).toBe("/today");
   });

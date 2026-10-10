@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { getBusinessImpact, getJournal, getToday, getTodayNote, type TodayNote, type TodayOut } from "../../api";
 import { AskCoach } from "../../components/AskCoach";
 import { useConfig } from "../../components/config";
+import { StartingPictureBanner } from "../../components/StartingPictureBanner";
 import { EmptyState } from "../../components/EmptyState";
 import { InfoTip } from "../../components/InfoTip";
 import { LoadError } from "../../components/LoadError";
@@ -105,6 +106,7 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
         Today at {today.name}
         {today.is_sample && <span className="sample-tag">Sample business</span>}
       </h1>
+      {today.setup_source === "guide" && <StartingPictureBanner />}
       {today.is_sample && (
         <div className="sample-banner">
           <p>This is a sample {industryName}: example numbers, not a real business.</p>

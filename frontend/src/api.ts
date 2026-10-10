@@ -691,6 +691,7 @@ export interface TodayOut {
   industry: string;
   currency: string;
   is_sample: boolean;
+  setup_source?: string; // "guide": made from the start-up guide
   run_id: number;
   horizon: number;
   engine_version: string;
@@ -732,7 +733,7 @@ export function logEvents(sessionId: string, businessId: number | null, events: 
 
 export interface DeletedOut {
   id: number;
-  kind: "business" | "scenario" | "run" | "journal";
+  kind: "business" | "scenario" | "run" | "journal" | "plan";
   name: string;
   deleted_at: string;
 }
@@ -961,4 +962,222 @@ export function deleteJournalEntry(businessId: number, month: string): Promise<D
 
 export function restoreJournalEntry(businessId: number, month: string): Promise<JournalMonthOut> {
   return request(`/businesses/${businessId}/journal/${month}/restore`, { method: "POST" });
+}
+
+// ---------- "I don't have a business yet": the start-up guide ----------
+
+export type GuideMode = "full" | "own_numbers" | "checklist_only";
+
+export interface GuideCountry {
+  id: string;
+  name: string;
+  currency: string;
+  mode: GuideMode;
+}
+
+export interface GuideOptions {
+  data_version: string;
+  engine_version: string;
+  countries: GuideCountry[];
+  business_types: { id: string; name: string }[];
+}
+
+/** The nine screens' answers. Anything the person was not sure about is null. */
+export interface GuideAnswers {
+  business_type: string | null;
+  country: string | null;
+  currency: string | null;
+  budget: number | null;
+  premises: string | null;
+  rent: number | null;
+  size: string | null;
+  menu: string | null;
+  alcohol: string | null;
+  people: number | null;
+  customers_per_day: number | null;
+  avg_spend: number | null;
+  ingredient_share: number | null;
+  timeline: string | null;
+}
+
+export interface GuideSource {
+  id: string;
+  name: string;
+  type: string;
+  url: string;
+  published: string | null;
+  accessed: string;
+  status: string;
+  note: string | null;
+  sells_to_restaurants: boolean | null;
+  data_period: string | null;
+  effective_from: string | null;
+  kind_text: string;
+  last_checked: string | null;
+  link_result: string | null;
+}
+
+/** One sourced figure: a range (low = high when the source gives one number), the unit and where it comes from. */
+export interface GuideLine {
+  id: string;
+  label: string;
+  low: number;
+  high: number;
+  median: number | null;
+  unit: string;
+  currency: string | null;
+  basis: string | null;
+  note: string | null;
+  source: GuideSource | null;
+}
+
+export interface Trio {
+  low: number;
+  middle: number;
+  high: number;
+}
+
+export interface GuideChecklistItem {
+  id: string;
+  title: string;
+  do: string[];
+  costs: GuideLine[];
+  where_kinds: string[];
+  where_sources: GuideSource[];
+  cant: string | null;
+  urgent?: string;
+}
+
+export interface GuidePlan {
+  data_version: string;
+  answers: GuideAnswers & { format?: string };
+  country: { id: string; name: string; mode: GuideMode };
+  currency: string;
+  business_type: string;
+  format: string;
+  mode: GuideMode;
+  warnings: string[];
+  startup: {
+    available: boolean;
+    reason?: string;
+    lines: GuideLine[];
+    notes: string[];
+    low?: number;
+    high?: number;
+    middle?: number;
+    one_guide_only?: boolean;
+    label?: string;
+    why_wide?: string;
+    cross_check?: GuideLine;
+  };
+  running: {
+    available: boolean;
+    reason?: string;
+    needs?: string[];
+    notes?: string[];
+    sales?: number | null;
+    partial?: boolean;
+    lines?: { key: string; label: string; low: number; middle: number; high: number; how: string; pay?: GuideLine; per_person?: Trio; share?: number }[];
+    low?: number;
+    middle?: number;
+    high?: number;
+    rent_from?: string;
+    ingredient_from?: string;
+    ingredient_share?: number | null;
+    per_person_monthly?: Trio;
+    labour_check?: { share_of_sales: [number, number]; published?: GuideLine };
+  };
+  break_even: {
+    available: boolean;
+    reason?: string;
+    needs?: string[];
+    each_customer_adds?: number;
+    fixed_costs?: { low: number; high: number };
+    customers_per_month?: Trio;
+    per_day?: Trio;
+    per_day_with_cushion?: Trio;
+    cushion_percent?: number;
+    days_open?: number;
+    hoped_per_day?: number | null;
+    verdict?: string;
+    verdict_text?: string;
+    cushion_row?: GuideLine;
+  };
+  buffer: { available: boolean; months?: [number, number]; low?: number; middle?: number; high?: number; partial?: boolean };
+  budget: {
+    available: boolean;
+    verdict: "enough" | "tight" | "not_enough" | "unknown";
+    text: string;
+    suggested_low?: number;
+    suggested_middle?: number;
+    suggested_high?: number;
+    contingency?: { low: number; high: number; percent: [number, number] };
+  };
+  checklist: GuideChecklistItem[];
+  struggles: { id: string; title: string; what: string; watch: string }[];
+  gaps: { id: string; text: string }[];
+  assumptions: { id: string; label: string; low: number | null; high: number | null; unit: string; rationale: string }[];
+  sources: GuideSource[];
+  facts_used: GuideLine[];
+  selling_note: string;
+}
+
+export interface GuidePlanOut {
+  id: number;
+  created_at: string;
+  business_id: number | null;
+  data_version: string;
+  data_changed: boolean;
+  plan: GuidePlan;
+}
+
+export interface GuideSimulatorOut {
+  ready: boolean;
+  missing: string[];
+  notes: string[];
+  quick: QuickStartOut | null;
+}
+
+export function getGuideOptions(): Promise<GuideOptions> {
+  return request("/guide/options");
+}
+
+export function createGuidePlan(answers: GuideAnswers): Promise<GuidePlanOut> {
+  return request("/guide/plans", { method: "POST", body: JSON.stringify(answers) });
+}
+
+export function getGuidePlan(id: number): Promise<GuidePlanOut> {
+  return request(`/guide/plans/${id}`);
+}
+
+export function changeGuideAnswers(id: number, answers: GuideAnswers): Promise<GuidePlanOut> {
+  return request(`/guide/plans/${id}`, { method: "PUT", body: JSON.stringify(answers) });
+}
+
+export function recalculateGuidePlan(id: number): Promise<GuidePlanOut> {
+  return request(`/guide/plans/${id}/recalculate`, { method: "POST" });
+}
+
+export function getGuideSimulator(id: number): Promise<GuideSimulatorOut> {
+  return request(`/guide/plans/${id}/simulator`);
+}
+
+export function linkGuideBusiness(id: number, businessId: number): Promise<GuidePlanOut> {
+  return request(`/guide/plans/${id}/link_business`, { method: "POST", body: JSON.stringify({ business_id: businessId }) });
+}
+
+export function deleteGuidePlan(id: number): Promise<DeletedOut> {
+  return request(`/guide/plans/${id}`, { method: "DELETE" });
+}
+
+export function restoreGuidePlan(id: number): Promise<GuidePlanOut> {
+  return request(`/guide/plans/${id}/restore`, { method: "POST" });
+}
+
+/** The practice business: the usual start flow, with the guide's own numbers and `setup_source: "guide"`. */
+export function createGuideBusiness(name: string, industry: string, currency: string, quick: QuickStartOut): Promise<BusinessOut> {
+  return request("/businesses", {
+    method: "POST",
+    body: JSON.stringify({ name, industry, currency, baseline: quick.baseline, setup_source: "guide", assumed_fields: quick.assumed }),
+  });
 }

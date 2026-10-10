@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Photo } from "../../components/Photo";
 import { jumpLink } from "../../lib/jumpTo";
 import { LANDING_PHOTOS } from "../../lib/landingImages";
@@ -52,9 +53,14 @@ export function Landing() {
           <p className="hero-lead">
             Try a change on paper before you make it, and see what could happen to your profit, cash and customers. In plain words.
           </p>
-          <a href="#start-here" className="btn btn-amber" onClick={jumpLink("start-here")}>
-            Start your journey →
-          </a>
+          <div className="hero-buttons">
+            <a href="#start-here" className="btn btn-amber" onClick={jumpLink("start-here")}>
+              Start your journey →
+            </a>
+            <Link to="/guide" className="btn btn-secondary">
+              I don’t have a business yet
+            </Link>
+          </div>
           <p className="hero-small">Free · Simple · Made for small businesses</p>
         </div>
         <div className="hero-photo reveal" style={{ ["--i" as string]: 2 }}>

@@ -103,6 +103,19 @@ describe("Today: the coach speaks first", () => {
     expect(await screen.findByText("Start page")).toBeTruthy();
   });
 
+  it("for a business made from the start-up guide, says it is a starting picture", async () => {
+    vi.mocked(api.getToday).mockResolvedValue(makeToday({ setup_source: "guide" }));
+    mount();
+    await screen.findByRole("heading", { name: "Today at My café" });
+    expect(screen.getByText("This is a starting picture. It assumes your business is open and running smoothly.")).toBeTruthy();
+  });
+
+  it("shows no starting-picture banner for other businesses", async () => {
+    mount();
+    await screen.findByRole("heading", { name: "Today at My café" });
+    expect(screen.queryByText(/This is a starting picture/)).toBeNull();
+  });
+
   it("shows no sample tag for a real business", async () => {
     mount();
     await screen.findByRole("heading", { name: "Today at My café" });

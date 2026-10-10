@@ -2405,6 +2405,658 @@ button.danger:hover:not(:disabled) {
   min-height: 52px;
 }
 
+/* =====================================================================================================================
+   START-UP GUIDE ("I don't have a business yet"): the nine questions and the plan page.
+   Same cards, pills and tokens as everywhere else. The plan page prints as plain black on white (last block of this file).
+   ===================================================================================================================== */
+
+/* The two ways in, on the start page */
+.hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 14px;
+  align-items: center;
+}
+
+.guide-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  margin-top: 28px;
+  padding: 20px 28px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.guide-entry h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.guide-entry p {
+  margin: 0;
+  max-width: 40em;
+}
+
+/* The questions */
+.guide-page {
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+.guide-progress {
+  margin: 0 0 14px;
+  font-weight: 700;
+  color: var(--body);
+}
+
+.guide-progress-bar {
+  display: block;
+  height: 10px;
+  margin-top: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--sage);
+  overflow: hidden;
+}
+
+.guide-progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--green);
+  transition: width var(--t-med) var(--ease);
+}
+
+.guide-card {
+  padding: 34px 36px 30px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.guide-card h1 {
+  margin-top: 0;
+  font-size: clamp(26px, 3.4vw, 34px);
+}
+
+.guide-card h1:focus {
+  outline: none;
+}
+
+.guide-why {
+  margin: 0 0 22px;
+  color: var(--body);
+}
+
+.guide-sub {
+  margin: 18px 0 8px;
+  font-size: 20px;
+}
+
+.guide-choices {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 12px;
+  padding: 0;
+  border: none;
+}
+
+.guide-choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 12px 22px;
+  border: 2px solid var(--card-border);
+  border-radius: 24px;
+  background: var(--white);
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
+}
+
+.guide-choice:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+  background: var(--cream);
+}
+
+.guide-choice input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.guide-choice:focus-within {
+  outline: 3px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.guide-choice-on {
+  border-color: var(--green);
+  background: var(--sage);
+}
+
+.guide-choice-label {
+  font-family: var(--font-heading);
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--charcoal);
+}
+
+.guide-choice-help {
+  color: var(--body);
+  font-size: 16px;
+}
+
+.guide-mode {
+  margin: 8px 0 14px;
+  padding: 12px 18px;
+  border: 2px solid var(--sage-edge);
+  border-radius: 20px;
+  background: var(--sage);
+  color: var(--charcoal);
+}
+
+.guide-disclaimer {
+  margin: 20px 0 6px;
+  font-size: 15px;
+  color: var(--body);
+}
+
+/* The banner that says what the simulator's picture is */
+.starting-picture {
+  margin: 12px 0;
+  padding: 12px 20px;
+  border: 2px solid var(--amber);
+  border-radius: 22px;
+  background: var(--white);
+  color: var(--charcoal);
+  font-weight: 600;
+}
+
+/* The plan page */
+.guide-plan {
+  max-width: 980px;
+  margin-inline: auto;
+}
+
+.guide-header h1 {
+  margin-bottom: 4px;
+}
+
+.guide-subtitle {
+  margin: 0 0 14px;
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--body);
+}
+
+.guide-disclaimer-box {
+  margin: 0 0 12px;
+  padding: 14px 20px;
+  border: 2px solid var(--amber);
+  border-radius: 22px;
+  background: var(--amber-soft);
+  color: var(--charcoal);
+}
+
+.guide-small {
+  margin: 8px 0;
+  font-size: 15px;
+  color: var(--body);
+}
+
+.guide-changed {
+  padding: 10px 16px;
+  border: 2px solid var(--sage-edge);
+  border-radius: 20px;
+  background: var(--sage);
+}
+
+.guide-section {
+  margin-top: var(--space-section);
+  padding: 28px 32px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.guide-header + .guide-section {
+  margin-top: 28px;
+}
+
+.guide-section h2 {
+  margin-top: 0;
+  font-size: 26px;
+}
+
+.guide-section h3 {
+  margin: 22px 0 8px;
+  font-size: 20px;
+}
+
+.guide-lead {
+  margin: 0 0 16px;
+  color: var(--charcoal);
+}
+
+.guide-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.guide-tile {
+  padding: 18px 20px;
+  border: 2px solid var(--card-border);
+  border-radius: 24px;
+  background: var(--cream);
+}
+
+.guide-tile h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--body);
+}
+
+.guide-tile p {
+  margin: 0 0 6px;
+}
+
+.guide-tile-number {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--green-heading);
+  font-variant-numeric: lining-nums;
+}
+
+.guide-tile-good {
+  background: var(--sage);
+  border-color: var(--sage-edge);
+}
+
+/* A caution is calm charcoal words in an amber outline, never red */
+.guide-tile-careful {
+  background: var(--white);
+  border-color: var(--amber);
+}
+
+.guide-tile-careful .guide-tile-number {
+  color: var(--charcoal);
+}
+
+.guide-tile-missing {
+  color: var(--charcoal);
+}
+
+.guide-unavailable {
+  padding: 16px 20px;
+  border: 2px solid var(--amber);
+  border-radius: 22px;
+  background: var(--white);
+}
+
+.guide-unavailable p {
+  margin: 0 0 8px;
+}
+
+.guide-unavailable ul {
+  margin: 0 0 8px;
+}
+
+/* Tables of lines: a normal table on a wide screen, small cards on a phone */
+.guide-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 2px solid var(--card-border);
+  border-radius: 20px;
+  font-size: 16px;
+}
+
+.guide-table th,
+.guide-table td {
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--card-border);
+  color: var(--charcoal);
+}
+
+.guide-table thead th {
+  background: var(--sage);
+  color: var(--green-heading);
+  font-family: var(--font-heading);
+  font-weight: 800;
+}
+
+.guide-table tbody tr:nth-child(even) {
+  background: var(--cream);
+}
+
+.guide-table tbody tr:last-child th,
+.guide-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.guide-table tbody th {
+  font-weight: 700;
+}
+
+.guide-total-row th,
+.guide-total-row td {
+  background: var(--sage);
+}
+
+.guide-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--body);
+}
+
+.guide-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 10px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--body);
+}
+
+.guide-tag-urgent {
+  border-color: var(--amber);
+  color: var(--charcoal);
+}
+
+.guide-source-kind {
+  color: var(--body);
+  font-size: 14px;
+}
+
+.guide-total {
+  margin-top: 18px;
+  padding: 18px 22px;
+  border: 2px solid var(--sage-edge);
+  border-radius: 24px;
+  background: var(--sage);
+}
+
+.guide-total p {
+  margin: 0 0 6px;
+}
+
+.guide-total-label {
+  font-weight: 700;
+  color: var(--body);
+}
+
+.guide-total-number {
+  font-family: var(--font-heading);
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--green-heading);
+  font-variant-numeric: lining-nums;
+}
+
+.guide-wide {
+  font-weight: 600;
+  color: var(--charcoal);
+}
+
+.guide-steps {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.guide-steps li {
+  margin-bottom: 8px;
+}
+
+.guide-sum {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+}
+
+.guide-sum li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px 20px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.guide-sum-total {
+  border-bottom: none;
+  font-size: 18px;
+}
+
+.guide-verdict {
+  padding: 12px 18px;
+  border-radius: 20px;
+  border: 2px solid var(--sage-edge);
+  background: var(--sage);
+  font-weight: 700;
+}
+
+.guide-verdict-careful {
+  border-color: var(--amber);
+  background: var(--white);
+}
+
+.guide-check {
+  margin-bottom: 12px;
+  border: 2px solid var(--card-border);
+  border-radius: 24px;
+  background: var(--white);
+}
+
+.guide-check > summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  min-height: 56px;
+  padding: 10px 22px;
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--green-heading);
+  cursor: pointer;
+}
+
+.guide-check[open] > summary {
+  border-bottom: 1px solid var(--card-border);
+}
+
+.guide-check-body {
+  padding: 8px 22px 18px;
+}
+
+.guide-check-body h3 {
+  margin: 16px 0 6px;
+  font-size: 16px;
+  color: var(--body);
+  letter-spacing: 0.04em;
+}
+
+.guide-check-body ul {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.guide-check-body li {
+  margin-bottom: 6px;
+}
+
+.guide-cant {
+  margin: 14px 0 0;
+  padding: 12px 18px;
+  border: 2px solid var(--amber);
+  border-radius: 20px;
+  background: var(--white);
+  color: var(--charcoal);
+}
+
+.guide-struggles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.guide-struggle {
+  padding: 18px 20px;
+  border: 2px solid var(--card-border);
+  border-radius: 24px;
+  background: var(--cream);
+}
+
+.guide-struggle h3 {
+  margin-top: 0;
+}
+
+.guide-struggle p {
+  margin: 0 0 8px;
+}
+
+.guide-assumptions li {
+  margin-bottom: 8px;
+}
+
+.guide-try {
+  border-color: var(--amber);
+}
+
+.guide-try-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.guide-try-actions button {
+  min-height: 56px;
+  font-size: 18px;
+}
+
+.guide-footer {
+  margin-top: var(--space-section);
+  text-align: center;
+}
+
+.guide-standing {
+  margin: 0 0 14px;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.guide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+@media (max-width: 860px) {
+  .guide-tiles,
+  .guide-struggles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .guide-section {
+    padding: 22px 18px;
+  }
+
+  .guide-card {
+    padding: 24px 18px 22px;
+  }
+
+  .guide-entry {
+    padding: 18px 20px;
+  }
+
+  /* Tables become small cards: the item on top, then each figure with its own label */
+  .guide-table,
+  .guide-table thead,
+  .guide-table tbody,
+  .guide-table tr,
+  .guide-table th,
+  .guide-table td {
+    display: block;
+  }
+
+  .guide-table {
+    border: none;
+  }
+
+  .guide-table thead {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .guide-table tbody tr {
+    margin-bottom: 12px;
+    border: 2px solid var(--card-border);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .guide-table td {
+    border-bottom: none;
+    padding-top: 4px;
+  }
+
+  .guide-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--body);
+  }
+
+  .guide-try-actions button {
+    width: 100%;
+  }
+
+  .hero-buttons .btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-choice:hover {
+    transform: none !important;
+  }
+}
+
+
 /* ---------- Less motion: switch all of it off ---------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -2519,6 +3171,53 @@ button.danger:hover:not(:disabled) {
 
   .share-footer {
     border-top: 2px solid #000000;
+  }
+
+  /* The start-up plan page: plain black on white, every card open, no boxes, links printed with their address */
+  .guide-plan,
+  .guide-plan * {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #bbbbbb !important;
+    border-radius: 0 !important;
+  }
+
+  .guide-plan {
+    max-width: none;
+  }
+
+  .guide-section,
+  .guide-check,
+  .guide-struggle,
+  .guide-tile {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding: 6px 0 !important;
+    border-width: 0 0 1px 0 !important;
+  }
+
+  .guide-table,
+  .guide-table th,
+  .guide-table td {
+    border: 1px solid #bbbbbb !important;
+  }
+
+  .guide-plan a {
+    text-decoration: none;
+  }
+
+  .guide-plan a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 11px;
+  }
+
+  .guide-check > summary::marker {
+    content: "";
+  }
+
+  .guide-try,
+  .guide-header + .guide-section {
+    margin-top: 12px;
   }
 
   .confetti-layer,
