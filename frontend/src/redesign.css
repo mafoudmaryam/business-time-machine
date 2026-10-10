@@ -418,30 +418,6 @@ button.link-button:disabled {
   padding-bottom: 24px;
 }
 
-/* "Continue with <name>": a slim pill above the hero, not a full-width bar. */
-.continue-current {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 20px;
-  max-width: 720px;
-  margin: 4px auto 28px;
-  padding: 8px 8px 8px 28px;
-  background: var(--sage);
-  border: 2px solid var(--card-border);
-  border-radius: var(--radius-pill);
-}
-
-.continue-current p {
-  margin: 0;
-  font-size: 18px;
-  color: var(--charcoal);
-}
-
-.continue-current button {
-  flex: none;
-}
-
 /* The hero: text on the left, one photo on the right, both centred against each other. */
 .hero-panel {
   display: grid;
@@ -1160,11 +1136,6 @@ button.link-button:disabled {
     padding: 32px 36px;
   }
 
-  .continue-current {
-    border-radius: 28px;
-    padding: 14px 16px 14px 22px;
-  }
-
   .start-form {
     padding: 26px 20px 24px;
   }
@@ -1241,14 +1212,6 @@ button.link-button:disabled {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
-  }
-
-  .continue-current {
-    padding: 12px 14px 12px 20px;
-  }
-
-  .continue-current p {
-    font-size: 17px;
   }
 
   /* Phone: the badge sits above the words and everything is left-aligned. */

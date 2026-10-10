@@ -6,7 +6,7 @@
 
 An AI-assisted decision simulator for small food-service businesses: cafés, restaurants and bakeries.
 
-![The Business Time Machine start page: a welcome panel, a photo of a café owner reading a page of figures, and a small example card](docs/images/redesign-step1/start-1440-1-top-bar-continue-hero.jpg)
+![The Business Time Machine start page: a welcome panel, a photo of a café owner reading a page of figures, and a small example card](docs/images/redesign-step1/start-1440-1-top-bar-hero-no-business.jpg)
 
 </div>
 
@@ -141,7 +141,7 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 # from the project root; all three use the backend's virtual environment
 cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
 cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 679 tests
-cd ..\frontend; npm test                                        # 781 tests
+cd ..\frontend; npm test                                        # 782 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -191,7 +191,7 @@ Measured on 2026-10-10, running the suites one after another on a quiet machine:
 |---|---|
 | Engine tests (pytest) | 356 passed |
 | Backend tests (pytest) | 679 (678 passed in the last full run; the one failure was fixed and its file re-run: 70 passed. The full run was not repeated after that fix) |
-| Frontend tests (Vitest, 55 files) | 781 passed |
+| Frontend tests (Vitest, 55 files) | 782 passed |
 | TypeScript check | clean |
 | Lint (oxlint) | no errors, 2 old warnings |
 | Production build (Vite) | succeeds |

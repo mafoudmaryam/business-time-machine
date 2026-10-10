@@ -1,6 +1,7 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { isStartScreen } from "../lib/backTarget";
 import { jumpLink } from "../lib/jumpTo";
+import { getRememberedBusinessId } from "../lib/session";
 import { ADVANCED_LINKS } from "../lib/navLinks";
 import { BusinessSwitcher } from "./BusinessSwitcher";
 import { Logo } from "./Logo";
@@ -26,6 +27,12 @@ export function AppNav() {
           <li>
             <a href="#what-you-get" onClick={jumpLink("what-you-get")}>What you get</a>
           </li>
+          {/* The way back into an open business, so nobody is stranded on the front door. */}
+          {getRememberedBusinessId() !== null && (
+            <li>
+              <Link to="/today">Today</Link>
+            </li>
+          )}
         </ul>
         <BusinessSwitcher />
         <a href="#start-here" className="appnav-cta" onClick={jumpLink("start-here")}>

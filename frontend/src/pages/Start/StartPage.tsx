@@ -63,7 +63,7 @@ export function StartPage() {
   const [failure, setFailure] = useState<string | null>(null);
   const [pickError, setPickError] = useState(false);
 
-  // The business that is open in this tab (if the server still has it) gets the big "Continue" button; the rest go in the list.
+  // The business that is open in this tab (if the server still has it) is reached from "Today" in the top bar; the rest go in the list.
   const openId = getRememberedBusinessId();
   const current = existing.find((b) => b.id === openId) ?? null;
   const others = existing.filter((b) => b.id !== current?.id);
@@ -138,17 +138,6 @@ export function StartPage() {
 
   return (
     <div className="page start-page">
-      {/* A returning visitor sees the way back in first, before any of the welcome text. */}
-      {step === 0 && current && (
-        <section className="continue-current" aria-label="Carry on where you were">
-          <p>
-            <strong>{current.name}</strong> is open.
-          </p>
-          <button type="button" onClick={() => enter(current, "continue")}>
-            Continue with {current.name}
-          </button>
-        </section>
-      )}
       {step === 0 && <Landing />}
       {step === 0 && (
         <section className="guide-entry" aria-labelledby="guide-entry-title">

@@ -39,7 +39,7 @@ don't, and a plain "we can't do this, ask X" everywhere else.**
 **Entry point.** On the start page (`/`), directly under the hero button "Start your journey", a second, quieter
 pill button: **"I don't have a business yet"**. It also appears as a slim card above the business-type picker (the
 working form), so it is one click from either place. Returning visitors who have a business open still see the
-"Continue with ..." pill first; the new button sits below it. No change to the top bar.
+"Continue with ..." pill first (since removed; see the changelog); the new button sits below the hero. No change to the top bar.
 
 **Routes** (all inside `AppLayout`, so the Back button comes for free):
 

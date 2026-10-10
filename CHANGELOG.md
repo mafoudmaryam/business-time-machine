@@ -3,6 +3,10 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## Start page: no "Continue" bar (Oct 2026)
+
+- The "<name> is open. Continue with <name>" bar above the hero is gone. With a business open, the top bar of the start page shows a "Today" link next to "How it works" and "What you get"; the business switcher is unchanged. With no business open the page looks as before.
+
 ## Bug-fix pass: practice businesses and the coach (Oct 2026)
 
 - **Coach used the wrong currency.** A café in yuan read "$168,000" in the coach's words. The prompt was stripping the currency symbol; it now keeps it, and a new check rejects any AI text with another currency's symbol or code (the rule-based text then stays).

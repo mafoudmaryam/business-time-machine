@@ -349,13 +349,17 @@ describe("StartPage: the welcome text", () => {
     expect(screen.getByRole("link", { name: "Start your journey →" }).getAttribute("href")).toBe("#start-here");
   });
 
-  it("puts the way back in at the very top for a returning visitor", async () => {
+  it("for a returning visitor the hero is the first thing on the page: no Continue bar above it", async () => {
     vi.mocked(api.listBusinesses).mockResolvedValue([BUSINESS({ id: 12, name: "My café" })]);
     rememberBusiness(12);
     const { container } = mount();
-    const button = await screen.findByRole("button", { name: "Continue with My café" });
-    const hero = container.querySelector(".hero-panel")!;
-    expect(button.compareDocumentPosition(hero) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    await screen.findByRole("button", { name: "Café" });
+    expect(screen.queryByRole("button", { name: "Continue with My café" })).toBeNull();
+    expect(container.querySelector(".continue-current")).toBeNull();
+    const page = container.querySelector(".start-page")!;
+    expect(page.firstElementChild?.querySelector(".hero-panel") ?? page.firstElementChild).toBeTruthy();
+    expect(page.querySelector(".hero-panel")).toBeTruthy();
+    expect(page.firstElementChild?.className).not.toMatch(/continue/);
   });
 
   it("shows no welcome text once the four questions have started", async () => {
