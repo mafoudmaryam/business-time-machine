@@ -10,7 +10,7 @@ An AI-assisted decision simulator for small food-service businesses: cafés, res
 
 </div>
 
-> **Status:** a personal project, still in development. The repository is private, so these steps are for the owner and collaborators. The photo above is an AI-generated image (see [Credits](#credits)).
+> **Status:** a personal project, still in development. The photo above is an AI-generated image (see [Credits](#credits)).
 
 ---
 
@@ -90,7 +90,7 @@ These steps are for **Windows and PowerShell**.
 - Git
 - Optional: [Ollama](https://ollama.com), only if you want the local AI coach
 
-**One-time setup** (the repository is private, so you must be signed in to GitHub as the owner or a collaborator):
+**One-time setup:**
 
 ```powershell
 git clone https://github.com/mafoudmaryam/business-time-machine.git
