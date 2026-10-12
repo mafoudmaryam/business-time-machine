@@ -3,7 +3,7 @@
     facts (engine)  ->  provider writes text  ->  grounding check  ->  retry once  ->  template fallback
                     ->  ideas validated + simulated by the engine  ->  cached per run
 
-Every provider call is written to ai_interactions (thesis data), including the fallback.
+Every provider call is written to ai_interactions (evaluation data), including the fallback.
 """
 from __future__ import annotations
 

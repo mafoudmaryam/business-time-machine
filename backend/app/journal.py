@@ -182,7 +182,7 @@ def build_journal(db: Session, business: models.Business) -> schemas.JournalOut:
 
 
 def accuracy_report(db: Session, include_samples: bool = False) -> schemas.JournalAccuracyReport:
-    """Every compared month across all businesses (the thesis table), with the run's seed so each row can be reproduced."""
+    """Every compared month across all businesses (the accuracy table), with the run's seed so each row can be reproduced."""
     rows, by_metric = [], {m: [] for m in METRICS}
     entries = (db.query(models.JournalEntry).join(models.Business)
                .filter(models.JournalEntry.deleted_at.is_(None), models.Business.deleted_at.is_(None))

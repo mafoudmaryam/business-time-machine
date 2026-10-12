@@ -1,4 +1,4 @@
-"""The evaluation set is real thesis data: keep it well-formed, keep the scoring honest, and guard the rule-based score."""
+"""The evaluation set is real evaluation data: keep it well-formed, keep the scoring honest, and guard the rule-based score."""
 from __future__ import annotations
 
 import csv

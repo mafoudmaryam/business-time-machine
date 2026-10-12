@@ -3,9 +3,9 @@
 Status: **plan only, nothing built.** Written 2026-10-08 after reading `CLAUDE.md`, `docs/beginner-journey-plan.md`
 and the code study mode will touch (`settings.py`, `coach/service.py`, `coach/today.py`, `models.py`, `routers/beginner.py`,
 `ConfigProvider`/`config.ts`, `start.ps1`, `.gitignore`). This is a personal project and nothing has been collected from anyone, so the rule for the whole
-plan is: *collect the least personal data that still answers the research question.*
+plan is: *collect the least personal data that still answers the question.* No study has been run: this describes a possible small test with real owners, with their consent.
 
-Research question: do an AI-assisted simulation, and an AI coach explaining it, help non-expert small-business
+Question to test: do an AI-assisted simulation, and an AI coach explaining it, help non-expert small-business
 owners make **better** and **more confident** decisions? Design: between-subjects, **coach on** vs **coach off**.
 
 What differs between the groups is *only* the coach. The scripted business, the numbers, the charts, the seed and

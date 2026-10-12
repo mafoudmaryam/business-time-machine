@@ -107,7 +107,7 @@ class Decision(Base):
     extra = Column(JSON, nullable=False, default=dict)
     source = Column(String, nullable=False, default="user")  # "user" | "ai"
     confirmed = Column(Boolean, nullable=False, default=False)
-    # How the owner confirmed it (thesis data): one_by_one | confirm_all | confirm_all_on_save | edited | looks_right
+    # How the owner confirmed it (evaluation data): one_by_one | confirm_all | confirm_all_on_save | edited | looks_right
     confirmed_via = Column(String, nullable=True)
 
     scenario = relationship("Scenario", back_populates="decisions")
@@ -151,7 +151,7 @@ class SimulationResult(Base):
 
 
 class AiInteraction(Base):
-    """Every call to a coach provider (and every template answer), kept as thesis data.
+    """Every call to a coach provider (and every template answer), kept as evaluation data.
     grounding says whether the numbers in the response were all found in the facts."""
 
     __tablename__ = "ai_interactions"
@@ -173,7 +173,7 @@ class AiInteraction(Base):
     grounding = Column(JSON, nullable=True)            # {"passed": bool, "unmatched": [numbers]}
     error = Column(Text, nullable=True)
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
-    # Thesis data outlives the things it was about. When a run, business or reading is purged for good, the link
+    # Evaluation data outlives the things it was about. When a run, business or reading is purged for good, the link
     # above is cleared and its old id is kept here as plain numbers (no foreign key, so nothing can block the purge).
     former_run_id = Column(Integer, nullable=True)
     former_business_id = Column(Integer, nullable=True)
@@ -181,7 +181,7 @@ class AiInteraction(Base):
 
 
 class Interpretation(Base):
-    """One "describe it in your own words" request and what came back (thesis data, and the polling row)."""
+    """One "describe it in your own words" request and what came back (evaluation data, and the polling row)."""
 
     __tablename__ = "interpretations"
 

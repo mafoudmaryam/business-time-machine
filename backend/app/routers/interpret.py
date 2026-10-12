@@ -3,7 +3,7 @@
 POST /businesses/{id}/interpret    -- starts reading the text. Returns at once: "done" for the rule-based parser,
                                       "pending" when an AI is reading (poll the GET below).
 GET  /interpretations/{id}         -- poll for the result.
-POST /interpretations/{id}/outcome -- what the owner finally kept, edited or added (thesis metric).
+POST /interpretations/{id}/outcome -- what the owner finally kept, edited or added (evaluation measure).
 """
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 """Removing soft-deleted things for good, on purpose (scripts/purge_deleted.py). Nothing calls this by itself.
 
-The AI logs (`ai_interactions`) are thesis data and are NEVER deleted. When the run, business or reading a log row
+The AI logs (`ai_interactions`) are evaluation data and are NEVER deleted. When the run, business or reading a log row
 belonged to is purged, the row's link is cleared (so nothing points at a missing row) and the old id is kept as a plain
 number in `former_run_id` / `former_business_id` / `former_interpretation_id`.
 """

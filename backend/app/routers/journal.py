@@ -101,5 +101,5 @@ def restore_entry(business_id: int, month: str = Path(**_MONTH), db: Session = D
 
 @router.get("/journal/accuracy", response_model=schemas.JournalAccuracyReport)
 def accuracy(include_samples: bool = False, db: Session = Depends(get_db)):
-    """Thesis output: how the expected ranges did against what owners wrote down. Pilot data, not a validation."""
+    """Evaluation output: how the expected ranges did against what owners wrote down. Pilot data, not a validation."""
     return journal.accuracy_report(db, include_samples=include_samples)

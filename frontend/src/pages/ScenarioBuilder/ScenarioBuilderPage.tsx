@@ -56,7 +56,7 @@ export function ScenarioBuilderPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [fromCoach, setFromCoach] = useState(prefill !== undefined);
-  // The reading of the owner's own words that the current steps came from (for the thesis measure).
+  // The reading of the owner's own words that the current steps came from (for the evaluation measure).
   const [interpretationId, setInterpretationId] = useState<number | null>(null);
 
   function selectBusiness(id: number) {

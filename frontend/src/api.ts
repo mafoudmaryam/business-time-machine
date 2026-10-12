@@ -176,7 +176,7 @@ export function listIndustries(): Promise<IndustryOut[]> {
 
 // ---------- scenarios / decisions ----------
 
-/** How the owner confirmed a step (thesis data): ticked one by one, "Confirm all", "Confirm all and save",
+/** How the owner confirmed a step (evaluation data): ticked one by one, "Confirm all", "Confirm all and save",
  * or by editing it (saving an edit counts as reviewing it). */
 export type ConfirmVia = "one_by_one" | "confirm_all" | "confirm_all_on_save" | "edited" | "try_change";
 
@@ -579,7 +579,7 @@ export function getInterpretation(interpretationId: number): Promise<Interpretat
   return request(`/interpretations/${interpretationId}`);
 }
 
-/** Tells the server what the owner finally kept, edited or added after the AI's steps (a thesis measure). */
+/** Tells the server what the owner finally kept, edited or added after the AI's steps (a evaluation measure). */
 export function logInterpretOutcome(
   interpretationId: number,
   decisions: DecisionFormValues[],

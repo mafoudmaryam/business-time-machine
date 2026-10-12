@@ -133,7 +133,7 @@ class DecisionIn(BaseModel):
     investment: Optional[float] = None
     source: str = "user"  # "user" | "ai"
     confirmed: bool = False
-    confirmed_via: Optional[str] = Field(None, pattern=r"^[a-z_]{1,30}$")   # how it was confirmed (thesis data)
+    confirmed_via: Optional[str] = Field(None, pattern=r"^[a-z_]{1,30}$")   # how it was confirmed (evaluation data)
 
     _EXTRA_FIELDS = ("loan_months", "annual_rate", "capacity_pct", "cogs_ratio", "investment")
 
@@ -611,7 +611,7 @@ class JournalAccuracyRow(BaseModel):
 
 
 class JournalAccuracyReport(BaseModel):
-    """GET /journal/accuracy -- thesis output: every compared month, and totals per metric."""
+    """GET /journal/accuracy -- evaluation output: every compared month, and totals per metric."""
     pilot: bool = True
     rows: list[JournalAccuracyRow]
     totals: list[JournalAccuracyOut]

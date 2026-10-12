@@ -1,4 +1,4 @@
-"""Plain-language decision input: rules, AI (mocked), questions, refusals, logging, and the thesis metric."""
+"""Plain-language decision input: rules, AI (mocked), questions, refusals, logging, and the evaluation measure."""
 from __future__ import annotations
 
 import datetime as dt
@@ -527,7 +527,7 @@ def test_a_job_lost_to_a_restart_is_answered_by_the_rules(client, business):
     assert body["status"] == "done" and body["decisions"][0]["value"] == 5
 
 
-# ================= logging (thesis data) =================
+# ================= logging (evaluation data) =================
 
 def test_every_call_is_logged_with_text_provider_output_and_validation(client, business, use_ai):
     use_ai(reply(item("price", 5, "percent", "next month", "raise prices 5% next month")))

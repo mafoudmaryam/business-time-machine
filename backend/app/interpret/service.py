@@ -233,7 +233,7 @@ def read(db: Session, row: models.Interpretation, today: Optional[dt.date] = Non
     return public(row)
 
 
-# ---------- what the owner finally did with it (thesis metric) ----------
+# ---------- what the owner finally did with it (evaluation measure) ----------
 
 def _key(d: dict) -> tuple:
     extras = tuple((k, round(float(d[k]), 4)) for k in ENGINE_KEYS if d.get(k) not in (None, 0, 0.0))

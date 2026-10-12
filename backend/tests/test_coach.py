@@ -138,7 +138,7 @@ def test_coach_is_cached_per_run(client, run):
     assert third.status_code == 200 and len(interactions()) > n
 
 
-def test_template_coach_logged_for_thesis_data(client, run):
+def test_template_coach_logged_as_evaluation_data(client, run):
     client.post(f"/simulation_runs/{run['id']}/coach")
     (row,) = interactions()
     assert (row.kind, row.provider, row.simulation_run_id) == ("coach", "template", run["id"])
