@@ -21,3 +21,5 @@ backend/*.db-*
 *.sqlite
 *.sqlite3
 frontend/.photo-originals/
+*.sqlite*
+backend/.env
