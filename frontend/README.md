@@ -28,7 +28,7 @@ npm run build      # type-checks, then builds to dist/
 | `src/redesign.css` | The look, loaded last and organised page by page (table of contents at the top) |
 | `src/chartTheme.ts` | The one colour system shared by every chart |
 | `public/fonts/` | Nunito, Inter and Patrick Hand, served from the app itself |
-| `public/images/` | Industry photos and the four start-page photos, with `CREDITS.md` |
+| `public/images/` | Pexels industry photos and the four AI-generated start-page pictures, with `CREDITS.md` files |
 | `scripts/make-redesign-images.py` | Turns the four start-page photos into small WebP files (needs Pillow) |
 
 ## Rules to keep

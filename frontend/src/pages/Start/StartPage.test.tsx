@@ -324,6 +324,7 @@ describe("StartPage: the welcome text", () => {
     expect(screen.queryByText(/after your first change you can say/)).toBeNull();
     expect(screen.getByText("The Business Time Machine team")).toBeTruthy();
     expect(screen.getByText("Scenarios, not forecasts. Built from typical numbers and the ones you give us. Not financial advice.")).toBeTruthy();
+    expect(screen.getByText("Some pictures on this site are AI-generated illustrations and the others are stock photos. None show our customers or owners.")).toBeTruthy();
   });
 
   it("gives every photo a width, a height and a real alt text, and loads only the hero at once", async () => {
@@ -335,6 +336,7 @@ describe("StartPage: the welcome text", () => {
       expect(Number(img.getAttribute("width"))).toBeGreaterThan(0);
       expect(Number(img.getAttribute("height"))).toBeGreaterThan(0);
       expect((img.getAttribute("alt") ?? "").length).toBeGreaterThan(10);
+      expect(img.getAttribute("alt")).toMatch(/^Illustration of /);
     }
     expect(photos.filter((img) => img.getAttribute("loading") === "eager")).toHaveLength(1);
     expect(photos.filter((img) => img.getAttribute("loading") === "lazy")).toHaveLength(3);

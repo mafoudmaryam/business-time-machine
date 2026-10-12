@@ -137,6 +137,7 @@ export function LandingFooter() {
   return (
     <footer className="landing-footer">
       <p>Scenarios, not forecasts. Built from typical numbers and the ones you give us. Not financial advice.</p>
+      <p>Some pictures on this site are AI-generated illustrations and the others are stock photos. None show our customers or owners.</p>
     </footer>
   );
 }

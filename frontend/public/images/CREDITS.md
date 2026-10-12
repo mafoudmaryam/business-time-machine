@@ -25,18 +25,7 @@ three (chalkboard marketing sign, coins for price) -- see the "Used for" column.
 | `{cafe,restaurant,bakery}/marketing.jpg` | Marketing, all three industries | Timothy Huliselan | https://www.pexels.com/photo/empty-chalkboard-on-brick-street-outdoors-32367351/ |
 | `{cafe,restaurant,bakery}/price.jpg` | Price, all three industries | ClickerHappy | https://www.pexels.com/photo/close-up-of-coins-on-table-332304/ |
 
-## Start page photos (the 2026 redesign)
+## Start page pictures (the 2026 redesign)
 
-These four photos are used only on the start page. They are served as WebP files made by
-`frontend/scripts/make-redesign-images.py` (cropped and resized; the originals are kept outside the build, in the
-git-ignored `frontend/.photo-originals/`).
-
-| File | Used for | Source and photographer | Licence | Notes |
-| --- | --- | --- | --- | --- |
-| `redesign/hero-720.webp` (from `hero2.jpg`) | Start page hero, right side | not applicable | not applicable | **AI-generated image.** It shows no real person. It must always be labelled as AI-generated. |
-| `redesign/desk-632.webp` (from `desk.jpg`) | Start page card "See the impact" | to be confirmed by the project owner | to be confirmed by the project owner | |
-| `redesign/tablet-632.webp` (from `tablet.jpg`) | Start page card "Get a simple explanation" | to be confirmed by the project owner | to be confirmed by the project owner | |
-| `redesign/notes-632.webp` (from `notes.jpg`) | Start page card "Keep a journal" | to be confirmed by the project owner | to be confirmed by the project owner | |
-
-No photographer names or licences are written here on purpose: they are not known yet and must not be guessed. Until the
-project owner confirms them, treat these three photos as "source unknown" and do not publish the app publicly.
+These four are AI-generated illustrations, not photographs. Their per-file details are in
+[`redesign/CREDITS.md`](redesign/CREDITS.md).

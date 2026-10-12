@@ -3,6 +3,10 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## Pictures labelled and credited (Oct 2026)
+
+- The four start-page pictures are now labelled as AI-generated illustrations (ChatGPT, October 2026): a new `frontend/public/images/redesign/CREDITS.md`, alt text that starts "Illustration of ...", and one line in the start-page footer. The café, restaurant and bakery photos are still credited to their Pexels photographers. README has an "Images" section. Docs and text only.
+
 ## Start page: no "Continue" bar (Oct 2026)
 
 - The "<name> is open. Continue with <name>" bar above the hero is gone. With a business open, the top bar of the start page shows a "Today" link next to "How it works" and "What you get"; the business switcher is unchanged. With no business open the page looks as before.

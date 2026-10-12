@@ -205,7 +205,7 @@ Measured on 2026-10-10, running the suites one after another on a quiet machine:
 - **The cloud AI provider is not covered by automated tests with a real key.** The tests replace every provider with a stand-in, so the Anthropic mode has not been verified against the live service by this test suite.
 - **The plain-language parser's score is optimistic.** The rule-based one gets 44 of 48 test sentences exactly right, but it was written alongside those sentences. A fresh, independent test set is still needed.
 - **The journal is a pilot.** A few months of figures cannot prove a forecast right or wrong.
-- **Pictures.** The photo in the hero is an AI-generated image. The other start-page photos' sources and licences are **not yet confirmed**; see `frontend/public/images/CREDITS.md`.
+- **Pictures.** The four start-page pictures are AI-generated illustrations, not real people. The café, restaurant and bakery photos are stock photos from Pexels. See the [Images](#images) section.
 
 ## Why I built this
 
@@ -263,8 +263,12 @@ CHANGELOG.md What changed, phase by phase
 ## Credits
 
 - **Fonts:** Nunito, Inter and Patrick Hand, under the SIL Open Font License (see `frontend/public/fonts/README.md`).
-- **Industry photos** (café, restaurant, bakery): from Pexels, with photographers listed in `frontend/public/images/CREDITS.md`.
-- **Start-page photos:** the hero image is **AI-generated**. The sources and licences of the other three are still to be confirmed by the project owner, and are listed as such in the same file. No credit has been invented.
+- **Industry photos** (café, restaurant, bakery): stock photos from Pexels, with photographers listed in `frontend/public/images/CREDITS.md`.
+- **Start-page pictures:** AI-generated, see [Images](#images).
+
+## Images
+
+The four pictures on the start page (hero, desk, tablet, notes) are AI-generated illustrations, made with ChatGPT (OpenAI) from text prompts in October 2026. They are not real people, customers or owners. The café, restaurant and bakery photos are stock photos from Pexels, credited to their photographers. Details for each file are in [`frontend/public/images/redesign/CREDITS.md`](frontend/public/images/redesign/CREDITS.md) and [`frontend/public/images/CREDITS.md`](frontend/public/images/CREDITS.md). The start page footer says the same in one line.
 
 ## Licence
 

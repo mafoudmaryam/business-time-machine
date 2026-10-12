@@ -15,25 +15,25 @@ export const LANDING_PHOTOS = {
     base: "/images/redesign/hero",
     widths: [720],
     ratio: 1.25,
-    alt: "A café owner in a green apron, chin resting on their hand, reading a page of figures beside a notebook and a coffee cup",
+    alt: "Illustration of a café owner in a green apron, chin resting on their hand, reading a page of figures beside a notebook and a coffee cup",
   },
   impact: {
     base: "/images/redesign/desk",
     widths: [632],
     ratio: 0.75,
-    alt: "A wooden table seen from above with a notepad, printed food-cost sheets, a calculator, a tablet and a cup of coffee",
+    alt: "Illustration of a wooden table seen from above with a notepad, printed food-cost sheets, a calculator, a tablet and a cup of coffee",
   },
   explain: {
     base: "/images/redesign/tablet",
     widths: [632],
     ratio: 0.75,
-    alt: "A smiling café worker in an apron looking at a tablet behind the counter",
+    alt: "Illustration of a smiling café worker in an apron looking at a tablet behind the counter",
   },
   journal: {
     base: "/images/redesign/notes",
     widths: [632],
     ratio: 0.75,
-    alt: "A shop owner in an apron writing in a notebook at a wooden table, a takeaway coffee in their other hand",
+    alt: "Illustration of a shop owner in an apron writing in a notebook at a wooden table, a takeaway coffee in their other hand",
   },
 } satisfies Record<string, LandingPhoto>;
 
