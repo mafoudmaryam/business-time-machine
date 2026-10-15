@@ -12,6 +12,14 @@ An AI-assisted decision simulator for small food-service businesses: cafés, res
 
 > **Status:** a personal project, still in development. The photo above is an AI-generated image (see [Credits](#credits)).
 
+**At a glance**
+
+- **What:** try a business decision (raise prices, hire someone, run a promotion) and see good, likely and bad outcomes for the next 12 months.
+- **How:** a deterministic simulation engine with Monte Carlo runs does all the maths; the AI only reads the owner's words and explains the engine's results.
+- **Safeguards:** every number the AI writes is checked against the engine's facts, and the owner confirms every decision before it is simulated.
+- **Stack:** Python + NumPy engine, FastAPI + SQLAlchemy backend, React + TypeScript frontend.
+- **Quality:** 1,800+ automated tests across engine, backend and frontend, plus automatic accessibility checks on every page.
+
 ---
 
 ## What it does
