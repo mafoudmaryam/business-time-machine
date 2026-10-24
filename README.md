@@ -10,6 +10,8 @@ Try a small change to your café, bakery or restaurant and see what could happen
 
 Created and maintained by **[Maryam Mafoud (@mafoudmaryam)](https://github.com/mafoudmaryam)**.
 
+![Current Business Time Machine homepage with the purple replay-loop logo, short introduction and lavender interactive café demo](docs/images/current/homepage.jpg)
+
 </div>
 
 > **Status:** a personal project, still in development. The current design uses purple, lavender and coral, with the selected replay-loop logo and matching favicon.
@@ -36,7 +38,7 @@ Most small food businesses make big choices on instinct: raise prices, hire a ba
 
 ## The start-up guide ("I don't have a business yet")
 
-![The start-up guide plan page for a small café in the United States: the short version, then start-up cost shown line by line with the source of every line](docs/images/startup-guide/plan-us-1440.png)
+![Current start-up guide in the purple design, beginning with the type of business to open](docs/images/current/startup-guide.jpg)
 
 For someone who is only thinking about opening a café, restaurant or bakery. It asks nine questions, one per screen (what to open, country, budget, premises, size, menu, people, customers and spend, timeline) and then shows a **rough plan** on its own page: what it might cost to start (line by line, never one headline number), running costs a month, how many customers a day you need to break even, a starting budget with a cushion, a nine-item first-year checklist with "where to find it" pointers, and what you will probably struggle with. A button sets up a practice business from the answers so you can try changes in the simulator. Plans are saved on your computer only, can be edited, and can be deleted with Undo.
 
@@ -64,46 +66,20 @@ The practice business starts at the plan's own break-even customers a day (with 
 
 The homepage uses a small animated café illustration and three short steps instead of long feature sections. The header stays simple, and extra figures are revealed when requested. Motion switches off when the device requests reduced motion.
 
-<details>
-<summary>Earlier interface screenshots (October 2026)</summary>
+### Today: your starting picture
 
-These screenshots document the previous green design. They do not show the current colors, homepage, logo, labels or order of the Today page.
+![Current Today page for a sample café, with the selected replay-loop logo and three plain-language financial tiles above the coach](docs/images/current/today.jpg)
 
-![The start page, a photo card for each of the three things you get](docs/images/redesign-step1/start-1440-2-photo-cards.jpg)
+*Example numbers for a made-up café. The key figures appear before the coach: money left after bills, money in the bank today, and its lowest modeled bank amount.*
 
-*The start page. Pick a business type, answer four questions, or try a one-click sample café, restaurant or bakery.*
+### Try a change
 
-![Try a change: a price slider and three tiles for what you keep, money in the bank and the catch](docs/images/redesign-step1/try-desktop-2-result-tiles.jpg)
+![Current price experiment in purple and lavender, showing the slider and the estimated effect on money left after bills](docs/images/current/try-a-change.jpg)
 
-*Try a change. Drag the slider and the answer on the right moves. It is labelled "just a sketch" and nothing is saved.*
+*Move the price slider, compare the estimate and its possible downside, then explore the next 12 months. Nothing is saved as a plan until you confirm.*
 
-![The Today page: the coach speaks first, then three tiles](docs/images/redesign-step2/today-1440-1-coach-and-tiles.jpg)
+These screenshots were captured from the current frontend on 2026-10-25 using a separate local preview database and sample figures. They show the purple/lavender design and selected replay-loop logo.
 
-*Today. The coach opens with a few plain sentences, then three tiles: what you keep each month, your safety net and your lowest cash point.*
-
-![The 12-month view: a green most-likely line, a sage band from bad case to good case, and an amber Save as a plan button](docs/images/redesign-step2/timeline-1440-2-save-as-a-plan.jpg)
-
-*The next 12 months, month by month, with "Save as a plan".*
-
-![My journal: a forecast band with the real months marked, and a card for each month written down](docs/images/redesign-step2/journal-1440-2-entry-cards.jpg)
-
-*My journal (a pilot feature). What really happened, set next to what we expected.*
-
-![How we worked it out: cards for what you told us, what we assumed and what we do not know](docs/images/redesign-step2/how-1440.jpg)
-
-*How we worked it out. What you told us, what we guessed, and what we do not know, in plain words.*
-
-![The Share page: a one-page summary on screen](docs/images/redesign-step2/share-1440-on-screen.jpg)
-
-*Share. A one-page summary you can print or save as a PDF from your browser. On paper it is plain black on white.*
-
-![The Today page on a phone-sized screen](docs/images/redesign-step2/today-390.jpg)
-
-*Every page fits a phone-sized screen (390 pixels wide).*
-
-The older, more detailed pages (scenario builder, comparison dashboard, run history and the full business setup) are still there under **Advanced** in the top bar, for example [the scenario builder](docs/images/redesign-step2/scenario-builder-1440.jpg) and [a saved result with the coach's verdict](docs/images/redesign-step2/run-history-1440-coach-card.jpg).
-
-</details>
 
 ## Run it on your computer
 
@@ -311,5 +287,6 @@ The older hero, desk, tablet and notes images are AI-generated illustrations mad
 ## Licence
 
 **Not yet chosen.** There is no `LICENSE` file, so all rights are reserved by the author until one is added.
+
 
 
