@@ -121,6 +121,7 @@ describe("getting back to the front page", () => {
     expect(getRememberedBusinessId()).toBeNull();
     expect(await screen.findByRole("button", { name: "Continue with My café" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Continue with Demo Cafe" })).toBeNull();
-    expect(screen.getByRole("button", { name: /Choose a business/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Choose a business/ })).toBeNull();
   });
 });
+

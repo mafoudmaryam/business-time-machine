@@ -149,7 +149,7 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 # from the project root; all three use the backend's virtual environment
 cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
 cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 679 tests
-cd ..\frontend; npm test                                        # 787 tests
+cd ..\frontend; npm test                                        # 788 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -184,9 +184,9 @@ Every full run stores its engine version, random seed and number of iterations, 
 
 ## Design
 
-Brand refresh (2026-10-25): a forest-green clock with branching hands, matching favicon, neutral cream pages, muted sage panels and restrained amber highlights. The name stays Business Time Machine, with “Explore tomorrow’s business decisions.” as its descriptor. Primary landing and dashboard actions use green; amber buttons have no glow.
+The latest design uses violet, coral and warm white. The homepage begins with a short everyday example and a gently animated café illustration built in CSS/SVG. Long feature/photo sections and the team quote have been replaced with three short steps. The price demo shows money left after bills and the possible loss of customer visits first; bank details and uncertainty are available under “What else could happen?”. Setup stays one click away, and the start-up guide remains available for people who have not opened a business.
 
-The landing page now offers a sample café directly in the hero, beside setup with your own numbers. An opt-in price slider demo creates a sample café and shows the existing engine’s sketch results directly in the hero. A shorter headline and a neutral hero surface replace the explanatory preview card. Today leads with the three key figures, followed by the coach and chart, with a prominent link to explore a change. The latest frontend check passed all 787 tests across 56 files on 2026-10-24; the production build and lint completed (lint retains warnings in unchanged files). The quality table below records the earlier full-project check.
+Financial figures still come from the engine. Motion respects reduced-motion preferences. The existing `--green` token names are compatibility aliases for the violet palette. Earlier screenshots below and above show previous designs. Current validation: 788 frontend tests across 56 files, a successful production build and lint with existing warnings in unchanged files.
 
 - **One place for the look.** `frontend/src/theme.css` holds every colour, font, shape and spacing value: cream pages, green buttons and numbers, soft sage panels, one amber highlight, charcoal text. Fonts are Nunito (headings), Inter (text) and Patrick Hand (one slogan), all served from the app itself, so it looks the same offline.
 - **`frontend/src/redesign.css`** is loaded last and organised page by page; its table of contents is at the top. One colour system is shared by every chart (`src/chartTheme.ts`), and chart lines also differ by dash pattern, so colour is never the only clue.

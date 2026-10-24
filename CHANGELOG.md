@@ -3,6 +3,13 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## A clearer first experiment for beginners (2026-10-25)
+
+- Replace the green-heavy brand treatment with violet, coral and warm white, using the existing shared tokens so charts and controls remain consistent.
+- Lead with “Big idea? Try it first.”, a short everyday description, and a gently animated café illustration. Remove the long feature/photo sections, team quote, repeated guide link and duplicate header link. The business switcher remains available when a business is open; saved businesses remain reachable on the start screen.
+- In the demo, show a concrete order-price example, money left after bills and the possible downside immediately. Reveal bank figures and uncertainty through “What else could happen?”. Use everyday labels on Today, Share and Try. Keep engine calculations and confirmation rules unchanged.
+- Validation: 788 frontend tests across 56 files, accessibility/contrast checks and production build; existing warnings remain. Animation respects reduced-motion settings.
+
 ## Brand palette and clock mark (2026-10-25)
 
 - Retain Business Time Machine, with the descriptor “Explore tomorrow’s business decisions.” in the wordmark and page description.

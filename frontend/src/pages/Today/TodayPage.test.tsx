@@ -58,10 +58,10 @@ describe("Today: the financial position comes first", () => {
     expect(coach.textContent).toContain("you keep about $5,820");
     expect(screen.getByRole("link", { name: "Explore a change →" }).getAttribute("href")).toBe("/try");
     // The figures lead, with the explanation immediately after them.
-    const tiles = screen.getByRole("heading", { name: /What you keep each month/ });
+    const tiles = screen.getByRole("heading", { name: /Money left after bills/ });
     expect(tiles.compareDocumentPosition(coach) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(screen.getByRole("heading", { name: /Your safety net/ })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: /Your lowest cash point/ })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /Money in your bank today/ })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /Least money in your bank/ })).toBeTruthy();
     expect(screen.getByText("The chart")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "What we assumed" })).toBeTruthy();
   });
@@ -83,7 +83,7 @@ describe("Today: the financial position comes first", () => {
     await screen.findByRole("heading", { name: "Today at My café" });
     expect(screen.queryByRole("region", { name: "Your coach says" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Ask a question" })).toBeNull();
-    expect(screen.getByRole("heading", { name: /What you keep each month/ })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /Money left after bills/ })).toBeTruthy();
   });
 
   it("also hides the coach when the app settings say it is off", async () => {

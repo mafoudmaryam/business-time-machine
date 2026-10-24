@@ -18,14 +18,11 @@ export function AppNav() {
       <nav className="appnav appnav-landing" aria-label="Main">
         <Link to="/" className="appnav-title" aria-label="Business Time Machine">
           <Logo />
-          <span className="brand-wordmark"><strong>Business Time Machine</strong><small>Explore tomorrow’s business decisions.</small></span>
+          <span className="brand-wordmark"><strong>Business Time Machine</strong></span>
         </Link>
         <ul className="appnav-links">
           <li>
             <a href="#how-it-works" onClick={jumpLink("how-it-works")}>How it works</a>
-          </li>
-          <li>
-            <a href="#what-you-get" onClick={jumpLink("what-you-get")}>What you get</a>
           </li>
           {/* The way back into an open business, so nobody is stranded on the front door. */}
           {getRememberedBusinessId() !== null && (
@@ -34,7 +31,7 @@ export function AppNav() {
             </li>
           )}
         </ul>
-        <BusinessSwitcher />
+        {getRememberedBusinessId() !== null && <BusinessSwitcher />}
         <a href="#start-here" className="appnav-cta" onClick={jumpLink("start-here")}>
           Get started
         </a>
@@ -47,7 +44,7 @@ export function AppNav() {
       {/* The name always takes you to the start screen. Opening it never changes or deletes anything. */}
       <Link to="/" className="appnav-title" aria-label="Business Time Machine">
         <Logo />
-        <span className="brand-wordmark"><strong>Business Time Machine</strong><small>Explore tomorrow’s business decisions.</small></span>
+        <span className="brand-wordmark"><strong>Business Time Machine</strong></span>
       </Link>
       <ul className="appnav-links">
         <li>

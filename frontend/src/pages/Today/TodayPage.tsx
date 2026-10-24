@@ -106,7 +106,7 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
         <div>
           <p className="page-eyebrow">YOUR BUSINESS AT A GLANCE</p>
           <h1>Today at {today.name}{today.is_sample && <span className="sample-tag">Sample business</span>}</h1>
-          <p className="today-subtitle">Your starting picture. A clearer place to make your next decision.</p>
+          <p className="today-subtitle">Try a small change to see what could be different.</p>
         </div>
         <Link className="btn btn-green" to="/try" onClick={() => track("try_a_change_clicked", "today")}>Explore a change →</Link>
       </header>

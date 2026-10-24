@@ -65,9 +65,8 @@ describe("the start-up guide entry", () => {
     mount();
     const links = await screen.findAllByRole("link", { name: "I don’t have a business yet" });
     expect(links).toHaveLength(1);
-    expect(screen.getByRole("link", { name: /Not open yet\? Build a rough start-up plan/ }).getAttribute("href")).toBe("/guide");
     for (const link of links) expect(link.getAttribute("href")).toBe("/guide");
-    expect(screen.getByRole("heading", { name: "Not open yet?" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Just an idea?" })).toBeTruthy();
   });
 });
 
@@ -298,18 +297,18 @@ describe("StartPage: the welcome text", () => {
     await screen.findByRole("button", { name: "Café" });
     const h1s = screen.getAllByRole("heading", { level: 1 });
     expect(h1s).toHaveLength(1);
-    expect(h1s[0].textContent).toBe("Try tomorrow’s business decisions today.");
-    expect(screen.getByText("FOR THE BUSINESS YOU’RE BUILDING")).toBeTruthy();
-    expect(screen.getByText(/See what your choices could mean/)).toBeTruthy();
-    expect(screen.getByText("Four quick answers to get started. Or explore with example numbers.")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Use my own numbers →" })).toBeTruthy();
+    expect(h1s[0].textContent).toBe("Big idea? Try it first.");
+    expect(screen.getByText("A little practice for your next big idea")).toBeTruthy();
+    expect(screen.getByText(/See what a small change could mean/)).toBeTruthy();
+    expect(screen.getByText("No business knowledge needed. We’ll guide you.")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Try my business →" })).toBeTruthy();
   });
 
   it("opens the sample directly from the hero without running the inline demo", async () => {
     const { user } = mount();
-    expect(screen.getByRole("button", { name: "Run this example →" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "See what happens →" })).toBeTruthy();
     expect(api.createSampleBusiness).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Explore a sample café" }));
+    await user.click(screen.getByRole("button", { name: "Show me an example" }));
     expect(api.createSampleBusiness).toHaveBeenCalledWith("cafe", "USD");
     expect(await screen.findByText("Today page")).toBeTruthy();
     expect(getRememberedBusinessId()).toBe(99);
@@ -318,41 +317,27 @@ describe("StartPage: the welcome text", () => {
   it("reports a failed hero demo and lets the visitor retry", async () => {
     vi.mocked(api.createSampleBusiness).mockRejectedValueOnce(new Error("Unable to open sample"));
     const { user } = mount();
-    await user.click(screen.getByRole("button", { name: "Explore a sample café" }));
+    await user.click(screen.getByRole("button", { name: "Show me an example" }));
     expect(await screen.findByRole("alert")).toHaveProperty("textContent", "Unable to open sample");
-    await user.click(screen.getByRole("button", { name: "Explore a sample café" }));
+    await user.click(screen.getByRole("button", { name: "Show me an example" }));
     expect(await screen.findByText("Today page")).toBeTruthy();
   });
 
-  it("shows the three photo cards, the three small steps and the team's note", async () => {
+  it("explains the idea in three short, everyday steps", async () => {
     mount();
     await screen.findByRole("button", { name: "Café" });
-    for (const title of ["See the impact", "Get a simple explanation", "Keep a journal", "Tell us a little", "Try a change", "Learn from real life"]) {
+    for (const title of ["Try a small change", "See what could happen", "Choose with more confidence"]) {
       expect(screen.getByRole("heading", { name: title })).toBeTruthy();
     }
-    expect(screen.getByRole("heading", { name: "Three small steps" })).toBeTruthy();
-    const quote = screen.getByText(/We can’t promise the future\. We can help you see what might happen before you decide\./);
-    expect(quote.textContent).toContain("can’t"); // a proper apostrophe, not a straight one
-    expect(screen.queryByText(/after your first change you can say/)).toBeNull();
-    expect(screen.getByText("The Business Time Machine team")).toBeTruthy();
-    expect(screen.getByText("Scenarios, not forecasts. Built from typical numbers and the ones you give us. Not financial advice.")).toBeTruthy();
-    expect(screen.getByText("Some pictures on this site are AI-generated illustrations and the others are stock photos. None show our customers or owners.")).toBeTruthy();
+    expect(screen.getByText("Possible outcomes, not promises. Not financial advice.")).toBeTruthy();
+    expect(screen.queryByText("The Business Time Machine team")).toBeNull();
   });
 
-  it("gives the secondary illustrations dimensions, descriptive alt text and lazy loading", async () => {
-    mount();
+  it("keeps decorative imagery out of the reading order", async () => {
+    const { container } = mount();
     await screen.findByRole("button", { name: "Café" });
-    const photos = Array.from(document.querySelectorAll("img.photo"));
-    expect(photos).toHaveLength(3);
-    for (const img of photos) {
-      expect(Number(img.getAttribute("width"))).toBeGreaterThan(0);
-      expect(Number(img.getAttribute("height"))).toBeGreaterThan(0);
-      expect((img.getAttribute("alt") ?? "").length).toBeGreaterThan(10);
-      expect(img.getAttribute("alt")).toMatch(/^Illustration of /);
-    }
-    expect(photos.filter((img) => img.getAttribute("loading") === "eager")).toHaveLength(0);
-    expect(photos.filter((img) => img.getAttribute("loading") === "lazy")).toHaveLength(3);
-
+    expect(container.querySelector(".cafe-scene")?.getAttribute("aria-hidden")).toBe("true");
+    expect(container.querySelectorAll("img.photo")).toHaveLength(0);
   });
 
   it("keeps the working form on the page and one click away from the hero button", async () => {
@@ -360,7 +345,7 @@ describe("StartPage: the welcome text", () => {
     await screen.findByRole("button", { name: "Café" });
     expect(screen.getByRole("heading", { name: "What kind of business do you run?" })).toBeTruthy();
     expect(document.getElementById("start-here")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Use my own numbers →" }).getAttribute("href")).toBe("#start-here");
+    expect(screen.getByRole("link", { name: "Try my business →" }).getAttribute("href")).toBe("#start-here");
   });
 
   it("for a returning visitor the hero is the first thing on the page: no Continue bar above it", async () => {

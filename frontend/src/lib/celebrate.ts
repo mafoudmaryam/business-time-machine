@@ -4,7 +4,7 @@
  *  It is plain DOM, not React, so it keeps playing while the page changes underneath it (saving a plan opens the
  *  results page at once). It does nothing for people who asked for less motion, and it never takes a click or a tap. */
 
-const COLORS = ["#24594b", "#d9aa58", "#edf2ed", "#173f35", "#ffd9a0"];
+const COLORS = ["#5146c8", "#ffbd69", "#f0eefb", "#272250", "#ffd9a0"];
 const PIECES = 36;
 const LIFETIME_MS = 2200;
 

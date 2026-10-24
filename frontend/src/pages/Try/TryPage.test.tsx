@@ -137,7 +137,7 @@ describe("Try a change: the answer", () => {
   it("uses the headings from the brief", async () => {
     mount();
     await settle();
-    for (const h of ["What you keep", "Money in the bank", "The catch", "How sure are we?"]) {
+    for (const h of ["Money left after bills", "Money in the bank", "The catch", "How sure are we?"]) {
       expect(screen.getByRole("heading", { name: h })).toBeTruthy();
     }
   });
@@ -380,3 +380,4 @@ describe("Try a change: keyboard, phone and accessibility", () => {
     setItem.mockRestore();
   });
 });
+

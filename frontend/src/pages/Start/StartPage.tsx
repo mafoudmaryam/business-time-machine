@@ -142,8 +142,8 @@ export function StartPage() {
       {step === 0 && (
         <section className="guide-entry" aria-labelledby="guide-entry-title">
           <div>
-            <h2 id="guide-entry-title">Not open yet?</h2>
-            <p>Answer nine short questions and get a rough start-up plan, with a checklist of what to sort out and where to look.</p>
+            <h2 id="guide-entry-title">Just an idea?</h2>
+            <p>Plan your first business, one question at a time.</p>
           </div>
           <Link to="/guide" className="btn btn-secondary">I don’t have a business yet</Link>
         </section>

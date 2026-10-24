@@ -22,20 +22,31 @@ describe("the landing price demo", () => {
     const { container } = render(<HeroDemo currency="GBP" onOpen={open} />);
     expect(createSampleBusiness).not.toHaveBeenCalled();
     expect(previewChange).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Run this example →" }));
+    await user.click(screen.getByRole("button", { name: "See what happens →" }));
     expect(createSampleBusiness).toHaveBeenCalledWith("cafe", "GBP");
     await waitFor(() => expect(previewChange).toHaveBeenCalledWith(99, { type: "price", amount: 7, start_month: 1 }, expect.any(AbortSignal)));
     expect(await screen.findByText("+£534", { exact: true })).toBeTruthy();
-    expect(screen.getByText(/Example numbers, not your business/)).toBeTruthy();
+    expect(screen.getByText("A £6.50 order → £6.96")).toBeTruthy();
+    expect(screen.getByText(/A made-up café/)).toBeTruthy();
     expect((await axe(container)).violations).toEqual([]);
-    await user.click(screen.getByRole("button", { name: /Explore this café in the full simulator/ }));
+    await user.click(screen.getByRole("button", { name: /Keep exploring this café/ }));
     expect(open).toHaveBeenCalledWith(sample);
+  });
+
+  it("shows the downside immediately and lets beginners reveal the extra figures", async () => {
+    render(<HeroDemo currency="GBP" onOpen={vi.fn()} />);
+    await userEvent.click(screen.getByRole("button", { name: "See what happens →" }));
+    await screen.findByText("+£534", { exact: true });
+    expect(screen.getByText(/About 382 fewer visits/).closest("details")).toBeNull();
+    expect(screen.getByRole("heading", { name: "Money in the bank" }).closest("details")?.hasAttribute("open")).toBe(false);
+    await userEvent.click(screen.getByText("What else could happen?"));
+    expect(screen.getByRole("heading", { name: "Money in the bank" }).closest("details")?.hasAttribute("open")).toBe(true);
   });
 
   it("uses a selected price in the engine request and updates when the slider moves", async () => {
     render(<HeroDemo currency="GBP" onOpen={vi.fn()} />);
     fireEvent.change(screen.getByRole("slider"), { target: { value: "10" } });
-    await userEvent.click(screen.getByRole("button", { name: "Run this example →" }));
+    await userEvent.click(screen.getByRole("button", { name: "See what happens →" }));
     await waitFor(() => expect(previewChange).toHaveBeenCalledWith(99, { type: "price", amount: 10, start_month: 1 }, expect.any(AbortSignal)));
     fireEvent.change(screen.getByRole("slider"), { target: { value: "4" } });
     await waitFor(() => expect(previewChange).toHaveBeenLastCalledWith(99, { type: "price", amount: 4, start_month: 1 }, expect.any(AbortSignal)));
@@ -45,16 +56,16 @@ describe("the landing price demo", () => {
   it("allows a failed sample creation to be retried", async () => {
     vi.mocked(createSampleBusiness).mockRejectedValueOnce(new Error("offline"));
     render(<HeroDemo currency="GBP" onOpen={vi.fn()} />);
-    await userEvent.click(screen.getByRole("button", { name: "Run this example →" }));
+    await userEvent.click(screen.getByRole("button", { name: "See what happens →" }));
     expect(await screen.findByRole("alert")).toHaveProperty("textContent", "The example couldn’t open. Try again.");
     expect(previewChange).not.toHaveBeenCalled();
-    await userEvent.click(screen.getByRole("button", { name: "Run this example →" }));
+    await userEvent.click(screen.getByRole("button", { name: "See what happens →" }));
     expect(await screen.findByText("+£534", { exact: true })).toBeTruthy();
   });
 
   it("keeps the previous result and explains a failed slider update", async () => {
     render(<HeroDemo currency="GBP" onOpen={vi.fn()} />);
-    await userEvent.click(screen.getByRole("button", { name: "Run this example →" }));
+    await userEvent.click(screen.getByRole("button", { name: "See what happens →" }));
     await screen.findByText("+£534", { exact: true });
     vi.mocked(previewChange).mockRejectedValueOnce(new Error("offline"));
     fireEvent.change(screen.getByRole("slider"), { target: { value: "9" } });

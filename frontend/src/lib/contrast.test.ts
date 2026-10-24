@@ -29,15 +29,15 @@ describe("contrast", () => {
   });
 
   it("uses the approved direction-B colours", () => {
-    expect(token("cream")).toBe("#faf8f2");
-    expect(token("green")).toBe("#24594b");
-    expect(token("green-heading")).toBe("#173f35");
-    expect(token("sage")).toBe("#edf2ed");
-    expect(token("amber")).toBe("#d9aa58");
-    expect(token("amber-soft")).toBe("#f8efdd");
-    expect(token("charcoal")).toBe("#26302a");
-    expect(token("body")).toBe("#4a544d");
-    expect(token("card-border")).toBe("#dce5dd");
+    expect(token("cream")).toBe("#fbfaff");
+    expect(token("green")).toBe("#5146c8");
+    expect(token("green-heading")).toBe("#272250");
+    expect(token("sage")).toBe("#f0eefb");
+    expect(token("amber")).toBe("#ffbd69");
+    expect(token("amber-soft")).toBe("#fff2df");
+    expect(token("charcoal")).toBe("#202236");
+    expect(token("body")).toBe("#525365");
+    expect(token("card-border")).toBe("#e2e1ec");
   });
 
   const surfaces = ["cream", "white", "sage", "amber-soft"] as const;
