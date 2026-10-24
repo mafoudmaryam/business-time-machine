@@ -3,6 +3,12 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## Marketing assumptions: repeatable audit (2026-10-24)
+
+- Added a local CSV diagnostic for paired marketing comparisons across budgets, time spans, seeds and three assumption cases. No database, AI or network is used.
+- Saved the cafe's 108 result rows and a plain-language explanation. Increasing monthly marketing from $400 to $1,200 beats the baseline in every default sampled run, but the zero-extra-response and at-capacity stress cases show why that is conditional on assumptions.
+- Added two diagnostic tests; 358 engine tests passed. No engine equations, defaults or app behavior changed. Real-business data is still needed for calibration.
+
 ## Pictures labelled and credited (Oct 2026)
 
 - The four start-page pictures are now labelled as AI-generated illustrations (ChatGPT, October 2026): a new `frontend/public/images/redesign/CREDITS.md`, alt text that starts "Illustration of ...", and one line in the start-page footer. The café, restaurant and bakery photos are still credited to their Pexels photographers. README has an "Images" section. Docs and text only.
