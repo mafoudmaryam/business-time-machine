@@ -2,6 +2,9 @@
 
 We do not try to understand the sentence -- we only pull out the numbers and look
 for each one among the facts, allowing for rounding ("about 4,000" for 4,180).
+An explicit minus sign needs a negative fact. Unsigned amounts may describe the
+magnitude of a loss ("a loss of 4,000"), so they may match either sign. This does
+not establish which metric a number describes or understand profit/loss wording.
 """
 from __future__ import annotations
 
@@ -9,8 +12,8 @@ import re
 from typing import Any, Iterable
 
 # 1,234 / 1234.5 / 4.2k / 1.5m, with an optional leading minus sign. Digits glued to letters
-# ("q3", "v2") are not numbers.
-_NUMBER = re.compile(r"(?<![\w.])-?\d[\d,]*(?:\.\d+)?(?:\s?(?:k|thousand|m|million)\b)?", re.IGNORECASE)
+# ("q3", "v2") are not numbers. A minus may precede a currency symbol.
+_NUMBER = re.compile(r"(?<![\w.])(?:[-−]\s*[$€£¥₩₹]?\s*)?\d[\d,]*(?:\.\d+)?(?:\s?(?:k|thousand|m|million)\b)?", re.IGNORECASE)
 _SCALE = {"k": 1e3, "thousand": 1e3, "m": 1e6, "million": 1e6}
 
 REL_TOLERANCE = 0.06     # a number may be rounded by up to 6%...
@@ -20,7 +23,8 @@ ABS_TOLERANCE = 0.5      # ...or by half a unit for small numbers
 def extract_numbers(text: str) -> list[float]:
     found = []
     for m in _NUMBER.finditer(text):
-        raw = m.group(0).strip()
+        raw = m.group(0).strip().replace("−", "-")
+        raw = re.sub(r"^-[\s$€£¥₩₹]*", "-", raw)
         scale = 1.0
         for word, factor in _SCALE.items():
             if raw.lower().endswith(word):
@@ -29,7 +33,7 @@ def extract_numbers(text: str) -> list[float]:
                 break
         raw = raw.replace(",", "").rstrip(".")
         try:
-            found.append(abs(float(raw)) * scale)
+            found.append(float(raw) * scale)
         except ValueError:
             continue
     return found
@@ -39,7 +43,7 @@ def _numbers_in(value: Any) -> Iterable[float]:
     if isinstance(value, bool) or value is None:
         return
     if isinstance(value, (int, float)):
-        yield abs(float(value))
+        yield float(value)
     elif isinstance(value, str):
         yield from extract_numbers(value)
     elif isinstance(value, dict):
@@ -57,12 +61,16 @@ def allowed_numbers(facts: dict, extra: Iterable[float] = ()) -> set[float]:
     months = facts.get("business", {}).get("months")
     if months:
         allowed |= {float(months), months / 12}
-    allowed |= {abs(float(x)) for x in extra}
+    allowed |= {float(x) for x in extra}
     return allowed
 
 
 def _matches(x: float, allowed: set[float]) -> bool:
-    return any(abs(x - f) <= max(ABS_TOLERANCE, REL_TOLERANCE * f) for f in allowed)
+    # Rounding must not turn a positive/zero fact into a negative claim.
+    # Unsigned prose may still describe the magnitude of a negative fact.
+    candidates = (f for f in allowed if f < 0) if x < 0 else iter(allowed)
+    return any(abs(abs(x) - abs(f)) <= max(ABS_TOLERANCE, REL_TOLERANCE * abs(f))
+               for f in candidates)
 
 
 def unmatched_numbers(texts: Iterable[str], allowed: set[float]) -> list[float]:
