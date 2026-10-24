@@ -16,9 +16,9 @@ export function AppNav() {
   if (isStartScreen(location.pathname)) {
     return (
       <nav className="appnav appnav-landing" aria-label="Main">
-        <Link to="/" className="appnav-title">
+        <Link to="/" className="appnav-title" aria-label="Business Time Machine">
           <Logo />
-          <span>Business Time Machine</span>
+          <span className="brand-wordmark"><strong>Business Time Machine</strong><small>Explore tomorrow’s business decisions.</small></span>
         </Link>
         <ul className="appnav-links">
           <li>
@@ -45,9 +45,9 @@ export function AppNav() {
   return (
     <nav className="appnav" aria-label="Main">
       {/* The name always takes you to the start screen. Opening it never changes or deletes anything. */}
-      <Link to="/" className="appnav-title">
+      <Link to="/" className="appnav-title" aria-label="Business Time Machine">
         <Logo />
-        <span>Business Time Machine</span>
+        <span className="brand-wordmark"><strong>Business Time Machine</strong><small>Explore tomorrow’s business decisions.</small></span>
       </Link>
       <ul className="appnav-links">
         <li>
@@ -85,3 +85,4 @@ export function AppNav() {
     </nav>
   );
 }
+

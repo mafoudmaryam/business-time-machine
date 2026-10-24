@@ -3,6 +3,13 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## Brand palette and clock mark (2026-10-25)
+
+- Retain Business Time Machine, with the descriptor “Explore tomorrow’s business decisions.” in the wordmark and page description.
+- Use a deeper forest green, neutral cream, quieter sage and muted amber. Primary landing/dashboard actions are green; amber remains for selected controls, saved-plan actions and caution. Remove the orange button glow.
+- Replace the generic clock and default Vite favicon with a matching clock whose hands branch into a forward direction. The mark stays decorative beside the accessible brand link.
+- Palette, chart and contrast checks are updated to the new tokens; all readability assertions remain in place.
+
 ## Interactive landing demo and visual refinement (2026-10-24)
 
 - The hero now uses a shorter headline, a neutral surface and an opt-in sample café price slider. It creates a sample only when Run this example is clicked; all displayed financial figures come from the existing preview-change endpoint through useSketch.

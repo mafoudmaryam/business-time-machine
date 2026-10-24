@@ -223,11 +223,11 @@ button.btn-amber {
   background: var(--amber);
   border-color: var(--amber);
   color: var(--charcoal);
-  box-shadow: 0 6px 18px rgba(242, 163, 58, 0.35);
+  box-shadow: none;
 }
 
 .btn-amber:hover:not(:disabled) {
-  box-shadow: 0 10px 24px rgba(242, 163, 58, 0.45);
+  box-shadow: none;
 }
 
 button:disabled {
@@ -338,7 +338,7 @@ button.link-button:disabled {
 .appnav {
   gap: 6px 22px;
   padding: 10px 24px;
-  background: rgba(255, 249, 240, 0.94);
+  background: var(--cream);
   border-bottom: 2px solid var(--card-border);
 }
 
@@ -405,6 +405,27 @@ button.link-button:disabled {
   font-weight: 800;
   color: var(--green-heading);
 }
+
+.brand-wordmark {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.brand-wordmark strong {
+  font-size: 19px;
+  line-height: 1.2;
+  letter-spacing: -.025em;
+}
+
+.brand-wordmark small {
+  font: 400 10px/1.4 var(--font-body);
+  letter-spacing: .01em;
+  color: var(--body);
+}
+
+.appnav-title .logo { flex: none; }
 
 .appnav a.appnav-title:hover {
   background: transparent;
@@ -491,7 +512,7 @@ button.link-button:disabled {
 }
 
 .industry-card-label {
-  background: linear-gradient(to top, rgba(34, 107, 65, 0.88), transparent);
+  background: linear-gradient(to top, var(--photo-overlay), transparent);
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 24px;
@@ -922,7 +943,7 @@ button.link-button:disabled {
   margin-top: -11px;
   border: 4px solid var(--white);
   background: var(--green);
-  box-shadow: 0 0 0 4px var(--amber), 0 4px 10px rgba(34, 107, 65, 0.3);
+  box-shadow: 0 0 0 4px var(--amber), var(--slider-shadow);
   transition: transform var(--t-fast) var(--ease);
 }
 
@@ -931,7 +952,7 @@ button.link-button:disabled {
   height: 26px;
   border: 4px solid var(--white);
   background: var(--green);
-  box-shadow: 0 0 0 4px var(--amber), 0 4px 10px rgba(34, 107, 65, 0.3);
+  box-shadow: 0 0 0 4px var(--amber), var(--slider-shadow);
 }
 
 .try-slider:hover::-webkit-slider-thumb,
@@ -970,7 +991,7 @@ button.link-button:disabled {
   gap: 14px;
   align-items: flex-start;
   padding: 18px 22px;
-  border: 2px solid #c3dec8;
+  border: 2px solid var(--sage-edge);
   border-radius: 24px;
   background: var(--sage);
   color: var(--charcoal);
@@ -1034,7 +1055,7 @@ button.link-button:disabled {
 
 .try-tile-keep {
   background: var(--sage);
-  border-color: #c3dec8;
+  border-color: var(--sage-edge);
 }
 
 .try-keep {
@@ -1221,6 +1242,9 @@ button.link-button:disabled {
 /* ---------- Smaller screens ---------- */
 
 @media (max-width: 860px) {
+  .brand-wordmark strong { font-size: 17px; }
+  .brand-wordmark small { font-size: 9px; }
+
   .hero-panel {
     grid-template-columns: minmax(0, 1fr);
     gap: 32px;

@@ -46,24 +46,27 @@
 
 :root {
   /* Colours */
-  --cream: #fff9f0;         /* page background */
-  --green: #2e7d50;         /* buttons, icons, big numbers */
-  --green-heading: #226b41; /* headings, and green text on sage */
-  --sage: #e3f0e4;          /* big panels */
-  --amber: #f2a33a;         /* the ONE highlight: main call-to-action, active-tab underline, slider ring, "just a sketch" pill */
-  --amber-soft: #fff1d6;    /* the quote card and soft notes */
+  --cream: #faf8f2;         /* page background */
+  --green: #24594b;         /* buttons, icons, big numbers */
+  --green-heading: #173f35; /* headings, and green text on sage */
+  --sage: #edf2ed;          /* big panels */
+  --amber: #d9aa58;         /* the ONE highlight: main call-to-action, active-tab underline, slider ring, "just a sketch" pill */
+  --amber-soft: #f8efdd;    /* the quote card and soft notes */
   --amber-ink: #7a4a00;     /* amber-looking TEXT (amber itself is too light to read as text) */
   --charcoal: #26302a;      /* text */
   --body: #4a544d;          /* body gray-green */
-  --card-border: #ddebdf;   /* the 2px card outline */
+  --card-border: #dce5dd;   /* the 2px card outline */
   --input-border: #6b9777;  /* form controls need a 3:1 edge, so they get a stronger green than cards */
   --white: #ffffff;
-  --sage-edge: #c3dec8;     /* a slightly deeper sage for the edge of a sage panel and the rim of a chart band */
+  --sage-edge: #cbdccf;     /* a slightly deeper sage for the edge of a sage panel and the rim of a chart band */
   --error: #9b2c1f;         /* the only red: form errors, in dark brick so it is calm and still readable */
 
   /* Shadows (soft and green-tinted) */
-  --shadow-soft: 0 6px 22px rgba(34, 107, 65, 0.1);
-  --shadow-lift: 0 14px 34px rgba(34, 107, 65, 0.18);
+  --shadow-soft: 0 6px 22px rgba(23, 63, 53, 0.07);
+  --shadow-lift: 0 14px 34px rgba(23, 63, 53, 0.12);
+
+  --photo-overlay: rgba(23, 63, 53, 0.88);
+  --slider-shadow: 0 4px 10px rgba(23, 63, 53, 0.18);
 
   /* Shapes */
   --radius-card: 28px;
@@ -134,3 +137,4 @@
     --space-gap: 28px;
   }
 }
+

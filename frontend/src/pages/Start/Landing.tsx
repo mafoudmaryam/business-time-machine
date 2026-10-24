@@ -56,7 +56,7 @@ export function Landing({ onTrySample, onOpenSample, currency, busy, failure }: 
             A new price. An extra pair of hands. A bigger next step. See what your choices could mean for your café, restaurant or bakery before you commit.
           </p>
           <div className="hero-buttons">
-            <a href="#start-here" className="btn btn-amber" onClick={jumpLink("start-here")}>
+            <a href="#start-here" className="btn btn-green" onClick={jumpLink("start-here")}>
               Use my own numbers →
             </a>
             <button type="button" className="btn btn-secondary" disabled={busy} onClick={onTrySample}>

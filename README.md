@@ -184,6 +184,8 @@ Every full run stores its engine version, random seed and number of iterations, 
 
 ## Design
 
+Brand refresh (2026-10-25): a forest-green clock with branching hands, matching favicon, neutral cream pages, muted sage panels and restrained amber highlights. The name stays Business Time Machine, with “Explore tomorrow’s business decisions.” as its descriptor. Primary landing and dashboard actions use green; amber buttons have no glow.
+
 The landing page now offers a sample café directly in the hero, beside setup with your own numbers. An opt-in price slider demo creates a sample café and shows the existing engine’s sketch results directly in the hero. A shorter headline and a neutral hero surface replace the explanatory preview card. Today leads with the three key figures, followed by the coach and chart, with a prominent link to explore a change. The latest frontend check passed all 787 tests across 56 files on 2026-10-24; the production build and lint completed (lint retains warnings in unchanged files). The quality table below records the earlier full-project check.
 
 - **One place for the look.** `frontend/src/theme.css` holds every colour, font, shape and spacing value: cream pages, green buttons and numbers, soft sage panels, one amber highlight, charcoal text. Fonts are Nunito (headings), Inter (text) and Patrick Hand (one slogan), all served from the app itself, so it looks the same offline.

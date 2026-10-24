@@ -98,7 +98,7 @@ describe("the new pages sit inside the shared layout", () => {
     open("/how");
     await screen.findByRole("heading", { level: 1 });
     const links = within(screen.getByRole("navigation", { name: "Main" })).getAllByRole("link").filter((l) => !l.closest("details"));
-    expect(links.map((l) => l.textContent)).toEqual(["Business Time Machine", "Today", "Try a change", "My journal"]);
+    expect(links.map((l) => l.getAttribute("aria-label") ?? l.textContent)).toEqual(["Business Time Machine", "Today", "Try a change", "My journal"]);
     expect(screen.getByText("Advanced")).toBeTruthy();
   });
 });
@@ -269,3 +269,4 @@ describe("failed loads: a calm message and Try again, never a raw error or a bla
     await act(async () => undefined);
   });
 });
+

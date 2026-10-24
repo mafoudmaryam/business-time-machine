@@ -29,15 +29,15 @@ describe("contrast", () => {
   });
 
   it("uses the approved direction-B colours", () => {
-    expect(token("cream")).toBe("#fff9f0");
-    expect(token("green")).toBe("#2e7d50");
-    expect(token("green-heading")).toBe("#226b41");
-    expect(token("sage")).toBe("#e3f0e4");
-    expect(token("amber")).toBe("#f2a33a");
-    expect(token("amber-soft")).toBe("#fff1d6");
+    expect(token("cream")).toBe("#faf8f2");
+    expect(token("green")).toBe("#24594b");
+    expect(token("green-heading")).toBe("#173f35");
+    expect(token("sage")).toBe("#edf2ed");
+    expect(token("amber")).toBe("#d9aa58");
+    expect(token("amber-soft")).toBe("#f8efdd");
     expect(token("charcoal")).toBe("#26302a");
     expect(token("body")).toBe("#4a544d");
-    expect(token("card-border")).toBe("#ddebdf");
+    expect(token("card-border")).toBe("#dce5dd");
   });
 
   const surfaces = ["cream", "white", "sage", "amber-soft"] as const;
@@ -120,3 +120,4 @@ describe("contrast", () => {
     expect(contrastRatio(token("muted-1"), token("amber-soft"))).toBeGreaterThanOrEqual(BODY);
   });
 });
+
