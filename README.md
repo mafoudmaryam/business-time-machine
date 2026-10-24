@@ -148,7 +148,7 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 ```powershell
 # from the project root; all three use the backend's virtual environment
 cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
-cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 679 tests
+cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 684 tests (includes one skipped development-database test)
 cd ..\frontend; npm test                                        # 782 tests
 ```
 
@@ -192,6 +192,9 @@ Every full run stores its engine version, random seed and number of iterations, 
 - **Confetti** appears only after you save something (a plan or a journal month), never for a forecast or a good number.
 
 ## Quality
+
+Verification for the negative-amount checker fix (2026-10-24, Linux, Python 3.12): engine **356 passed**; backend **683 passed, 1 skipped** (the round-trip migration test requires an existing development database). Frontend tests were not re-run for this backend-only change. The earlier frontend/build results below are historical.
+
 
 Measured on 2026-10-10, running the suites one after another on a quiet machine:
 
