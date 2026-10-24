@@ -218,6 +218,20 @@ def test_two_ungrounded_replies_fall_back_to_template(client, run, use_provider)
     body = final(client, run)
     assert body["mode"] == "template" and body["fallback"] is True
     assert "7,777,777" not in json.dumps(body)
+
+
+def test_sign_reversed_cash_retries_then_keeps_rule_based_coach(client, run, use_provider):
+    # The business starts with +25,000. Borrowing that magnitude must not justify
+    # a negative cash claim, even if it avoids the risk phrases in consistency.py.
+    bad = good_reply(why="Your starting cash is -$25,000.")
+    fake = use_provider(bad, bad)
+    body = final(client, run)
+    assert body["mode"] == "template" and body["fallback"] is True
+    assert len(fake.calls) == 2
+    assert "-$25,000" not in json.dumps(body)
+    attempts = [row for row in interactions() if row.provider == "ollama"]
+    assert len(attempts) == 2
+    assert all(row.grounding["unmatched"] == [-25000] for row in attempts)
     assert [r.provider for r in interactions()] == ["ollama", "ollama", "template"]
     assert len(fake.calls) == 2
 
