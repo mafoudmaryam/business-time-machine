@@ -3,6 +3,33 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## A clearer first experiment for beginners (2026-10-25)
+
+- Replace the green-heavy brand treatment with violet, coral and warm white, using the existing shared tokens so charts and controls remain consistent.
+- Lead with “Big idea? Try it first.”, a short everyday description, and a gently animated café illustration. Remove the long feature/photo sections, team quote, repeated guide link and duplicate header link. The business switcher remains available when a business is open; saved businesses remain reachable on the start screen.
+- In the demo, show a concrete order-price example, money left after bills and the possible downside immediately. Reveal bank figures and uncertainty through “What else could happen?”. Use everyday labels on Today, Share and Try. Keep engine calculations and confirmation rules unchanged.
+- Validation: 788 frontend tests across 56 files, accessibility/contrast checks and production build; existing warnings remain. Animation respects reduced-motion settings.
+
+## Brand palette and clock mark (2026-10-25)
+
+- Retain Business Time Machine, with the descriptor “Explore tomorrow’s business decisions.” in the wordmark and page description.
+- Use a deeper forest green, neutral cream, quieter sage and muted amber. Primary landing/dashboard actions are green; amber remains for selected controls, saved-plan actions and caution. Remove the orange button glow.
+- Replace the generic clock and default Vite favicon with a matching clock whose hands branch into a forward direction. The mark stays decorative beside the accessible brand link.
+- Palette, chart and contrast checks are updated to the new tokens; all readability assertions remain in place.
+
+## Interactive landing demo and visual refinement (2026-10-24)
+
+- The hero now uses a shorter headline, a neutral surface and an opt-in sample café price slider. It creates a sample only when Run this example is clicked; all displayed financial figures come from the existing preview-change endpoint through useSketch.
+- Loading, stale results, retry, the sample's currency and a full-simulator handoff are covered. The earlier direct sample entry and figures-first Today dashboard remain.
+- Validation: 787 frontend tests in 56 files pass, including accessibility checks, engine-response display and slider updates. Production build and lint complete with existing bundle-size and unchanged-file lint warnings. Backend and engine are unchanged.
+
+## Faster first sample and clearer dashboard (2026-10-24)
+
+- The hero names the food businesses the simulator serves, offers setup with your own numbers and a one-click sample café, and replaces the fixed money example with a decision-flow preview containing no financial results.
+- Today shows key financial figures before the coach, with an explicit Key figures heading and a prominent Explore a change action. Secondary cards use lighter borders and less decoration.
+- Sample failures appear beside the hero action and support retry. Existing sample actions, onboarding, startup guide and confirmation rules are retained.
+- Validation: 783 frontend tests in 55 files, production build and lint pass. Lint reports warnings in unchanged files. Engine and backend were not changed or re-tested.
+
 ## Pictures labelled and credited (Oct 2026)
 
 - The four start-page pictures are now labelled as AI-generated illustrations (ChatGPT, October 2026): a new `frontend/public/images/redesign/CREDITS.md`, alt text that starts "Illustration of ...", and one line in the start-page footer. The café, restaurant and bakery photos are still credited to their Pexels photographers. README has an "Images" section. Docs and text only.
@@ -71,3 +98,4 @@ frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 - Plain-language decision input ("describe it in your own words").
 - Café, restaurant and bakery in one engine; per-business currency; plain wording with "?" tips.
 - The first FastAPI backend, React frontend and simulation engine.
+

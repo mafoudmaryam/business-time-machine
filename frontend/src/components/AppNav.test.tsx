@@ -91,7 +91,7 @@ describe("AppNav on the start screen", () => {
     nav("/");
     const main = screen.getByRole("navigation", { name: "Main" });
     expect(within(main).getByRole("link", { name: "How it works" }).getAttribute("href")).toBe("#how-it-works");
-    expect(within(main).getByRole("link", { name: "What you get" }).getAttribute("href")).toBe("#what-you-get");
+    expect(within(main).queryByRole("link", { name: "What you get" })).toBeNull();
     expect(within(main).getByRole("link", { name: "Get started" }).getAttribute("href")).toBe("#start-here");
     expect(within(main).getByRole("link", { name: "Business Time Machine" }).getAttribute("href")).toBe("/");
   });
@@ -118,3 +118,4 @@ describe("AppNav on the start screen", () => {
     expect(screen.getByRole("link", { name: "Today" })).toBeTruthy();
   });
 });
+

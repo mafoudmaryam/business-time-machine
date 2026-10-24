@@ -111,7 +111,7 @@ export function TryPage() {
             {sketch && keep && bank && (
               <div className={updating ? "try-numbers try-numbers-updating" : "try-numbers"}>
                 <div className="try-tile try-tile-keep">
-                  <h3 className="try-eyebrow">What you keep</h3>
+                  <h3 className="try-eyebrow">Money left after bills</h3>
                   <p className="try-keep">
                     <span className="try-keep-number" key={keep.amount}>{keep.amount}</span> <span className="try-keep-word">{keep.direction} each month</span>
                   </p>
@@ -168,3 +168,4 @@ export function TryPage() {
     </div>
   );
 }
+

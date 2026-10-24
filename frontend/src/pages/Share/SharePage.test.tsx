@@ -63,11 +63,11 @@ describe("Share: the one-page summary", () => {
     expect((await screen.findByRole("heading", { level: 1 })).textContent).toBe("My café: plan summary");
     expect(sheet().getByText(/^Prepared on /)).toBeTruthy();
     const today = within(screen.getByRole("region", { name: "Where the business stands today" }));
-    expect(today.getByRole("heading", { name: "What you keep each month" })).toBeTruthy();
+    expect(today.getByRole("heading", { name: "Money left after bills" })).toBeTruthy();
     expect(today.getByText("$5,820")).toBeTruthy();
-    expect(today.getByRole("heading", { name: "Your safety net" })).toBeTruthy();
+    expect(today.getByRole("heading", { name: "Money in your bank today" })).toBeTruthy();
     expect(today.getAllByText("$51,400").length).toBeGreaterThanOrEqual(1);       // the bank today, and the lowest point
-    expect(today.getByRole("heading", { name: "Your lowest cash point" })).toBeTruthy();
+    expect(today.getByRole("heading", { name: "Least money in your bank" })).toBeTruthy();
   });
 
   it("has the 12-month charts, as pictures with a spoken description", async () => {
@@ -305,3 +305,4 @@ describe("SharePlanChart", () => {
     expect(container.querySelector(".plan-baseline")).toBeNull();
   });
 });
+

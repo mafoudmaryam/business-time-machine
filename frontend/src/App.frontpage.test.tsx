@@ -104,7 +104,7 @@ describe("the start screen with a business open", () => {
     const user = open("/");
     const nav = within(await screen.findByRole("navigation", { name: "Main" }));
     const labels = nav.getAllByRole("link").map((a) => a.textContent);
-    expect(labels).toEqual(expect.arrayContaining(["How it works", "What you get", "Today"]));
+    expect(labels).toEqual(expect.arrayContaining(["How it works", "Today"]));
     await user.click(nav.getByRole("link", { name: "Today" }));
     expect(await screen.findByRole("heading", { name: "Today at noah" })).toBeTruthy();
     expect(api.getToday).toHaveBeenCalledWith(5);
@@ -203,3 +203,4 @@ describe("the Back button in the real app", () => {
     expect(await screen.findByRole("heading", { name: FRONT_PAGE })).toBeTruthy();
   });
 });
+
