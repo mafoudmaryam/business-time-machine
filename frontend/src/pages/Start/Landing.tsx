@@ -1,3 +1,5 @@
+import type { BusinessOut } from "../../api";
+import { HeroDemo } from "./HeroDemo";
 import { Link } from "react-router-dom";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Photo } from "../../components/Photo";
@@ -41,17 +43,17 @@ function CoffeeCup() {
   );
 }
 
-export function Landing({ onTrySample, busy, failure }: { onTrySample: () => void; busy: boolean; failure: string | null }) {
+export function Landing({ onTrySample, onOpenSample, currency, busy, failure }: { onTrySample: () => void; onOpenSample: (business: BusinessOut) => void; currency: string; busy: boolean; failure: string | null }) {
   return (
     <>
       <section className="hero-panel" aria-labelledby="hero-title">
         <div className="hero-copy reveal">
-          <p className="hero-slogan">A clearer picture of what comes next</p>
+          <p className="hero-slogan">FOR THE BUSINESS YOU’RE BUILDING</p>
           <h1 id="hero-title">
-            See what your next business decision could change.
+            Try tomorrow’s business decisions <em>today.</em>
           </h1>
           <p className="hero-lead">
-            Try a change on paper before you make it. Explore what it could mean for your profit, cash and customers—built for cafés, restaurants and bakeries.
+            A new price. An extra pair of hands. A bigger next step. See what your choices could mean for your café, restaurant or bakery before you commit.
           </p>
           <div className="hero-buttons">
             <a href="#start-here" className="btn btn-amber" onClick={jumpLink("start-here")}>
@@ -65,18 +67,7 @@ export function Landing({ onTrySample, busy, failure }: { onTrySample: () => voi
           <p className="hero-small">Four quick answers to get started. Or explore with example numbers.</p>
           <Link to="/guide" className="hero-guide">Not open yet? Build a rough start-up plan →</Link>
         </div>
-        <aside className="decision-preview" aria-label="A preview of how to explore a decision">
-          <div className="preview-top"><span className="preview-dot" aria-hidden="true" /> YOUR DECISION SPACE <span className="preview-badge">Preview</span></div>
-          <p className="preview-question">What if you raised your prices?</p>
-          <p className="preview-intro">Explore the upside. Understand the trade-off.</p>
-          <ol className="preview-flow">
-            <li><span className="preview-step" aria-hidden="true">01</span><div><strong>Start with your business</strong><p>Customers, costs and the cash you have.</p></div></li>
-            <li><span className="preview-step" aria-hidden="true">02</span><div><strong>Try a different direction</strong><p>Adjust a price. Choose when it starts.</p></div></li>
-            <li><span className="preview-step" aria-hidden="true">03</span><div><strong>See the possible outcomes</strong><p>Profit, cash and customers, side by side.</p></div></li>
-          </ol>
-          <div className="preview-bottom"><span>Good case · Most likely · Bad case</span><span aria-hidden="true">↗</span></div>
-          <p className="preview-footnote">Open the sample to see calculated results. No results are shown in this preview.</p>
-        </aside>
+        <HeroDemo currency={currency} onOpen={onOpenSample} />
       </section>
 
       <section id="what-you-get" className="landing-section" aria-labelledby="what-you-get-title">

@@ -138,7 +138,7 @@ export function StartPage() {
 
   return (
     <div className="page start-page">
-      {step === 0 && <Landing onTrySample={() => void trySample("cafe")} busy={busy} failure={failure} />}
+      {step === 0 && <Landing onTrySample={() => void trySample("cafe")} onOpenSample={(business) => enter(business, "sample")} currency={currency} busy={busy} failure={failure} />}
       {step === 0 && (
         <section className="guide-entry" aria-labelledby="guide-entry-title">
           <div>

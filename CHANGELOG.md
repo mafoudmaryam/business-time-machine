@@ -3,6 +3,12 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## Interactive landing demo and visual refinement (2026-10-24)
+
+- The hero now uses a shorter headline, a neutral surface and an opt-in sample café price slider. It creates a sample only when Run this example is clicked; all displayed financial figures come from the existing preview-change endpoint through useSketch.
+- Loading, stale results, retry, the sample's currency and a full-simulator handoff are covered. The earlier direct sample entry and figures-first Today dashboard remain.
+- Validation: 787 frontend tests in 56 files pass, including accessibility checks, engine-response display and slider updates. Production build and lint complete with existing bundle-size and unchanged-file lint warnings. Backend and engine are unchanged.
+
 ## Faster first sample and clearer dashboard (2026-10-24)
 
 - The hero names the food businesses the simulator serves, offers setup with your own numbers and a one-click sample café, and replaces the fixed money example with a decision-flow preview containing no financial results.

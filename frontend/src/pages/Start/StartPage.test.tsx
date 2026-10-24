@@ -298,18 +298,17 @@ describe("StartPage: the welcome text", () => {
     await screen.findByRole("button", { name: "Café" });
     const h1s = screen.getAllByRole("heading", { level: 1 });
     expect(h1s).toHaveLength(1);
-    expect(h1s[0].textContent).toBe("See what your next business decision could change.");
-    expect(screen.getByText("A clearer picture of what comes next")).toBeTruthy();
-    expect(screen.getByText(/Try a change on paper before you make it/)).toBeTruthy();
+    expect(h1s[0].textContent).toBe("Try tomorrow’s business decisions today.");
+    expect(screen.getByText("FOR THE BUSINESS YOU’RE BUILDING")).toBeTruthy();
+    expect(screen.getByText(/See what your choices could mean/)).toBeTruthy();
     expect(screen.getByText("Four quick answers to get started. Or explore with example numbers.")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Use my own numbers →" })).toBeTruthy();
   });
 
-  it("opens the sample directly from the hero and keeps the preview free of result figures", async () => {
+  it("opens the sample directly from the hero without running the inline demo", async () => {
     const { user } = mount();
-    const preview = screen.getByRole("complementary", { name: "A preview of how to explore a decision" });
-    expect(preview.textContent).toContain("No results are shown in this preview");
-    expect(preview.textContent).not.toMatch(/\$|£|%/);
+    expect(screen.getByRole("button", { name: "Run this example →" })).toBeTruthy();
+    expect(api.createSampleBusiness).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Explore a sample café" }));
     expect(api.createSampleBusiness).toHaveBeenCalledWith("cafe", "USD");
     expect(await screen.findByText("Today page")).toBeTruthy();
