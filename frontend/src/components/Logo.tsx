@@ -1,10 +1,10 @@
-/** A clock with branching hands: time, a choice, and a possible direction. Decorative beside the wordmark. */
+/** Concept C: a replay loop and play symbol for trying a decision before committing. */
 export function Logo({ size = 36 }: { size?: number }) {
   return (
-    <svg className="logo" width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-      <rect width="32" height="32" rx="9" fill="var(--green-heading)" />
-      <path d="M25.8 18A10 10 0 1 1 16 6" fill="none" stroke="var(--cream)" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M16 10v7m0 0 6-6m-6 6 5 5m-3-11h4v4" fill="none" stroke="var(--cream)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <svg className="logo" width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
+      <path d="M25.5 9.5A11.5 11.5 0 1 0 27 21" stroke="var(--green)" strokeWidth="3.2" strokeLinecap="round" />
+      <path d="M19 9.5h7v-7" stroke="var(--green)" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13 10.5v11l8.5-5.5z" fill="var(--green)" strokeLinejoin="round" />
     </svg>
   );
 }
