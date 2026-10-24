@@ -3,6 +3,13 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## Clearer simulation and marketing estimates (24 Oct 2026)
+
+- New and reopened comparison results show a visible explanation above the coach: simulated shares are conditional on the model's inputs and assumptions, not measured real-world success probabilities.
+- The same note explains that marketing needs customer response and spare service capacity, and that its response assumptions have not been checked against real business data.
+- The summary table labels its percentages as shares of simulated futures and explains this in the tooltips. No engine equations or default values change.
+- Validation: all 782 frontend tests passed; production build passed; lint completed with warnings in unchanged files. Browser visual checking was unavailable because no browser executable is installed.
+
 ## Pictures labelled and credited (Oct 2026)
 
 - The four start-page pictures are now labelled as AI-generated illustrations (ChatGPT, October 2026): a new `frontend/public/images/redesign/CREDITS.md`, alt text that starts "Illustration of ...", and one line in the start-page footer. The café, restaurant and bakery photos are still credited to their Pexels photographers. README has an "Images" section. Docs and text only.

@@ -9,6 +9,7 @@ import {
   type SimulationRunOut,
 } from "../../api";
 import { CoachCard } from "../../components/CoachCard";
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { LoadError } from "../../components/LoadError";
@@ -196,6 +197,7 @@ export function ComparisonDashboardPage() {
 
           {run && (
             <section className="run-results">
+              <ResultAssumptions />
               <CoachCard
                 key={run.id}
                 runId={run.id}

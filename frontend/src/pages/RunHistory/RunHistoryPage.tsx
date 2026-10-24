@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getSimulationRun, listBusinesses, listIndustries, listSimulationRuns, type SimulationRunOut } from "../../api";
 import { CoachCard } from "../../components/CoachCard";
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { LoadError } from "../../components/LoadError";
@@ -187,6 +188,7 @@ export function RunHistoryPage() {
                 <Link to="/how" onClick={() => rememberBusiness(openedRun.business_id)}>How did we get these numbers?</Link> ·{" "}
                 <Link to={`/share?run=${openedRun.id}`} onClick={() => rememberBusiness(openedRun.business_id)}>Print or share this result</Link>
               </p>
+              <ResultAssumptions />
               <CoachCard key={openedRun.id} runId={openedRun.id} businessId={openedRun.business_id} currency={currency} />
               <RiskAlerts results={openedRun.results} />
               <ChartCaption />

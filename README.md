@@ -274,6 +274,10 @@ CHANGELOG.md What changed, phase by phase
 - **Industry photos** (café, restaurant, bakery): stock photos from Pexels, with photographers listed in `frontend/public/images/CREDITS.md`.
 - **Start-page pictures:** AI-generated, see [Images](#images).
 
+### Reading marketing results
+
+Comparison results and reopened runs explain their assumptions beside the results. Percentages in the summary table describe simulated futures under the model's assumptions, not measured real-world success probabilities. Marketing estimates depend on extra customer response and the business's ability to serve those customers; that response has not been checked against real business data.
+
 ## Images
 
 The four pictures on the start page (hero, desk, tablet, notes) are AI-generated illustrations, made with ChatGPT (OpenAI) from text prompts in October 2026. They are not real people, customers or owners. The café, restaurant and bakery photos are stock photos from Pexels, credited to their photographers. Details for each file are in [`frontend/public/images/redesign/CREDITS.md`](frontend/public/images/redesign/CREDITS.md) and [`frontend/public/images/CREDITS.md`](frontend/public/images/CREDITS.md). The start page footer says the same in one line.
