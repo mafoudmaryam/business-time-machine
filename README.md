@@ -147,7 +147,7 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 
 ```powershell
 # from the project root; all three use the backend's virtual environment
-cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
+cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 358 tests
 cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 679 tests
 cd ..\frontend; npm test                                        # 782 tests
 ```
@@ -192,6 +192,9 @@ Every full run stores its engine version, random seed and number of iterations, 
 - **Confetti** appears only after you save something (a plan or a journal month), never for a forecast or a good number.
 
 ## Quality
+
+Marketing diagnostic verification (2026-10-24): **358 engine tests passed**, including two audit controls. The audit changes no engine equations, backend or frontend behavior. [Read the marketing audit and reproduce its results](docs/analysis/marketing-assumptions.md). Earlier suite counts below are historical.
+
 
 Measured on 2026-10-10, running the suites one after another on a quiet machine:
 

@@ -85,3 +85,7 @@ café's uncertainty ranges pending real calibration.
 - Restaurant and bakery defaults are typical-small-business estimates, not sourced data -- see the TODO comments in `templates/restaurant.py` and `templates/bakery.py`. Bakery's `waste_rate` in particular is a guess pending real numbers.
 - Capacity is a hard cap (κ visits/covers/output units per staff member per month). Queues and lost sales at peak hours are not modelled.
 - Seasonality defaults to flat. Pass `IndustryTemplate(seasonality=(...12 values...))` to add it.
+
+## Marketing assumption audit
+
+Run `python engine/scripts/audit_marketing.py` from the project root for a CSV comparison of marketing budgets under the default model, a no-extra-response stress case, and a business starting at modeled capacity. This is a diagnostic, not real-business calibration. See [the audit and measured results](../docs/analysis/marketing-assumptions.md) for the exact settings, results, limitations and next evidence needed. No model defaults change.
