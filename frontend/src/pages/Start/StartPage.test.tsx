@@ -64,7 +64,8 @@ describe("the start-up guide entry", () => {
   it("offers a slim card for people who have no business yet, linking to the guide", async () => {
     mount();
     const links = await screen.findAllByRole("link", { name: "I don’t have a business yet" });
-    expect(links).toHaveLength(2); // under "Start your journey" and in the slim card above the form
+    expect(links).toHaveLength(1);
+    expect(screen.getByRole("link", { name: /Not open yet\? Build a rough start-up plan/ }).getAttribute("href")).toBe("/guide");
     for (const link of links) expect(link.getAttribute("href")).toBe("/guide");
     expect(screen.getByRole("heading", { name: "Not open yet?" })).toBeTruthy();
   });
@@ -297,19 +298,31 @@ describe("StartPage: the welcome text", () => {
     await screen.findByRole("button", { name: "Café" });
     const h1s = screen.getAllByRole("heading", { level: 1 });
     expect(h1s).toHaveLength(1);
-    expect(h1s[0].textContent).toBe("Your business. A little more predictable.");
-    expect(screen.getByText("Better decisions today. A stronger tomorrow.")).toBeTruthy();
+    expect(h1s[0].textContent).toBe("See what your next business decision could change.");
+    expect(screen.getByText("A clearer picture of what comes next")).toBeTruthy();
     expect(screen.getByText(/Try a change on paper before you make it/)).toBeTruthy();
-    expect(screen.getByText("Free · Simple · Made for small businesses")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Start your journey →" })).toBeTruthy();
+    expect(screen.getByText("Four quick answers to get started. Or explore with example numbers.")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Use my own numbers →" })).toBeTruthy();
   });
 
-  it("labels the floating money card as a fixed example", async () => {
-    mount();
-    await screen.findByRole("button", { name: "Café" });
-    const card = screen.getByRole("note", { name: "An example, not your numbers" });
-    expect(card.textContent).toContain("+$1,320 a month");
-    expect(card.textContent).toContain("An example, for a 7% price rise");
+  it("opens the sample directly from the hero and keeps the preview free of result figures", async () => {
+    const { user } = mount();
+    const preview = screen.getByRole("complementary", { name: "A preview of how to explore a decision" });
+    expect(preview.textContent).toContain("No results are shown in this preview");
+    expect(preview.textContent).not.toMatch(/\$|£|%/);
+    await user.click(screen.getByRole("button", { name: "Explore a sample café" }));
+    expect(api.createSampleBusiness).toHaveBeenCalledWith("cafe", "USD");
+    expect(await screen.findByText("Today page")).toBeTruthy();
+    expect(getRememberedBusinessId()).toBe(99);
+  });
+
+  it("reports a failed hero demo and lets the visitor retry", async () => {
+    vi.mocked(api.createSampleBusiness).mockRejectedValueOnce(new Error("Unable to open sample"));
+    const { user } = mount();
+    await user.click(screen.getByRole("button", { name: "Explore a sample café" }));
+    expect(await screen.findByRole("alert")).toHaveProperty("textContent", "Unable to open sample");
+    await user.click(screen.getByRole("button", { name: "Explore a sample café" }));
+    expect(await screen.findByText("Today page")).toBeTruthy();
   });
 
   it("shows the three photo cards, the three small steps and the team's note", async () => {
@@ -327,20 +340,20 @@ describe("StartPage: the welcome text", () => {
     expect(screen.getByText("Some pictures on this site are AI-generated illustrations and the others are stock photos. None show our customers or owners.")).toBeTruthy();
   });
 
-  it("gives every photo a width, a height and a real alt text, and loads only the hero at once", async () => {
+  it("gives the secondary illustrations dimensions, descriptive alt text and lazy loading", async () => {
     mount();
     await screen.findByRole("button", { name: "Café" });
     const photos = Array.from(document.querySelectorAll("img.photo"));
-    expect(photos).toHaveLength(4);
+    expect(photos).toHaveLength(3);
     for (const img of photos) {
       expect(Number(img.getAttribute("width"))).toBeGreaterThan(0);
       expect(Number(img.getAttribute("height"))).toBeGreaterThan(0);
       expect((img.getAttribute("alt") ?? "").length).toBeGreaterThan(10);
       expect(img.getAttribute("alt")).toMatch(/^Illustration of /);
     }
-    expect(photos.filter((img) => img.getAttribute("loading") === "eager")).toHaveLength(1);
+    expect(photos.filter((img) => img.getAttribute("loading") === "eager")).toHaveLength(0);
     expect(photos.filter((img) => img.getAttribute("loading") === "lazy")).toHaveLength(3);
-    expect(photos[0].getAttribute("src")).toBe("/images/redesign/hero-720.webp");
+
   });
 
   it("keeps the working form on the page and one click away from the hero button", async () => {
@@ -348,7 +361,7 @@ describe("StartPage: the welcome text", () => {
     await screen.findByRole("button", { name: "Café" });
     expect(screen.getByRole("heading", { name: "What kind of business do you run?" })).toBeTruthy();
     expect(document.getElementById("start-here")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Start your journey →" }).getAttribute("href")).toBe("#start-here");
+    expect(screen.getByRole("link", { name: "Use my own numbers →" }).getAttribute("href")).toBe("#start-here");
   });
 
   it("for a returning visitor the hero is the first thing on the page: no Continue bar above it", async () => {
@@ -379,3 +392,4 @@ describe("StartPage: the welcome text", () => {
     expect((await axe(container)).violations).toEqual([]);
   });
 });
+

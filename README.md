@@ -149,7 +149,7 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 # from the project root; all three use the backend's virtual environment
 cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
 cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 679 tests
-cd ..\frontend; npm test                                        # 782 tests
+cd ..\frontend; npm test                                        # 783 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -183,6 +183,8 @@ flowchart LR
 Every full run stores its engine version, random seed and number of iterations, so a result can be reproduced.
 
 ## Design
+
+The landing page now offers a sample café directly in the hero, beside setup with your own numbers. Its preview describes the decision flow without displaying financial results. Today leads with the three key figures, followed by the coach and chart, with a prominent link to explore a change. The latest frontend check passed all 783 tests across 55 files on 2026-10-24; the production build and lint completed (lint retains warnings in unchanged files). The quality table below records the earlier full-project check.
 
 - **One place for the look.** `frontend/src/theme.css` holds every colour, font, shape and spacing value: cream pages, green buttons and numbers, soft sage panels, one amber highlight, charcoal text. Fonts are Nunito (headings), Inter (text) and Patrick Hand (one slogan), all served from the app itself, so it looks the same offline.
 - **`frontend/src/redesign.css`** is loaded last and organised page by page; its table of contents is at the top. One colour system is shared by every chart (`src/chartTheme.ts`), and chart lines also differ by dash pattern, so colour is never the only clue.
@@ -281,3 +283,4 @@ The four pictures on the start page (hero, desk, tablet, notes) are AI-generated
 ## Licence
 
 **Not yet chosen.** There is no `LICENSE` file, so all rights are reserved by the author until one is added.
+

@@ -138,7 +138,7 @@ export function StartPage() {
 
   return (
     <div className="page start-page">
-      {step === 0 && <Landing />}
+      {step === 0 && <Landing onTrySample={() => void trySample("cafe")} busy={busy} failure={failure} />}
       {step === 0 && (
         <section className="guide-entry" aria-labelledby="guide-entry-title">
           <div>
@@ -283,7 +283,7 @@ export function StartPage() {
         </>
       )}
 
-      <ErrorBanner message={failure} />
+      {step > 0 && <ErrorBanner message={failure} />}
 
       <div className="wizard-nav">
         <button
@@ -346,3 +346,4 @@ export function StartPage() {
     </div>
   );
 }
+

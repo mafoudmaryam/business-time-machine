@@ -102,10 +102,14 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
 
   return (
     <div className="page today-page">
-      <h1>
-        Today at {today.name}
-        {today.is_sample && <span className="sample-tag">Sample business</span>}
-      </h1>
+      <header className="today-heading">
+        <div>
+          <p className="page-eyebrow">YOUR BUSINESS AT A GLANCE</p>
+          <h1>Today at {today.name}{today.is_sample && <span className="sample-tag">Sample business</span>}</h1>
+          <p className="today-subtitle">Your starting picture. A clearer place to make your next decision.</p>
+        </div>
+        <Link className="btn btn-amber" to="/try" onClick={() => track("try_a_change_clicked", "today")}>Explore a change →</Link>
+      </header>
       {today.setup_source === "guide" && <StartingPictureBanner />}
       {today.is_sample && (
         <div className="sample-banner">
@@ -115,6 +119,13 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
           </button>
         </div>
       )}
+
+      <section className="today-tiles" aria-labelledby="today-figures">
+        <h2 id="today-figures" className="visually-hidden">Key figures</h2>
+        <TileCard tile={profitTile(today.tiles, today.currency)} />
+        <TileCard tile={safetyTile(today.tiles, today.currency)} />
+        <TileCard tile={lowestCashTile(today.tiles, today.currency)} />
+      </section>
 
       {coachOn && today.note && (
         <CoachNote
@@ -127,12 +138,6 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
           }}
         />
       )}
-
-      <div className="today-tiles">
-        <TileCard tile={profitTile(today.tiles, today.currency)} />
-        <TileCard tile={safetyTile(today.tiles, today.currency)} />
-        <TileCard tile={lowestCashTile(today.tiles, today.currency)} />
-      </div>
 
       <TodayChart today={today} />
 
@@ -249,3 +254,4 @@ export function TodayPage() {
   }
   return <Loaded today={today.data} reload={today.reload} />;
 }
+

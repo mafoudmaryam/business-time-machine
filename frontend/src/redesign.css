@@ -20,6 +20,59 @@
      Printing                   plain black on white; this block must stay last
    ==================================================================================================================== */
 
+/* ---------- Landing decision preview and dashboard hierarchy ---------- */
+.hero-guide {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 8px;
+  font-size: 14px;
+  text-underline-offset: 4px;
+}
+.decision-preview {
+  min-width: 0;
+  padding: 26px;
+  border: 1px solid var(--sage-edge);
+  border-radius: 18px;
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+.preview-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .09em;
+}
+.preview-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+.preview-badge { margin-left: auto; padding: 4px 8px; border-radius: 6px; background: var(--sage); color: var(--green-heading); letter-spacing: 0; }
+.preview-question { margin: 24px 0 8px; font: 800 26px/1.2 var(--font-heading); color: var(--charcoal); }
+.preview-intro { margin: 0 0 24px; font-size: 14px; }
+.preview-flow { display: grid; gap: 20px; margin: 0; padding: 0; list-style: none; }
+.preview-flow li { display: flex; gap: 14px; align-items: flex-start; }
+.preview-step { flex: none; display: grid; place-items: center; width: 32px; height: 32px; background: var(--sage); border-radius: 8px; font-size: 12px; font-weight: 700; color: var(--green-heading); }
+.preview-flow strong { color: var(--charcoal); font-size: 14px; }
+.preview-flow p { margin: 2px 0 0; font-size: 13px; }
+.preview-bottom { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--card-border); margin-top: 24px; padding-top: 16px; color: var(--green-heading); font-size: 12px; font-weight: 600; }
+.preview-footnote { margin: 12px 0 0; font-size: 12px; }
+.today-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-bottom: 28px; }
+.page-eyebrow { margin: 0 0 6px; font-size: 12px; letter-spacing: .1em; font-weight: 700; color: var(--green-heading); }
+.today-heading h1 { margin-top: 0; }
+.today-heading .btn { flex: none; }
+.today-subtitle { margin: 0; color: var(--body); }
+@media (max-width: 860px) {
+  .today-heading { align-items: flex-start; flex-direction: column; gap: 16px; }
+}
+@media (max-width: 640px) {
+  .decision-preview { padding: 20px; }
+  .preview-question { font-size: 24px; }
+  .hero-buttons > .btn { width: 100%; }
+  .today-heading .btn { width: 100%; }
+}
+
 /* ---------- Base ---------- */
 
 body {
@@ -421,13 +474,13 @@ button.link-button:disabled {
 /* The hero: text on the left, one photo on the right, both centred against each other. */
 .hero-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   align-items: center;
   gap: var(--space-gap);
   margin-top: 8px;
-  padding: 48px;
+  padding: 40px;
   background: var(--sage);
-  border-radius: var(--radius-panel);
+  border-radius: 24px;
 }
 
 .hero-copy {
@@ -436,8 +489,9 @@ button.link-button:disabled {
 
 .hero-slogan {
   margin: 0 0 10px;
-  font-family: var(--font-script);
-  font-size: 26px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
   line-height: 1.2;
   color: var(--amber-ink);
 }
@@ -459,20 +513,20 @@ button.link-button:disabled {
 .hero-lead {
   max-width: 32em;
   margin: 0 0 26px;
-  font-size: 19px;
+  font-size: 17px;
   color: var(--body);
 }
 
 .hero-copy .btn {
-  min-height: 56px;
-  padding: 14px 34px;
-  font-size: 19px;
+  min-height: 48px;
+  padding: 12px 20px;
+  font-size: 16px;
 }
 
 .hero-small {
   margin: 16px 0 0;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 400;
   color: var(--body);
 }
 
@@ -741,6 +795,15 @@ button.link-button:disabled {
   margin: 0 auto;
   font-size: 16px;
 }
+
+/* Quiet secondary surfaces keep attention on the first decision and the key figures. */
+.start-page .photo-card { border-width: 1px; border-radius: 16px; box-shadow: none; }
+.start-page .photo-frame-card { border-radius: 10px; aspect-ratio: 16 / 9; }
+.start-page .quote-card { border-radius: 16px; padding: 28px; }
+.start-page .start-form { border-width: 1px; border-radius: 20px; box-shadow: none; }
+.today-page .today-tile { border-width: 1px; border-radius: 16px; box-shadow: none; }
+.today-page .today-tiles { margin-bottom: 24px; }
+.today-page .today-coach { border-radius: 16px; box-shadow: none; }
 
 /* ---------- Try a change ---------- */
 
@@ -3202,3 +3265,4 @@ button.danger:hover:not(:disabled) {
     display: none !important;
   }
 }
+

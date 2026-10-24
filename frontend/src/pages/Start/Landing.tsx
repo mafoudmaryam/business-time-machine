@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
+import { ErrorBanner } from "../../components/ErrorBanner";
 import { Photo } from "../../components/Photo";
 import { jumpLink } from "../../lib/jumpTo";
 import { LANDING_PHOTOS } from "../../lib/landingImages";
 
-/** The welcome part of the start screen: what the app is, in plain words. Shown only on the first step, above the form.
- *  The "+$1,320 a month" card is a FIXED example (it says so) and is never connected to anyone's real numbers. */
+/** First-step welcome: a direct sample entry and an interface preview without calculated figures. */
 
 const CARDS = [
   {
@@ -20,7 +20,7 @@ const CARDS = [
   {
     key: "journal",
     title: "Keep a journal",
-    text: "Write down what really happened each month and see how close the forecast was. You learn, and so does the model.",
+    text: "Write down what really happened each month and see how close the forecast was. Use the comparison to inform your next decision.",
   },
 ] as const;
 
@@ -41,37 +41,42 @@ function CoffeeCup() {
   );
 }
 
-export function Landing() {
+export function Landing({ onTrySample, busy, failure }: { onTrySample: () => void; busy: boolean; failure: string | null }) {
   return (
     <>
       <section className="hero-panel" aria-labelledby="hero-title">
         <div className="hero-copy reveal">
-          <p className="hero-slogan">Better decisions today. A stronger tomorrow.</p>
+          <p className="hero-slogan">A clearer picture of what comes next</p>
           <h1 id="hero-title">
-            <span className="hero-line">Your business.</span> <span className="hero-line">A little more predictable.</span>
+            See what your next business decision could change.
           </h1>
           <p className="hero-lead">
-            Try a change on paper before you make it, and see what could happen to your profit, cash and customers. In plain words.
+            Try a change on paper before you make it. Explore what it could mean for your profit, cash and customers—built for cafés, restaurants and bakeries.
           </p>
           <div className="hero-buttons">
             <a href="#start-here" className="btn btn-amber" onClick={jumpLink("start-here")}>
-              Start your journey →
+              Use my own numbers →
             </a>
-            <Link to="/guide" className="btn btn-secondary">
-              I don’t have a business yet
-            </Link>
+            <button type="button" className="btn btn-secondary" disabled={busy} onClick={onTrySample}>
+              {busy ? "Opening sample…" : "Explore a sample café"}
+            </button>
           </div>
-          <p className="hero-small">Free · Simple · Made for small businesses</p>
+          <ErrorBanner message={failure} />
+          <p className="hero-small">Four quick answers to get started. Or explore with example numbers.</p>
+          <Link to="/guide" className="hero-guide">Not open yet? Build a rough start-up plan →</Link>
         </div>
-        <div className="hero-photo reveal" style={{ ["--i" as string]: 2 }}>
-          <div className="photo-frame photo-frame-hero">
-            <Photo photo={LANDING_PHOTOS.hero} priority sizes="(max-width: 860px) 90vw, 520px" />
-          </div>
-          <div className="float-card" role="note" aria-label="An example, not your numbers">
-            <p className="float-card-number">+$1,320 a month</p>
-            <p className="float-card-label">An example, for a 7% price rise</p>
-          </div>
-        </div>
+        <aside className="decision-preview" aria-label="A preview of how to explore a decision">
+          <div className="preview-top"><span className="preview-dot" aria-hidden="true" /> YOUR DECISION SPACE <span className="preview-badge">Preview</span></div>
+          <p className="preview-question">What if you raised your prices?</p>
+          <p className="preview-intro">Explore the upside. Understand the trade-off.</p>
+          <ol className="preview-flow">
+            <li><span className="preview-step" aria-hidden="true">01</span><div><strong>Start with your business</strong><p>Customers, costs and the cash you have.</p></div></li>
+            <li><span className="preview-step" aria-hidden="true">02</span><div><strong>Try a different direction</strong><p>Adjust a price. Choose when it starts.</p></div></li>
+            <li><span className="preview-step" aria-hidden="true">03</span><div><strong>See the possible outcomes</strong><p>Profit, cash and customers, side by side.</p></div></li>
+          </ol>
+          <div className="preview-bottom"><span>Good case · Most likely · Bad case</span><span aria-hidden="true">↗</span></div>
+          <p className="preview-footnote">Open the sample to see calculated results. No results are shown in this preview.</p>
+        </aside>
       </section>
 
       <section id="what-you-get" className="landing-section" aria-labelledby="what-you-get-title">
@@ -141,3 +146,4 @@ export function LandingFooter() {
     </footer>
   );
 }
+

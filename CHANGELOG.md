@@ -3,6 +3,13 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## Faster first sample and clearer dashboard (2026-10-24)
+
+- The hero names the food businesses the simulator serves, offers setup with your own numbers and a one-click sample café, and replaces the fixed money example with a decision-flow preview containing no financial results.
+- Today shows key financial figures before the coach, with an explicit Key figures heading and a prominent Explore a change action. Secondary cards use lighter borders and less decoration.
+- Sample failures appear beside the hero action and support retry. Existing sample actions, onboarding, startup guide and confirmation rules are retained.
+- Validation: 783 frontend tests in 55 files, production build and lint pass. Lint reports warnings in unchanged files. Engine and backend were not changed or re-tested.
+
 ## Pictures labelled and credited (Oct 2026)
 
 - The four start-page pictures are now labelled as AI-generated illustrations (ChatGPT, October 2026): a new `frontend/public/images/redesign/CREDITS.md`, alt text that starts "Illustration of ...", and one line in the start-page footer. The café, restaurant and bakery photos are still credited to their Pexels photographers. README has an "Images" section. Docs and text only.
@@ -71,3 +78,4 @@ frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 - Plain-language decision input ("describe it in your own words").
 - Café, restaurant and bakery in one engine; per-business currency; plain wording with "?" tips.
 - The first FastAPI backend, React frontend and simulation engine.
+

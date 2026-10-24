@@ -50,15 +50,16 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe("Today: the coach speaks first", () => {
-  it("shows the coach's words at the top, then three tiles, the chart and what was assumed", async () => {
+describe("Today: the financial position comes first", () => {
+  it("shows three tiles before the coach, followed by the chart and assumptions", async () => {
     mount();
     expect(await screen.findByRole("heading", { name: "Today at My café" })).toBeTruthy();
     const coach = screen.getByRole("region", { name: "Your coach says" });
     expect(coach.textContent).toContain("you keep about $5,820");
-    // The coach comes before the tiles in the page.
+    expect(screen.getByRole("link", { name: "Explore a change →" }).getAttribute("href")).toBe("/try");
+    // The figures lead, with the explanation immediately after them.
     const tiles = screen.getByRole("heading", { name: /What you keep each month/ });
-    expect(coach.compareDocumentPosition(tiles) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(tiles.compareDocumentPosition(coach) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByRole("heading", { name: /Your safety net/ })).toBeTruthy();
     expect(screen.getByRole("heading", { name: /Your lowest cash point/ })).toBeTruthy();
     expect(screen.getByText("The chart")).toBeTruthy();
@@ -357,3 +358,4 @@ describe("Today: accessibility", () => {
     expect(screen.getAllByRole("heading", { level: 3 }).length).toBeGreaterThanOrEqual(3);
   });
 });
+
