@@ -3,6 +3,12 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## Coach: reject unsupported negative amounts (2026-10-24)
+
+- The number checker now preserves minus signs, including the Unicode minus and a minus before a currency symbol. A negative amount must match a negative fact; positive facts and rounding across zero cannot justify it.
+- Unsigned loss wording ("a loss of 4,200") still matches a negative fact. This is a numeric check, not proof that a number belongs to the correct metric or that profit/loss wording is true.
+- Added four focused regression tests and an integration test for retrying a sign-reversed cash claim and keeping the rule-based coach after both attempts fail.
+
 ## Pictures labelled and credited (Oct 2026)
 
 - The four start-page pictures are now labelled as AI-generated illustrations (ChatGPT, October 2026): a new `frontend/public/images/redesign/CREDITS.md`, alt text that starts "Illustration of ...", and one line in the start-page footer. The café, restaurant and bakery photos are still credited to their Pexels photographers. README has an "Images" section. Docs and text only.
