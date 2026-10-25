@@ -42,9 +42,9 @@ export function TryPage() {
   if (!businessId) return <Navigate to="/" replace />;
 
   const currency = business.data?.currency ?? DEFAULT_CURRENCY;
-  const fresh = sketch !== null && !updating && sketch.amount === percent && sketch.start_month === startMonth;
+  const fresh = sketch !== null && !updating && !failed && sketch.type === "price" && sketch.amount === percent && sketch.start_month === startMonth;
   const keep = sketch ? keepText(sketch, currency) : null;
-  const example = sketch ? exampleText(sketch.example, currency) : null;
+  const example = sketch && fresh ? exampleText(sketch.example, currency) : null;
   const bank = sketch ? bankTile(sketch, currency) : null;
 
   return (
@@ -109,7 +109,8 @@ export function TryPage() {
             {!sketch && failed && <p className="try-failed" role="alert">We couldn't work that out just now. Try moving the slider again.</p>}
 
             {sketch && keep && bank && (
-              <div className={updating ? "try-numbers try-numbers-updating" : "try-numbers"}>
+              <div aria-busy={updating} className={!fresh ? "try-numbers try-numbers-updating" : "try-numbers"}>
+                <p className="field-help">{fresh ? "Showing" : "Previous result:"} a {sketch.amount}% price rise from {sketch.start_label} (month {sketch.start_month}).</p>
                 <div className="try-tile try-tile-keep">
                   <h3 className="try-eyebrow">Money left after bills</h3>
                   <p className="try-keep">
@@ -147,9 +148,15 @@ export function TryPage() {
             </p>
           </section>
 
-          <Link className="btn btn-green try-watch" to={timelineLink({ type: "price", amount: percent, start: startMonth })}>
-            Watch the next 12 months →
-          </Link>
+          {fresh ? (
+            <Link className="btn btn-green try-watch" to={timelineLink({ type: "price", amount: percent, start: startMonth })}>
+              Watch the next 12 months →
+            </Link>
+          ) : (
+            <button type="button" className="btn btn-green try-watch" disabled>
+              Watch the next 12 months →
+            </button>
+          )}
           <button
             type="button" className="btn btn-amber try-save" disabled={!fresh}
             onClick={() => {

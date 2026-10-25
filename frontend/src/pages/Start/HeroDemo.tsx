@@ -10,6 +10,7 @@ export function HeroDemo({ currency, onOpen }: { currency: string; onOpen: (busi
   const [opening, setOpening] = useState(false);
   const [error, setError] = useState(false);
   const { sketch, updating, failed } = useSketch(sample?.id ?? null, { type: "price", amount: percent, start_month: 1 });
+  const fresh = sketch !== null && !updating && !failed && sketch.type === "price" && sketch.amount === percent && sketch.start_month === 1;
   const keep = sketch ? keepText(sketch, sample?.currency ?? currency) : null;
   const bank = sketch ? bankTile(sketch, sample?.currency ?? currency) : null;
 
@@ -52,6 +53,7 @@ export function HeroDemo({ currency, onOpen }: { currency: string; onOpen: (busi
           <p className="demo-status" role="status">{failed ? (sketch ? "We couldn’t update. Showing your last result. Move the slider to try again." : "We couldn’t calculate this change. Move the slider to try again.") : updating ? "Working out this change…" : "Just a sketch · Next month"}</p>
           {sketch && keep && bank && (
             <>
+              <p className="field-help">{fresh ? "Showing" : "Previous result:"} a {sketch.amount}% price rise from {sketch.start_label} (month {sketch.start_month}).</p>
               {sketch.example && <p className="demo-order">A {formatMoneyCents(sketch.example.before, sample.currency)} order → {formatMoneyCents(sketch.example.after, sample.currency)}</p>}
               <div className="demo-result-grid">
                 <div><h3>Money left after bills</h3><p className="demo-result-number">{keep.amount}</p><p>{keep.direction} each month</p></div>
@@ -64,8 +66,8 @@ export function HeroDemo({ currency, onOpen }: { currency: string; onOpen: (busi
               </details>
             </>
           )}
-          <p className="visually-hidden" aria-live="polite">{!updating && !failed && keep ? `${keep.amount} ${keep.direction} each month.` : ""}</p>
-          <button type="button" className="link-button" onClick={() => onOpen(sample)}>Keep exploring this café →</button>
+          <p className="visually-hidden" aria-live="polite">{fresh && keep ? `${keep.amount} ${keep.direction} each month.` : ""}</p>
+          <button type="button" className="link-button" disabled={!fresh} onClick={() => onOpen(sample)}>Keep exploring this café →</button>
         </div>
       )}
       <p className="preview-footnote demo-disclaimer">A made-up café. These are possibilities, not promises.</p>

@@ -53,6 +53,27 @@ describe("the landing price demo", () => {
     expect(createSampleBusiness).toHaveBeenCalledTimes(1);
   });
 
+  it("blocks exploration until the selected price has a successful result", async () => {
+    const open = vi.fn();
+    render(<HeroDemo currency="GBP" onOpen={open} />);
+    await userEvent.click(screen.getByRole("button", { name: "See what happens →" }));
+    await screen.findByText("+£534", { exact: true });
+    let finish!: (value: ReturnType<typeof makeSketch>) => void;
+    vi.mocked(previewChange).mockImplementation(() => new Promise((resolve) => { finish = resolve; }));
+    fireEvent.change(screen.getByRole("slider"), { target: { value: "10" } });
+    expect(screen.getByText(/Previous result: a 7%/)).toBeTruthy();
+    const next = screen.getByRole("button", { name: /Keep exploring this café/ }) as HTMLButtonElement;
+    expect(next.disabled).toBe(true);
+    await userEvent.click(next);
+    expect(open).not.toHaveBeenCalled();
+    await waitFor(() => expect(previewChange).toHaveBeenLastCalledWith(99, { type: "price", amount: 10, start_month: 1 }, expect.any(AbortSignal)));
+    finish(makeSketch({ amount: 10 }));
+    await waitFor(() => expect(next.disabled).toBe(false));
+    expect(screen.getByText(/Showing a 10%/)).toBeTruthy();
+    await userEvent.click(next);
+    expect(open).toHaveBeenCalledWith(sample);
+  });
+
   it("allows a failed sample creation to be retried", async () => {
     vi.mocked(createSampleBusiness).mockRejectedValueOnce(new Error("offline"));
     render(<HeroDemo currency="GBP" onOpen={vi.fn()} />);
@@ -71,5 +92,7 @@ describe("the landing price demo", () => {
     fireEvent.change(screen.getByRole("slider"), { target: { value: "9" } });
     expect(await screen.findByText(/We couldn’t update/)).toBeTruthy();
     expect(screen.getByText("+£534", { exact: true })).toBeTruthy();
+    expect(screen.getByText(/Previous result: a 7%/)).toBeTruthy();
+    expect((screen.getByRole("button", { name: /Keep exploring this café/ }) as HTMLButtonElement).disabled).toBe(true);
   });
 });

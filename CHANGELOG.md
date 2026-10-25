@@ -30,6 +30,12 @@ frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 - Sample failures appear beside the hero action and support retry. Existing sample actions, onboarding, startup guide and confirmation rules are retained.
 - Validation: 783 frontend tests in 55 files, production build and lint pass. Lint reports warnings in unchanged files. Engine and backend were not changed or re-tested.
 
+## Keep price sliders and results matched (25 Oct 2026)
+
+- Try a change labels previous results with their actual price increase and start date while a new calculation is pending or has failed. The timeline action stays disabled until the current selection has a successful matching result.
+- Saving also checks for calculation failure, including when the owner moves back to an earlier slider value. The homepage demo uses the same result labeling and blocks its exploration action until the result matches.
+- Added regression coverage for the first loading state, delayed responses, changes to the start month, failure after returning to an old value, and recovery. All 792 frontend tests passed; build passed; lint completed with existing warnings in unchanged files. Browser visual checking is pending because the browser download failed. No engine or backend changes.
+
 ## Pictures labelled and credited (Oct 2026)
 
 - The four start-page pictures are now labelled as AI-generated illustrations (ChatGPT, October 2026): a new `frontend/public/images/redesign/CREDITS.md`, alt text that starts "Illustration of ...", and one line in the start-page footer. The café, restaurant and bakery photos are still credited to their Pexels photographers. README has an "Images" section. Docs and text only.
