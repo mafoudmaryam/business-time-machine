@@ -142,7 +142,7 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 # from the project root; all three use the backend's virtual environment
 cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
 cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 679 tests
-cd ..\frontend; npm test                                        # 788 tests
+cd ..\frontend; npm test                                        # 792 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -191,15 +191,15 @@ Every full run stores its engine version, random seed and number of iterations, 
 
 ## Quality
 
-Latest frontend verification: **2026-10-25**, after the beginner-focused redesign and selected logo were implemented.
+Latest frontend verification: **2026-10-25**, after the slider/result consistency fix.
 
 | Check | Result |
 |---|---|
-| Frontend tests (Vitest, 56 files) | 788 passed |
+| Frontend tests (Vitest, 56 files) | 792 passed |
 | TypeScript check | clean |
 | Production build (Vite) | succeeds; existing bundle-size warning remains |
 | Lint (oxlint) | completes with existing warnings in unchanged files |
-| Visual checks | desktop and 390-pixel phone layout; 16/32-pixel favicons on light and dark backgrounds |
+| Visual checks | earlier redesign: desktop and 390-pixel phone layout, 16/32-pixel favicons; slider fix: browser verification pending (browser download failed) |
 | Logo consistency | navigation and favicon paths match the selected concept |
 
 The engine and backend suites were **not rerun for these frontend and logo changes**. Their last documented full-project check, on 2026-10-10, recorded 356 engine tests passing and 678 of 679 backend tests passing. The backend failure was subsequently fixed and its file rerun (70 passing tests), but the full backend suite was not repeated. Historical results are kept separate from the latest frontend verification.

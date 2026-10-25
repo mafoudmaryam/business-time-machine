@@ -229,7 +229,49 @@ describe("Try a change: live while dragging", () => {
     expect(screen.getByRole("link", { name: "Watch the next 12 months →" }).getAttribute("href")).toBe("/timeline?change=price&amount=7&start=1");
     await drag(10);
     await user.click(screen.getByRole("button", { name: "In 3 months" }));
+    expect((screen.getByRole("button", { name: "Watch the next 12 months →" }) as HTMLButtonElement).disabled).toBe(true);
+    await settle(250);
     expect(screen.getByRole("link", { name: "Watch the next 12 months →" }).getAttribute("href")).toBe("/timeline?change=price&amount=10&start=3");
+  });
+
+  it("blocks continuation before the first result arrives", async () => {
+    vi.mocked(api.previewChange).mockImplementation(() => new Promise(() => undefined));
+    mount();
+    expect(screen.queryByRole("link", { name: "Watch the next 12 months →" })).toBeNull();
+    expect((screen.getByRole("button", { name: "Watch the next 12 months →" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("labels the previous result and blocks continuation until the new result arrives", async () => {
+    const { user } = mount();
+    await settle();
+    let finish!: (value: api.Sketch) => void;
+    vi.mocked(api.previewChange).mockImplementation(() => new Promise((resolve) => { finish = resolve; }));
+    await drag(10);
+    expect(screen.getByText("Previous result: a 7% price rise from November 2026 (month 1).")).toBeTruthy();
+    expect(screen.queryByText("A typical $6.50 visit would cost $6.96.")).toBeNull();
+    expect(screen.queryByRole("link", { name: "Watch the next 12 months →" })).toBeNull();
+    const watch = screen.getByRole("button", { name: "Watch the next 12 months →" }) as HTMLButtonElement;
+    expect(watch.disabled).toBe(true);
+    await user.click(watch);
+    expect(screen.queryByTestId("where")).toBeNull();
+    await act(async () => finish(makeSketch({ amount: 10 })));
+    expect(screen.getByText("Showing a 10% price rise from November 2026 (month 1).")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Watch the next 12 months →" }).getAttribute("href")).toContain("amount=10");
+  });
+
+  it("blocks saving after failure even when returning to the old value, and recovers", async () => {
+    mount();
+    await settle();
+    vi.mocked(api.previewChange).mockRejectedValue(new Error("offline"));
+    await drag(9);
+    await drag(7);
+    expect(screen.queryByRole("link", { name: "Watch the next 12 months →" })).toBeNull();
+    expect((screen.getByRole("button", { name: "Save as a plan" }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText(/Previous result: a 7%/)).toBeTruthy();
+    vi.mocked(api.previewChange).mockImplementation((_id, body) => Promise.resolve(makeSketch({ amount: body.amount, start_month: body.start_month })));
+    await drag(8);
+    expect(screen.getByRole("link", { name: "Watch the next 12 months →" })).toBeTruthy();
+    expect((screen.getByRole("button", { name: "Save as a plan" }) as HTMLButtonElement).disabled).toBe(false);
   });
 
   it("shows a calm message if the very first answer fails", async () => {
