@@ -3,6 +3,12 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## Reuse sample businesses (2026-10-26)
+
+- Reopening an example reuses the latest active sample for the same industry and currency, preserving its edited numbers and saved runs.
+- The start page separates Examples from My businesses and shows one recent example per industry and currency. Older copies remain saved and accessible through the business menu.
+- Validation: 789 frontend tests pass; 681 backend tests pass with one skipped. Production build and lint complete with existing warnings.
+
 ## A clearer first experiment for beginners (2026-10-25)
 
 - Replace the green-heavy brand treatment with violet, coral and warm white, using the existing shared tokens so charts and controls remain consistent.
