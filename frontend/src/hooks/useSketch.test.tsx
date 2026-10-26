@@ -113,6 +113,19 @@ describe("useSketch", () => {
     expect(result.current.sketch?.amount).toBe(10);
   });
 
+  it("never carries another business's result into a new selection, including failure", async () => {
+    const { result, rerender } = renderHook(({ id }) => useSketch(id, req(7)), { initialProps: { id: 1 } });
+    await settle(0);
+    expect(result.current.sketch).not.toBeNull();
+    vi.mocked(api.previewChange).mockRejectedValue(new Error("unavailable"));
+    rerender({ id: 2 });
+    expect(result.current.sketch).toBeNull();
+    expect(result.current.updating).toBe(true);
+    await settle(SKETCH_DEBOUNCE_MS);
+    expect(result.current.sketch).toBeNull();
+    expect(result.current.failed).toBe(true);
+  });
+
   it("does nothing without a business", async () => {
     const { result } = renderHook(() => useSketch(null, req(7)));
     await settle(1000);

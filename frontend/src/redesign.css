@@ -3246,7 +3246,35 @@ button.danger:hover:not(:disabled) {
   .appnav-landing .brand-wordmark strong { font-size: 17px; }
 }
 
+/* ---------- Short result explanation, shared by interactive results and reports ---------- */
+.result-explanation {
+  padding: clamp(1rem, 3vw, 1.6rem);
+  margin: 1rem 0;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--cream);
+  animation: result-explanation-in 180ms ease-out;
+}
+.result-explanation h2 { margin: 0 0 .6rem; }
+.result-explanation-outcome { font-size: 1.12rem; font-weight: 700; line-height: 1.5; color: var(--green-heading); }
+.result-explanation-parts { display: grid; gap: 1rem; margin: 1rem 0; }
+.result-explanation-parts > div { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: .75rem; }
+.result-explanation dt { font-weight: 800; color: var(--green-heading); }
+.result-explanation dd { margin: 0; line-height: 1.6; }
+.result-explanation dd p { margin: 0 0 .35rem; }
+.try-result .result-explanation-parts > div { grid-template-columns: minmax(0, 1fr); gap: .2rem; }
+.result-explanation-limit { font-size: .88rem; line-height: 1.6; }
+.result-explanation-details { margin: .75rem 0; }
+.result-explanation-details > summary { min-height: 44px; padding: .65rem .25rem; cursor: pointer; font-weight: 700; color: var(--green-heading); }
+.result-explanation-details > summary:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+@keyframes result-explanation-in { from { opacity: .5; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@media (max-width: 600px) {
+  .result-explanation-parts > div { grid-template-columns: minmax(0, 1fr); gap: .2rem; }
+  .result-explanation { padding: 1rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .result-explanation { animation: none; }
   .guide-choice:hover {
     transform: none !important;
   }
@@ -3318,6 +3346,13 @@ button.danger:hover:not(:disabled) {
 }
 
 @media print {
+  .share-sheet .result-explanation { animation: none; padding: 10pt; margin: 8pt 0; break-inside: auto; box-shadow: none; }
+  .share-sheet .result-explanation-parts > div { break-inside: avoid; grid-template-columns: 85pt minmax(0, 1fr); }
+  .share-sheet .result-explanation-details { display: block; }
+  .share-sheet details.result-explanation-details::details-content { display: block; content-visibility: visible; }
+  .share-sheet details.result-explanation-details > * { display: revert; }
+  .share-sheet .result-explanation-details > summary { display: none; }
+
   *,
   *::before,
   *::after {

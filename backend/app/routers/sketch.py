@@ -53,6 +53,7 @@ def preview_change(business_id: int, payload: schemas.PreviewChangeIn, db: Sessi
     start = payload.start_month
     path = lambda p: schemas.SketchPath(**p)  # noqa: E731
     return schemas.PreviewChangeOut(
+        explanation_context=result.get("explanation_context"),
         type=payload.type, amount=payload.amount, start_month=start, start_label=long_labels[start - 1],
         # "Raise prices by 7% from month 1" -> "... from Nov 2026 (month 1)"
         sentence=result["sentence"].replace(f"from month {start}", f"from {long_labels[start - 1]} (month {start})"),

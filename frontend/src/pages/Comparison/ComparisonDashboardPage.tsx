@@ -1,5 +1,6 @@
+import { SavedResultExplanation } from "../../components/ResultExplanation";
 import { ResultAssumptions } from "../../components/ResultAssumptions";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   confirmScenario,
@@ -63,6 +64,14 @@ export function ComparisonDashboardPage() {
   const [runError, setRunError] = useState<string | null>(null);
   const [run, setRun] = useState<SimulationRunOut | null>(null);
 
+  const selection = `${businessId}:${horizon}:${[...selectedIds].sort().join(",")}`;
+  const latestSelection = useRef(selection);
+  useEffect(() => { latestSelection.current = selection; }, [selection]);
+  const [completedSelection, setCompletedSelection] = useState("");
+  const currentRun = !running && completedSelection === selection && run?.business_id === businessId ? run : null;
+
+  const resultCurrency = currentRun?.results.find(r => r.summary.explanation_context)?.summary.explanation_context?.currency ?? selectedBusiness?.currency ?? DEFAULT_CURRENCY;
+
   function selectBusiness(id: number) {
     setParams({ business: String(id) });
     setSelectedIds([]);
@@ -89,11 +98,13 @@ export function ComparisonDashboardPage() {
 
   async function runSimulation() {
     if (!businessId || selectedIds.length === 0) return;
+    const requestedSelection = selection;
     setRunning(true);
+    setRun(null);
     setRunError(null);
     try {
       const result = await simulateBusiness(businessId, selectedIds, horizon);
-      setRun(result);
+      if (latestSelection.current === requestedSelection) { setRun(result); setCompletedSelection(requestedSelection); }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setRunError(friendlyErrorMessage(message));
@@ -195,16 +206,20 @@ export function ComparisonDashboardPage() {
 
           <ErrorBanner message={runError} />
 
-          {run && (
+          {currentRun && (
             <section className="run-results">
+              <SavedResultExplanation key={currentRun.id} run={currentRun} currency={resultCurrency} />
+              <details className="result-explanation-details"><summary>See the numbers</summary>
               <ResultAssumptions />
+              <details><summary>Optional coach and ideas</summary>
               <CoachCard
-                key={run.id}
-                runId={run.id}
-                businessId={run.business_id}
-                currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
+                key={currentRun.id}
+                runId={currentRun.id}
+                businessId={currentRun.business_id}
+                currency={resultCurrency}
               />
-              <RiskAlerts results={run.results} />
+              </details>
+              <RiskAlerts results={currentRun.results} />
               <ChartCaption />
               <div className="chart-grid">
                 {charts.map((c) => (
@@ -213,21 +228,22 @@ export function ComparisonDashboardPage() {
                     title={c.title}
                     tooltip={c.tooltip}
                     metric={c.metric}
-                    results={run.results}
+                    results={currentRun.results}
                     isMoney={c.isMoney}
-                    currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
+                    currency={resultCurrency}
                   />
                 ))}
               </div>
               <SummaryTable
-                results={run.results}
+                results={currentRun.results}
                 customerNoun={customerNoun}
-                currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}
+                currency={resultCurrency}
               />
-              <RunMeta run={run} />
+              <RunMeta run={currentRun} />
+              </details>
               <p className="result-links">
-                <Link to="/how" onClick={() => rememberBusiness(run.business_id)}>How did we get these numbers?</Link> ·{" "}
-                <Link to={`/share?run=${run.id}`} onClick={() => rememberBusiness(run.business_id)}>Print or share this result</Link>
+                <Link to="/how" onClick={() => rememberBusiness(currentRun.business_id)}>How did we get these numbers?</Link> ·{" "}
+                <Link to={`/share?run=${currentRun.id}`} onClick={() => rememberBusiness(currentRun.business_id)}>Print or share this result</Link>
               </p>
             </section>
           )}

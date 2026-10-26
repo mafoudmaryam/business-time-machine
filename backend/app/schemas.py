@@ -701,6 +701,7 @@ class PriceExample(BaseModel):
 
 
 class PreviewChangeOut(BaseModel):
+    explanation_context: Optional[dict[str, Any]] = None
     just_a_sketch: bool = True        # the page must say so; nothing here is stored or explained by the AI
     type: str
     amount: float

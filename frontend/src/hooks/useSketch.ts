@@ -16,7 +16,7 @@ export interface SketchState {
  *  is given 200 ms to settle before asking, an older request is cancelled when a newer one starts, and an answer
  *  that arrives too late is ignored. Nothing is stored anywhere. */
 export function useSketch(businessId: number | null, request: SketchRequest, debounceMs = SKETCH_DEBOUNCE_MS): SketchState {
-  const [state, setState] = useState<SketchState>({ sketch: null, updating: businessId !== null, failed: false });
+  const [state, setState] = useState<SketchState & { businessId: number | null }>({ sketch: null, updating: businessId !== null, failed: false, businessId });
   const askedOnce = useRef(false);
   const { type, amount, start_month } = request;
 
@@ -30,10 +30,10 @@ export function useSketch(businessId: number | null, request: SketchRequest, deb
         askedOnce.current = true;
         previewChange(businessId, { type, amount, start_month }, controller.signal).then(
           (sketch) => {
-            if (!controller.signal.aborted) setState({ sketch, updating: false, failed: false });
+            if (!controller.signal.aborted) setState({ sketch, updating: false, failed: false, businessId });
           },
           () => {
-            if (!controller.signal.aborted) setState((s) => ({ ...s, updating: false, failed: true }));
+            if (!controller.signal.aborted) setState((s) => ({ ...s, sketch: s.businessId === businessId ? s.sketch : null, businessId, updating: false, failed: true }));
           },
         );
       },
@@ -45,5 +45,5 @@ export function useSketch(businessId: number | null, request: SketchRequest, deb
     };
   }, [businessId, type, amount, start_month, debounceMs]);
 
-  return state;
+  return state.businessId === businessId ? state : { sketch: null, updating: businessId !== null, failed: false };
 }

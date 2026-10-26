@@ -102,3 +102,40 @@ def test_list_simulation_runs_of_business(client, business):
 def test_list_simulation_runs_for_missing_business_404(client):
     resp = client.get("/businesses/999/simulation_runs")
     assert resp.status_code == 404
+
+
+def test_explanation_context_is_frozen_with_saved_run(client, business):
+    scenario = _make_scenario(client, business["id"], "Original", value=5)
+    run = client.post(f"/scenarios/{scenario['id']}/simulate", json={"horizon": 24, "iterations": 100, "seed": 42}).json()
+    saved = next(r for r in run["results"] if r["scenario_name"] == "Original")["summary"]["explanation_context"]
+    assert saved["decisions"][0]["value"] == 5
+    assert saved["decisions"][0]["start_month"] == 3
+    assert len(saved["month_labels"]) == 24
+    assert saved["currency"] == "USD"
+    assert abs(sum(saved["central"]["drivers"].values()) - saved["central"]["total"]) < 0.001
+    client.patch(f"/businesses/{business['id']}/baseline", json={"cash": 1})
+    client.delete(f"/scenarios/{scenario['id']}")
+    fetched = client.get(f"/simulation_runs/{run['id']}").json()
+    assert next(r for r in fetched["results"] if r["scenario_name"] == "Original")["summary"]["explanation_context"] == saved
+
+
+def test_each_scenario_keeps_its_own_explanation_and_seeded_numbers(client, business):
+    a = _make_scenario(client, business["id"], "Up", value=5)
+    b = _make_scenario(client, business["id"], "Down", value=-5)
+    run = client.post(f"/businesses/{business['id']}/simulate", json={"scenario_ids": [a["id"], b["id"]], "horizon": 12, "iterations": 100, "seed": 42}).json()
+    for name, value in [("Up", 5), ("Down", -5)]:
+        result = next(r for r in run["results"] if r["scenario_name"] == name)
+        assert result["summary"]["explanation_context"]["decisions"][0]["value"] == value
+
+
+def test_investment_cash_outflow_is_not_described_as_operating_profit(client, business):
+    scenario = client.post(f"/businesses/{business['id']}/scenarios", json={"name": "Cash only", "decisions": [
+        {"type": "investment", "value": 1000, "unit": "absolute", "start_month": 1, "confirmed": True},
+    ]}).json()
+    response = client.post(f"/scenarios/{scenario['id']}/simulate", json={"horizon": 12, "iterations": 100, "seed": 42})
+    assert response.status_code == 201
+    result = next(r for r in response.json()["results"] if r["scenario_name"] == "Cash only")
+    context = result["summary"]["explanation_context"]
+    assert context["central"]["total"] == 0
+    assert context["cash_effect"] == -1000
+    assert "investment" not in context["central"]["drivers"]

@@ -181,17 +181,18 @@ describe("Share: print", () => {
 
 describe("Share: result highlights", () => {
   it.each([
-    [82800, "Higher estimated profit", "+$15,800"],
-    [60000, "Lower estimated profit", "-$7,000"],
-    [67000, "No estimated profit difference", "$0"],
-  ])("labels the profit difference honestly for total %s", async (total, label, value) => {
+    [82800, "$15,800.00 more"],
+    [60000, "$7,000.00 less"],
+    [67000, "no difference in money left after bills after rounding"],
+  ])("labels the profit difference honestly for total %s", async (total, value) => {
     const run = makeRun();
     run.results[1].summary.total_profit_p50 = total;
     vi.mocked(api.getSimulationRun).mockResolvedValue(run);
     mount("?run=2");
-    await screen.findByText(label);
-    expect(sheet().getByText(value)).toBeTruthy();
-    expect(sheet().getByText("-39")).toBeTruthy();
+    const explanation = await screen.findByRole("region", { name: "Understand this result" });
+    expect(explanation.textContent).toContain(value);
+    expect(explanation.textContent).toContain("over 12 months in total");
+    expect(explanation.textContent).toContain("39 fewer regular customers");
   });
 });
 
@@ -335,3 +336,29 @@ describe("SharePlanChart", () => {
   });
 });
 
+
+
+describe("Share: explanation preservation", () => {
+  it("opens the existing disclosures for print and restores them without duplicating the explanation", async () => {
+    mount("?run=2");
+    await screen.findByRole("region", { name: "Understand this result" });
+    const details = [...document.querySelectorAll<HTMLDetailsElement>(".share-sheet details")];
+    expect(details.length).toBeGreaterThan(0);
+    expect(details.every(d => !d.open)).toBe(true);
+    window.dispatchEvent(new Event("beforeprint"));
+    expect(details.every(d => d.open)).toBe(true);
+    expect(sheet().getAllByText("What changes")).toHaveLength(1);
+    window.dispatchEvent(new Event("afterprint"));
+    expect(details.every(d => !d.open)).toBe(true);
+  });
+  it("uses a saved result's original currency for the explanation and detailed comparison", async () => {
+    const run = makeRun();
+    run.results[1].summary.explanation_context = { version: 1, currency: "EUR", month_labels: ["November 2026"], decisions: [{ type: "price", unit: "percent", value: 13, start_month: 1, extra: {} }], central: { total: 15800, drivers: { price: 15800 } } };
+    vi.mocked(api.getSimulationRun).mockResolvedValue(run);
+    mount("?run=2");
+    const explanation = await screen.findByRole("region", { name: "Understand this result" });
+    expect(explanation.textContent).toContain("€15,800.00 more");
+    const comparison = screen.getByRole("region", { name: /and without it/ });
+    expect(within(comparison).getByText("€82,800")).toBeTruthy();
+  });
+});

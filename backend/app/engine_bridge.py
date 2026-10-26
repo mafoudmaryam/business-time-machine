@@ -5,6 +5,7 @@ engine's dataclasses, calls the engine, and turns the result back into rows.
 """
 from __future__ import annotations
 
+import datetime as dt
 import random
 from typing import Optional
 
@@ -13,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from btm_engine import (AnswerError, BusinessBaseline, DECISIONS_JSON_SCHEMA, Decision as EngineDecision,
                         answers_from_baseline, build_facts, build_today_facts, describe_decision, format_money, currency_marks, get_template, list_industries,
-                        month_one_summary, preview_change, quick_baseline, run_scenarios, sample_assumed)
+                        month_one_summary, profit_breakdown, preview_change, quick_baseline, run_scenarios, sample_assumed)
 from btm_engine import startup as _startup
 from btm_engine import ENGINE_VERSION as _ENGINE_VERSION
 
@@ -63,6 +64,30 @@ def to_engine_decisions(decisions: list[models.Decision]) -> list[EngineDecision
     ]
 
 
+def explanation_context(base, tpl, decisions, horizon, currency):
+    """Freeze inputs and the existing central-run breakdown beside this exact result.
+
+    The central calculation is explanatory evidence, not a Monte Carlo median or
+    real-world probability. Old runs are never reconstructed from mutable scenarios.
+    Stored in the existing JSON summary, so no schema migration is needed.
+    """
+    from .today import labels_from
+    breakdown = profit_breakdown(base, tpl, decisions, horizon)
+    # Displayed Monte Carlo profit excludes capital/loan cash outflows. The
+    # existing breakdown includes them: keep that cash contribution separate.
+    drivers = dict(breakdown["drivers"])
+    cash_effect = drivers.pop("investment", 0.0)
+    return {
+        "version": 1,
+        "currency": currency,
+        "month_labels": labels_from(dt.date.today(), horizon, long=True),
+        "decisions": [{"type": d.type, "start_month": d.start_month, "value": d.value,
+                       "unit": d.unit, "extra": d.extra} for d in decisions],
+        "central": {"total": sum(drivers.values()), "drivers": drivers},
+        "cash_effect": cash_effect,
+    }
+
+
 def run_simulation(
     db: Session,
     business: models.Business,
@@ -110,7 +135,9 @@ def run_simulation(
             scenario_id=name_to_id.get(name),  # None for the auto-added "baseline"
             scenario_name=name,
             bands=scenario_result.bands,
-            summary=scenario_result.summary,
+            summary={**scenario_result.summary, **({"explanation_context": explanation_context(
+                base, tpl, scenario_map[name], horizon, business.currency,
+            )} if name in scenario_map else {})},
         ))
 
     db.commit()
@@ -261,8 +288,16 @@ def check_baseline(values: dict) -> None:
 def sketch_change(business: models.Business, kind: str, amount: float, start_month: int) -> dict:
     """The quick "just a sketch" for one change. Read-only. The seed depends only on the business, so the same slider
     position always gives the same picture. Raises ValueError (plain reason) for an amount or month that makes no sense."""
-    return preview_change(to_baseline(business.baseline), get_template(business.industry), kind, amount, start_month,
+    base = to_baseline(business.baseline)
+    tpl = get_template(business.industry)
+    result = preview_change(base, tpl, kind, amount, start_month,
                           seed=1000 + business.id, currency=business.currency)
+    units = {"price": "percent", "hours": "days", "hiring": "fte", "marketing": "percent"}
+    result["explanation_context"] = explanation_context(
+        base, tpl, [EngineDecision(type=kind, value=amount, start_month=start_month, unit=units[kind])],
+        result["horizon"], business.currency,
+    )
+    return result
 
 
 def quick_answers(snapshot: models.BusinessSnapshot) -> dict:

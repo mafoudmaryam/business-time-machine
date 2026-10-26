@@ -161,27 +161,34 @@ describe("Try a change: the answer", () => {
   });
 });
 
-describe("Try a change: the coach note is plain rules, never AI", () => {
-  it("small rise", async () => {
+describe("Try a change: short explanations", () => {
+  it("shows four parts and the actual period without promising low risk", async () => {
     mount();
     await settle();
-    expect(screen.getByLabelText("A quick thought").textContent).toBe("Small rises are often noticed less than owners fear.");
+    const explanation = screen.getByRole("region", { name: "Understand this result" });
+    for (const label of ["What changes", "Why it may help", "The trade-off", "What to check"]) expect(within(explanation).getByText(label)).toBeTruthy();
+    expect(explanation.textContent).toContain("averaged over all 12 months");
+    expect(explanation.textContent).not.toContain("Low risk");
   });
 
-  it("big jump (over 10%) and tiny rise (under 4%)", async () => {
-    mount();
-    await settle();
-    await drag(12);
-    expect(screen.getByLabelText("A quick thought").textContent).toBe("That is a big jump. More of your regulars may drift away, so the gain is less certain.");
-    await drag(2);
-    expect(screen.getByLabelText("A quick thought").textContent).toBe("Low risk, but the gain is small too.");
+  it("removes the explanation immediately while a changed amount is loading, then uses the new result", async () => {
+    mount(); await settle();
+    let resolve!: (value: api.Sketch) => void;
+    vi.mocked(api.previewChange).mockImplementation(() => new Promise(done => { resolve = done; }));
+    fireEvent.change(slider(), { target: { value: "12" } });
+    expect(screen.queryByRole("region", { name: "Understand this result" })).toBeNull();
+    await settle(250);
+    expect(screen.queryByRole("region", { name: "Understand this result" })).toBeNull();
+    await act(async () => resolve(makeSketch({ amount: 12, sentence: "Raise prices by 12% from November 2026 (month 1)" })));
+    expect(screen.getByRole("region", { name: "Understand this result" }).textContent).toContain("12%");
   });
 
-  it("the note changes at once, even before the numbers arrive", async () => {
-    mount();
-    await settle();
-    fireEvent.change(slider(), { target: { value: "13" } });
-    expect(screen.getByLabelText("A quick thought").textContent).toContain("big jump");
+  it("keeps the explanation hidden after a failed update", async () => {
+    mount(); await settle();
+    vi.mocked(api.previewChange).mockRejectedValue(new Error("offline"));
+    await drag(13);
+    expect(screen.queryByRole("region", { name: "Understand this result" })).toBeNull();
+    expect(screen.getByRole("status").textContent).toContain("couldn't update");
   });
 
   it("never calls the coach or anything AI", async () => {

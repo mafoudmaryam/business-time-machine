@@ -1,5 +1,6 @@
+import { SavedResultExplanation } from "../../components/ResultExplanation";
 import { ResultAssumptions } from "../../components/ResultAssumptions";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getSimulationRun, listBusinesses, listIndustries, listSimulationRuns, type SimulationRunOut } from "../../api";
 import { CoachCard } from "../../components/CoachCard";
@@ -44,21 +45,26 @@ export function RunHistoryPage() {
   const selectedBusiness = businesses.data?.find((b) => b.id === businessId) ?? null;
   const industry = industries.data?.find((i) => i.id === selectedBusiness?.industry) ?? null;
   const customerNoun = industry?.customer_noun ?? "customers";
-  const currency = selectedBusiness?.currency ?? DEFAULT_CURRENCY;
   const charts = buildCharts(customerNoun);
 
+  const [pickedRunId, setPickedRunId] = useState<number | null>(null);
   const [openedRun, setOpenedRun] = useState<SimulationRunOut | null>(null);
   const [openError, setOpenError] = useState<string | null>(null);
   const [openingId, setOpeningId] = useState<number | null>(null);
 
+  const currency = (openedRun?.business_id === businessId ? openedRun.results.find(r => r.summary.explanation_context)?.summary.explanation_context?.currency : null) ?? selectedBusiness?.currency ?? DEFAULT_CURRENCY;
+
+  const openingRequest = useRef(0);
+
   // "Save this as a scenario" sends people here with ?run=<id>: open that run, with its coach, straight away.
   const runFromAddress = params.get("run") ? Number(params.get("run")) : null;
   useEffect(() => {
+    const request = ++openingRequest.current;
     if (runFromAddress === null || !Number.isInteger(runFromAddress)) return;
     let cancelled = false;
     getSimulationRun(runFromAddress).then(
-      (run) => !cancelled && setOpenedRun(run),
-      (err) => !cancelled && setOpenError(err instanceof Error ? err.message : String(err)),
+      (run) => !cancelled && request === openingRequest.current && setOpenedRun(run),
+      (err) => !cancelled && request === openingRequest.current && setOpenError(err instanceof Error ? err.message : String(err)),
     );
     return () => {
       cancelled = true;
@@ -66,21 +72,27 @@ export function RunHistoryPage() {
   }, [runFromAddress]);
 
   function selectBusiness(id: number) {
+    openingRequest.current++;
+    setOpeningId(null);
     setParams({ business: String(id) });
     setOpenedRun(null);
+    setPickedRunId(null);
     setOpenError(null);
   }
 
   async function openRun(id: number) {
+    const request = ++openingRequest.current;
+    setPickedRunId(id);
+    setOpenedRun(null);
     setOpeningId(id);
     setOpenError(null);
     try {
       const run = await getSimulationRun(id);
-      setOpenedRun(run);
+      if (request === openingRequest.current) setOpenedRun(run);
     } catch (err) {
-      setOpenError(err instanceof Error ? err.message : String(err));
+      if (request === openingRequest.current) setOpenError(err instanceof Error ? err.message : String(err));
     } finally {
-      setOpeningId(null);
+      if (request === openingRequest.current) setOpeningId(null);
     }
   }
 
@@ -181,15 +193,19 @@ export function RunHistoryPage() {
 
           <ErrorBanner message={openError} />
 
-          {openedRun && (
+          {openedRun && openingId === null && openedRun.business_id === businessId && (!(pickedRunId ?? runFromAddress) || openedRun.id === (pickedRunId ?? runFromAddress)) && (
             <section className="run-results">
               <h2>Run #{openedRun.id}</h2>
               <p className="result-links">
                 <Link to="/how" onClick={() => rememberBusiness(openedRun.business_id)}>How did we get these numbers?</Link> ·{" "}
                 <Link to={`/share?run=${openedRun.id}`} onClick={() => rememberBusiness(openedRun.business_id)}>Print or share this result</Link>
               </p>
+              <SavedResultExplanation key={openedRun.id} run={openedRun} currency={currency} />
+              <details className="result-explanation-details"><summary>See the numbers</summary>
               <ResultAssumptions />
+              <details><summary>Optional coach and ideas</summary>
               <CoachCard key={openedRun.id} runId={openedRun.id} businessId={openedRun.business_id} currency={currency} />
+              </details>
               <RiskAlerts results={openedRun.results} />
               <ChartCaption />
               <div className="chart-grid">
@@ -207,6 +223,7 @@ export function RunHistoryPage() {
               </div>
               <SummaryTable results={openedRun.results} customerNoun={customerNoun} currency={currency} />
               <RunMeta run={openedRun} />
+              </details>
             </section>
           )}
         </>
