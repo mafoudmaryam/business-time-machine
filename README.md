@@ -191,18 +191,26 @@ Every full run stores its engine version, random seed and number of iterations, 
 
 ## Quality
 
-Latest frontend verification: **2026-10-25**, after the beginner-focused redesign and selected logo were implemented.
+Latest local verification: **2026-10-26**, using fresh Python 3.12 environments and a clean frontend install while preparing automated checks.
 
 | Check | Result |
 |---|---|
+| Engine tests (Python 3.12) | 356 passed |
+| Backend tests (Python 3.12) | 678 passed, 1 skipped (no development database) |
 | Frontend tests (Vitest, 56 files) | 788 passed |
 | TypeScript check | clean |
 | Production build (Vite) | succeeds; existing bundle-size warning remains |
 | Lint (oxlint) | completes with existing warnings in unchanged files |
-| Visual checks | desktop and 390-pixel phone layout; 16/32-pixel favicons on light and dark backgrounds |
+| Earlier visual checks | desktop and 390-pixel phone layout; 16/32-pixel favicons on light and dark backgrounds |
 | Logo consistency | navigation and favicon paths match the selected concept |
 
-The engine and backend suites were **not rerun for these frontend and logo changes**. Their last documented full-project check, on 2026-10-10, recorded 356 engine tests passing and 678 of 679 backend tests passing. The backend failure was subsequently fixed and its file rerun (70 passing tests), but the full backend suite was not repeated. Historical results are kept separate from the latest frontend verification.
+### Automatic checks
+
+`.github/workflows/checks.yml` runs **Project checks** on pull requests, pushes to `master`, and manual runs. Its three jobs are **Engine tests**, **Backend tests**, and **Frontend tests and build**. Open a pull request’s Checks tab to see the result and failing command. After the workflow is merged into the default branch, it is also available through Actions → Project checks → Run workflow.
+
+Python jobs use Python 3.12 and the checked-in requirements; the frontend uses Node 24 and `npm ci` with its lockfile, then tests, lint and build. Jobs have time limits, cancel superseded runs and cache downloaded packages. Official setup actions are pinned to commit SHAs. These checks use read-only repository permissions, temporary databases and a rule-based coach, with no API keys or business database. The development-database round-trip test intentionally skips on a fresh checkout; synthetic migration tests still run.
+
+This workflow reports results; it does not change branch protection or automatically merge/deploy anything. The Python requirements allow newer compatible package versions, so this is not a fully locked Python environment. Other unmerged feature branches have additional tests that will be checked when their changes are included.
 
 ## Honest limits
 
