@@ -142,7 +142,7 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 # from the project root; all three use the backend's virtual environment
 cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
 cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 679 tests
-cd ..\frontend; npm test                                        # 788 tests
+cd ..\frontend; npm test                                        # 796 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -191,15 +191,15 @@ Every full run stores its engine version, random seed and number of iterations, 
 
 ## Quality
 
-Latest frontend verification: **2026-10-25**, after the beginner-focused redesign and selected logo were implemented.
+Latest frontend verification: **2026-10-26**, after adding resumable business setup.
 
 | Check | Result |
 |---|---|
-| Frontend tests (Vitest, 56 files) | 788 passed |
+| Frontend tests (Vitest, 56 files) | 796 passed |
 | TypeScript check | clean |
 | Production build (Vite) | succeeds; existing bundle-size warning remains |
 | Lint (oxlint) | completes with existing warnings in unchanged files |
-| Visual checks | desktop and 390-pixel phone layout; 16/32-pixel favicons on light and dark backgrounds |
+| Visual checks | earlier redesign: desktop/phone layout and favicons; resumable setup: browser visual verification pending |
 | Logo consistency | navigation and favicon paths match the selected concept |
 
 The engine and backend suites were **not rerun for these frontend and logo changes**. Their last documented full-project check, on 2026-10-10, recorded 356 engine tests passing and 678 of 679 backend tests passing. The backend failure was subsequently fixed and its file rerun (70 passing tests), but the full backend suite was not repeated. Historical results are kept separate from the latest frontend verification.
@@ -250,6 +250,8 @@ What does exist for this: the coach can be switched off (`COACH_ENABLED=false`),
 See [CHANGELOG.md](CHANGELOG.md) for what changed and when.
 
 ## Privacy and data
+
+- **Unfinished setup stays in this tab.** Business type, currency, entered amounts, name and question step are saved in browser session storage. Refreshing or returning offers “Continue setup” or “Start over”. A restored summary is recalculated before confirmation; saved calculations are not reused. The draft is cleared after successful business creation or Start over, and is kept if creation fails or you explore a sample instead. It is not an account backup or cross-device sync. Blocked storage leaves the form usable and shows a message; empty or incomplete nonnumeric fields restore as blank.
 
 - **Stored on your computer.** In the default setup everything lives in a local SQLite file, `backend/btm.db`. Nothing is sent anywhere, and the app loads no outside fonts or scripts. If you switch on the **cloud AI coach**, the engine's facts and any text you type into the "say it in your own words" or "Ask the coach" boxes are sent to that provider; the local Ollama mode keeps everything on your machine.
 - **Keep experiments separate.** Use `.\start.ps1 -TempDb` for a throwaway preview database. Samples created by clicking the app are stored in whichever database the backend is using; the inline price estimate does not save a plan. Automated tests use their own temporary databases. Databases and backups are ignored by Git.

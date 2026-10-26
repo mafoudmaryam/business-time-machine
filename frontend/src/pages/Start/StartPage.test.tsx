@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { axe } from "vitest-axe";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as api from "../../api";
+import { readSetupDraft } from "../../lib/setupDraft";
 import { getRememberedBusinessId, rememberBusiness } from "../../lib/session";
 import { StartPage } from "./StartPage";
 
@@ -377,3 +378,113 @@ describe("StartPage: the welcome text", () => {
   });
 });
 
+
+
+describe("unfinished business setup", () => {
+  async function begin() {
+    const ctx = mount();
+    await ctx.user.click(await screen.findByRole("button", { name: "Café" }));
+    await ctx.user.click(screen.getByRole("button", { name: "Next" }));
+    return ctx;
+  }
+
+  it("offers a choice after refresh and restores partial answers and currency only on Continue", async () => {
+    const first = await begin();
+    await first.user.click(screen.getByRole("button", { name: "Change currency" }));
+    await first.user.selectOptions(screen.getByLabelText("Currency"), "EUR");
+    await first.user.type(screen.getByLabelText(/Customers on a normal day/), "123");
+    await first.user.type(screen.getByLabelText(/Monthly rent/), "0");
+    first.unmount();
+    const { user, container } = mount();
+    const next = await screen.findByRole("button", { name: "Continue setup" });
+    expect(screen.queryByLabelText(/Customers on a normal day/)).toBeNull();
+    expect(api.quickBaseline).not.toHaveBeenCalled();
+    expect(api.createQuickBusiness).not.toHaveBeenCalled();
+    expect((await axe(container)).violations).toEqual([]);
+    await user.click(next);
+    expect((screen.getByLabelText(/Customers on a normal day/) as HTMLInputElement).value).toBe("123");
+    expect((screen.getByLabelText(/Monthly rent/) as HTMLInputElement).value).toBe("0");
+    expect((screen.getByLabelText(/Average spend per customer/) as HTMLInputElement).value).toBe("");
+    expect(screen.getByText("Amounts in EUR")).toBeTruthy();
+    expect(api.quickBaseline).not.toHaveBeenCalled();
+  });
+
+  it.each(["pending", "active"])("Start over clears a %s draft without it coming back", async (kind) => {
+    const first = await begin();
+    await first.user.type(screen.getByLabelText(/Monthly rent/), "2500");
+    if (kind === "pending") {
+      first.unmount();
+      const second = mount();
+      await second.user.click(await screen.findByRole("button", { name: "Start over" }));
+      second.unmount();
+    } else {
+      await first.user.click(screen.getByRole("button", { name: "Start over" }));
+      first.unmount();
+    }
+    expect(readSetupDraft()).toBeNull();
+    const { user } = mount();
+    await user.click(await screen.findByRole("button", { name: "Café" }));
+    expect(screen.queryByRole("button", { name: "Continue setup" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect((screen.getByLabelText(/Monthly rent/) as HTMLInputElement).value).toBe("");
+  });
+
+  it("recalculates the summary, keeps the name, and clears the draft only after successful creation", async () => {
+    const first = await begin();
+    await fillAnswers(first.user);
+    await first.user.click(screen.getByRole("button", { name: "Next" }));
+    await first.user.clear(await screen.findByLabelText("What is it called?"));
+    await first.user.type(screen.getByLabelText("What is it called?"), "Corner Café");
+    first.unmount();
+    const { user } = mount();
+    await user.click(await screen.findByRole("button", { name: "Continue setup" }));
+    expect(screen.queryByLabelText("What is it called?")).toBeNull();
+    expect(api.quickBaseline).toHaveBeenCalledTimes(1);
+    expect(api.createQuickBusiness).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect((await screen.findByLabelText("What is it called?")) as HTMLInputElement).toHaveProperty("value", "Corner Café");
+    expect(api.quickBaseline).toHaveBeenCalledTimes(2);
+    vi.mocked(api.createQuickBusiness).mockRejectedValueOnce(new Error("offline"));
+    await user.click(screen.getByRole("button", { name: "Looks right, show me" }));
+    expect(await screen.findByRole("alert")).toHaveProperty("textContent", "offline");
+    expect(readSetupDraft()?.name).toBe("Corner Café");
+    await user.click(screen.getByRole("button", { name: "Looks right, show me" }));
+    expect(await screen.findByText("Today page")).toBeTruthy();
+    expect(readSetupDraft()).toBeNull();
+  });
+
+  it("keeps an unfinished setup when the owner explores a sample instead", async () => {
+    const first = await begin();
+    await first.user.type(screen.getByLabelText(/Monthly rent/), "2500");
+    first.unmount();
+    const second = mount();
+    await second.user.click(screen.getByRole("button", { name: "Show me an example" }));
+    expect(await screen.findByText("Today page")).toBeTruthy();
+    expect(readSetupDraft()?.answers.monthly_rent).toBe(2500);
+    second.unmount();
+    mount();
+    expect(await screen.findByRole("button", { name: "Continue setup" })).toBeTruthy();
+  });
+
+  it.each(["broken JSON", '{"version":999}'])("ignores an unreadable saved draft (%s)", async (raw) => {
+    window.sessionStorage.setItem("btm.setupDraft.v1", raw);
+    mount();
+    expect(await screen.findByRole("button", { name: "Café" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Continue setup" })).toBeNull();
+  });
+
+  it("keeps setup usable and explains when browser storage is blocked", async () => {
+    const get = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new Error("blocked"); });
+    const set = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("blocked"); });
+    const remove = vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => { throw new Error("blocked"); });
+    try {
+      const { user } = await begin();
+      expect(screen.getByText(/Your browser couldn’t save these answers/)).toBeTruthy();
+      await fillAnswers(user);
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      expect(await screen.findByLabelText("What is it called?")).toBeTruthy();
+    } finally {
+      get.mockRestore(); set.mockRestore(); remove.mockRestore();
+    }
+  });
+});

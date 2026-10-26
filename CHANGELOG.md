@@ -30,6 +30,13 @@ frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 - Sample failures appear beside the hero action and support retry. Existing sample actions, onboarding, startup guide and confirmation rules are retained.
 - Validation: 783 frontend tests in 55 files, production build and lint pass. Lint reports warnings in unchanged files. Engine and backend were not changed or re-tested.
 
+## Continue unfinished business setup (26 Oct 2026)
+
+- Remember entered setup answers in the current browser tab and offer Continue setup or Start over after a refresh or return. Preserve business type, currency, entered amounts, name and question step. Empty numeric fields stay blank.
+- Recalculate the summary before confirmation instead of storing a calculated preview. Remove the draft only after successful creation or Start over; retain it on errors or when exploring samples.
+- Ignore malformed/outdated drafts and keep the form usable with an explanation when storage is blocked. New controls keep keyboard focus in the setup section.
+- Eight integration cases cover partial refresh, currency/zero/blank values, both Start over paths, name and summary recalculation, failed/successful creation, samples, malformed drafts and unavailable storage.
+
 ## Pictures labelled and credited (Oct 2026)
 
 - The four start-page pictures are now labelled as AI-generated illustrations (ChatGPT, October 2026): a new `frontend/public/images/redesign/CREDITS.md`, alt text that starts "Illustration of ...", and one line in the start-page footer. The café, restaurant and bakery photos are still credited to their Pexels photographers. README has an "Images" section. Docs and text only.

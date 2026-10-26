@@ -80,14 +80,16 @@ describe("the front page is always reachable, even with a business open", () => 
     expect(getRememberedBusinessId()).toBe(5);
   });
 
-  it("clicking the title again, from the start screen itself, starts the form over", async () => {
+  it("clicking the title again offers the unfinished setup instead of losing it", async () => {
     const user = open("/");
     await user.click(await screen.findByRole("button", { name: "Café" }));
     await user.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByRole("heading", { name: "Tell us about your café" })).toBeTruthy();
     await user.click(screen.getByRole("link", { name: "Business Time Machine" }));
-    expect(await screen.findByRole("heading", { name: FRONT_PAGE })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "You have an unfinished setup" })).toBeTruthy();
     expect(screen.queryByRole("heading", { name: "Tell us about your café" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Continue setup" }));
+    expect(screen.getByRole("heading", { name: "Tell us about your café" })).toBeTruthy();
   });
 });
 
@@ -164,15 +166,21 @@ describe("'New business' in the header menu", () => {
     expect(getRememberedBusinessId()).toBe(5); // nothing is deleted or changed
   });
 
-  it("from the middle of the form, starts a fresh form instead of doing nothing", async () => {
+  it("from the middle of the form, lets the owner explicitly start over", async () => {
     const user = open("/");
     await user.click(await screen.findByRole("button", { name: "Café" }));
     await user.click(screen.getByRole("button", { name: "Next" }));
     await user.type(screen.getByLabelText(/Customers on a normal day/), "150");
     await user.click(screen.getByRole("button", { name: /noah/ }));
     await user.click(screen.getByRole("button", { name: "New business" }));
-    expect(await screen.findByRole("heading", { name: FRONT_PAGE })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "You have an unfinished setup" })).toBeTruthy();
     expect(screen.queryByLabelText(/Customers on a normal day/)).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Start over" }));
+    expect(screen.getByRole("heading", { name: FRONT_PAGE })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Café" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect((screen.getByLabelText(/Customers on a normal day/) as HTMLInputElement).value).toBe("");
+    expect(getRememberedBusinessId()).toBe(5);
   });
 });
 
