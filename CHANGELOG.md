@@ -30,6 +30,12 @@ frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 - Sample failures appear beside the hero action and support retry. Existing sample actions, onboarding, startup guide and confirmation rules are retained.
 - Validation: 783 frontend tests in 55 files, production build and lint pass. Lint reports warnings in unchanged files. Engine and backend were not changed or re-tested.
 
+## Run project checks automatically (26 Oct 2026)
+
+- Add GitHub Actions checks for pull requests, pushes to master and manual runs: engine tests, backend tests, and frontend tests/lint/build in separate jobs.
+- Use Python 3.12 and Node 24 with dependency caches, 15-minute job limits, superseded-run cancellation, read-only repository permissions and commit-pinned official actions. Backend tests use a temporary database and a rule-based coach without API keys.
+- Fresh local installs passed 356 engine tests, 678 backend tests (one development-database test skipped), and 788 frontend tests; lint and production build completed with existing warnings. No application code or dependencies changed.
+
 ## Pictures labelled and credited (Oct 2026)
 
 - The four start-page pictures are now labelled as AI-generated illustrations (ChatGPT, October 2026): a new `frontend/public/images/redesign/CREDITS.md`, alt text that starts "Illustration of ...", and one line in the start-page footer. The café, restaurant and bakery photos are still credited to their Pexels photographers. README has an "Images" section. Docs and text only.
