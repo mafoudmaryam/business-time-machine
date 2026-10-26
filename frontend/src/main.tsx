@@ -8,6 +8,7 @@ import "./theme.css";
 import "./index.css";
 import "./beginner.css";
 import "./redesign.css";
+import "./report.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

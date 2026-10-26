@@ -1,0 +1,70 @@
+/* Shared screen and PDF report design. */
+.share-sheet { --rp: #6847c7; --ri: #251d3e; --rl: #f1ecfb; color: var(--ri); background: #fcfaff; max-width: 900px; border: 1px solid #e4deee; }
+.share-sheet h1, .share-sheet h2, .share-sheet h3 { color: var(--ri); }
+.share-sheet h1 { font-size: 32px; overflow-wrap: anywhere; }
+.report-page + .report-page { margin-top: 40px; padding-top: 28px; border-top: 1px solid #e4deee; }
+.share-sheet .report-brand { font-size: 14px; font-weight: 800; color: var(--rp); letter-spacing: .06em; margin-bottom: 24px; }
+.share-sheet .report-eyebrow { text-transform: uppercase; letter-spacing: .08em; font-weight: 750; font-size: 11px; color: var(--rp); }
+.share-sheet .share-section h2 { font-size: 20px; border: 0; margin-bottom: 14px; }
+.share-sheet .share-fact { background: var(--rl); border: 1px solid #e4deee; border-radius: 12px; padding: 14px; min-width: 0; }
+.share-sheet .share-fact .share-number { color: var(--rp); font-size: 27px; overflow-wrap: anywhere; }
+.share-sheet .share-fact p { font-size: 12px; }
+.share-sheet .report-highlight { padding: 20px; border-radius: 14px; background: var(--rp); color: #fff; margin: 14px 0; }
+.share-sheet .report-highlight p { margin: 0; color: #fff; }
+.share-sheet .report-highlight .report-delta { font-size: 38px; font-weight: 800; margin: 4px 0; overflow-wrap: anywhere; }
+.report-deltas { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; margin-bottom: 18px; }
+.report-deltas p { background: var(--rl); padding: 12px; border: 1px solid #e4deee; border-radius: 10px; margin: 0; }
+.report-deltas strong, .report-deltas span { display: block; }
+.report-deltas strong { font-size: 24px; color: var(--rp); overflow-wrap: anywhere; }
+.report-deltas span { font-size: 12px; margin-top: 3px; }
+.share-sheet .share-table { table-layout: fixed; font-size: 12px; }
+.share-sheet .share-table th, .share-sheet .share-table td { overflow-wrap: anywhere; padding: 9px 10px; border-color: #e4deee; }
+.share-sheet .share-table th:first-child { width: 44%; }
+.share-sheet .share-table thead th { background: #251d3e; color: #fff; }
+.share-sheet .share-table tbody tr:nth-child(even) { background: var(--rl); }
+.share-sheet .share-figure { padding: 12px; background: #fff; border: 1px solid #e4deee; border-radius: 12px; margin: 18px 0 0; }
+.share-sheet .share-figure h3 { margin: 0 0 8px; font-size: 14px; }
+.share-sheet .share-figure figcaption, .share-sheet .share-small { font-size: 12px; color: #625b70; }
+.share-sheet .plan-band { fill: #ded3f5; fill-opacity: .8; }
+.share-sheet .plan-median { stroke: #6847c7; stroke-width: 3; }
+.share-sheet .plan-baseline { stroke: #55505f; stroke-width: 1.7; stroke-dasharray: 6 4; }
+.share-sheet .plan-grid { stroke: #ded9e7; }
+.share-sheet .plan-axis { fill: #514a5f; }
+.share-sheet .share-list { margin-left: 0; list-style: none; }
+.share-sheet .share-list li { padding: 10px 12px; margin-bottom: 6px; border-left: 3px solid #c5b4ea; background: #f1ecfb; }
+.share-sheet .chart-caption { border: 1px solid #e4deee; padding: 12px; border-radius: 10px; margin-top: 20px; }
+.share-sheet .chart-caption p { font-size: 12px; color: #625b70; }
+.share-sheet .share-footer { border-top: 1px solid #e4deee; }
+.share-sheet .share-disclaimer { background: #251d3e; color: #fff; padding: 14px; border-radius: 10px; font-size: 12px; }
+@media screen and (max-width: 760px) {
+ .report-deltas { grid-template-columns: minmax(0,1fr); }
+ .share-sheet .share-table { font-size: 11px; }
+ .share-sheet .share-table th, .share-sheet .share-table td { padding: 7px 4px; }
+}
+@media print {
+ .share-sheet { border: 0; padding: 0; max-width: none; border-radius: 0; font-size: 10pt; line-height: 1.4; background: #fff !important; color: #251d3e !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+ .report-page + .report-page { break-before: page; page-break-before: always; margin-top: 0; padding-top: 0; border: 0; }
+ .share-sheet .report-brand { margin-bottom: 12px; }
+ .share-sheet h1 { font-size: 25pt; }
+ .share-sheet .share-section { margin-top: 16px; break-inside: auto; page-break-inside: auto; }
+ .share-sheet h2, .share-sheet h3 { break-after: avoid; page-break-after: avoid; }
+ .share-sheet .share-section h2 { font-size: 15pt; margin-bottom: 8px; }
+ .share-sheet .share-facts { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+ .share-sheet .share-fact { padding: 10px; }
+ .share-sheet .share-fact h3, .share-sheet .share-fact p { font-size: 9pt; }
+ .share-sheet .share-fact .share-number { font-size: 21pt; }
+ .share-sheet .report-highlight { padding: 14px 18px; margin: 10px 0; break-inside: avoid; }
+ .share-sheet .report-highlight .report-delta { font-size: 28pt; }
+ .report-deltas { margin-bottom: 10px; }
+ .share-sheet .report-deltas strong { font-size: 18pt; }
+ .share-sheet .share-table { font-size: 9pt; break-inside: auto; page-break-inside: auto; }
+ .share-sheet .share-table th, .share-sheet .share-table td { padding: 7px 8px; }
+ .share-sheet .share-table tr, .share-sheet .share-list li, .report-deltas { break-inside: avoid; }
+ .share-sheet .share-table thead { display: table-header-group; }
+ .share-sheet .share-figure { margin-top: 12px; padding: 10px; break-inside: avoid; }
+ .share-sheet .plan-chart { width: 100%; max-height: 48mm; }
+ .share-sheet .share-figure figcaption { font-size: 9pt; }
+ .share-sheet .share-list { font-size: 10pt; }
+ .share-sheet .chart-caption { break-inside: auto; }
+ .share-sheet .share-footer { margin-top: 18px; break-inside: avoid; }
+}

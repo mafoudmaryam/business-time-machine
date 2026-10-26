@@ -3,6 +3,13 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## A designed PDF export from Share (2026-10-26)
+
+- Replace monochrome print styling with purple summary cards, comparison highlights, coloured SVG charts and separate overview, charts and assumptions sections. Values come from the selected saved run and business currency; loss and unchanged outcomes are labelled honestly.
+- Retain all uncertainty notes, sample labels, original metrics and print privacy wording. Keep tables, cards and figures legible on A4, with natural overflow for longer content. Explain the browser settings for removing its date/URL headers.
+- Delay printing while the selected scenario loads and omit stale comparisons. No simulation, backend or financial model changes.
+- Validation: frontend report tests cover positive, negative and zero profit differences; full frontend tests, TypeScript/build and lint. Three-page fixture visually rendered through WeasyPrint; Chromium print-dialog verification remains pending because the browser download is unavailable.
+
 ## A clearer first experiment for beginners (2026-10-25)
 
 - Replace the green-heavy brand treatment with violet, coral and warm white, using the existing shared tokens so charts and controls remain consistent.

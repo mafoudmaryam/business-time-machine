@@ -6,7 +6,7 @@ import { LoadError } from "../../components/LoadError";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
 import { track } from "../../lib/events";
-import { formatMoney } from "../../lib/format";
+import { formatCount, formatMoney } from "../../lib/format";
 import { DISCLAIMER, formatHowValue } from "../../lib/how";
 import { getRememberedBusinessId } from "../../lib/session";
 import { compareRows, initialChoice, parseChoice, scenarioChoices, type PlanRow } from "../../lib/share";
@@ -31,16 +31,26 @@ function ComparisonSection({ run, scenario, currency }: { run: SimulationRunOut;
   const nothing = run.results.find((r) => r.scenario_name === "baseline");
   if (!change || !nothing) return null;
   const money = (v: number) => formatMoney(v, currency);
-  const rows: PlanRow[] = change.bands.profit.p50.map((p50, i) => ({
-    label: `Month ${i + 1}`, p10: change.bands.profit.p10[i], p50, p90: change.bands.profit.p90[i], baseline: nothing.bands.profit.p50[i],
-  }));
+  const difference = change.summary.total_profit_p50 - nothing.summary.total_profit_p50;
+  const cashDifference = change.summary.end_cash_p50 - nothing.summary.end_cash_p50;
+  const customerDifference = change.summary.end_customers_p50 - nothing.summary.end_customers_p50;
+  const signedMoney = (value: number) => `${value > 0 ? "+" : ""}${money(value)}`;
   return (
     <section className="share-section" aria-labelledby="share-compare">
       <h2 id="share-compare">With “{displayScenarioName(scenario)}” and without it</h2>
+      <div className="report-highlight">
+        <p className="report-eyebrow">{difference > 0 ? "Higher estimated profit" : difference < 0 ? "Lower estimated profit" : "No estimated profit difference"}</p>
+        <p className="report-delta">{signedMoney(difference)}</p>
+        <p>Difference in total profit over {run.horizon} months, comparing the most likely results.</p>
+      </div>
+      <div className="report-deltas">
+        <p><strong>{signedMoney(cashDifference)}</strong><span>Cash difference at month {run.horizon}</span></p>
+        <p><strong>{customerDifference > 0 ? "+" : ""}{formatCount(customerDifference)}</strong><span>Regular customer difference at month {run.horizon}</span></p>
+      </div>
       <table className="share-table">
         <thead>
           <tr>
-            <th scope="col"><span className="visually-hidden">Measure</span></th>
+            <th scope="col">Measure</th>
             <th scope="col">With the change</th>
             <th scope="col">If you change nothing</th>
           </tr>
@@ -55,15 +65,24 @@ function ComparisonSection({ run, scenario, currency }: { run: SimulationRunOut;
           ))}
         </tbody>
       </table>
-      <figure className="share-figure">
-        <SharePlanChart rows={rows} format={money} label={describeChart("What you keep each month, with the change", rows, money)} />
-        <figcaption>
-          What you keep each month, over {run.horizon} months. Solid line: most likely with the change. Shaded: bad case to good case. Thin dashed line:
-          if you change nothing.
-        </figcaption>
-      </figure>
+
     </section>
   );
+}
+
+function ComparisonChart({ run, scenario, currency }: { run: SimulationRunOut; scenario: string; currency: string }) {
+  const change = run.results.find((r) => r.scenario_name === scenario);
+  const nothing = run.results.find((r) => r.scenario_name === "baseline");
+  if (!change || !nothing) return null;
+  const money = (v: number) => formatMoney(v, currency);
+  const rows: PlanRow[] = change.bands.profit.p50.map((p50, i) => ({
+    label: `Month ${i + 1}`, p10: change.bands.profit.p10[i], p50, p90: change.bands.profit.p90[i], baseline: nothing.bands.profit.p50[i],
+  }));
+  return <figure className="share-figure">
+    <h3>Monthly profit with the change - {run.horizon} months</h3>
+    <SharePlanChart rows={rows} format={money} label={describeChart("What you keep each month, with the change", rows, money)} />
+    <figcaption>Solid line: most likely with the change. Shaded: bad case to good case. Dashed line: if you change nothing.</figcaption>
+  </figure>;
 }
 
 function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
@@ -80,6 +99,7 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
     track("screen_view", "share", { sample: today.is_sample });
   }, [today.is_sample]);
 
+  const selectedRun = parsed && !run.loading && !run.error && run.data?.id === parsed.runId ? run.data : null;
   const money = (v: number) => formatMoney(v, today.currency);
   const profit = rowsFrom(today, "profit");
   const cash = rowsFrom(today, "cash");
@@ -92,6 +112,7 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
       <div className="share-controls no-print">
         <button
           type="button"
+          disabled={runs.loading || Boolean(parsed && run.loading)}
           onClick={() => {
             track("print_clicked", "share");
             window.print();
@@ -99,7 +120,7 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
         >
           Print or save as PDF
         </button>
-        <p className="field-help">This opens your browser's print window. Choose “Save as PDF” there to keep a copy. Nothing is sent anywhere.</p>
+        <p className="field-help">This opens your browser's print window. Choose “Save as PDF” there to keep a copy. For the cleanest report, turn off Headers and footers and turn on Background graphics in the print settings. Nothing is sent anywhere.</p>
         {choices.length > 0 ? (
           <div className="field">
             <label htmlFor="share-scenario">Add a saved scenario to compare (optional)</label>
@@ -122,7 +143,10 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
       </div>
 
       <article className="share-sheet" aria-labelledby="share-title">
+        <div className="report-page report-overview">
         <header className="share-header">
+          <p className="report-brand">Business Time Machine</p>
+          <p className="report-eyebrow">Your plan, at a glance</p>
           <h1 id="share-title">{today.name}: plan summary</h1>
           <p>Prepared on {date}</p>
           {today.is_sample && <p className="share-sample">This is a sample {noun}: the numbers are examples, not a real business.</p>}
@@ -142,21 +166,30 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
           </div>
         </section>
 
+        {selectedRun && parsed && <ComparisonSection run={selectedRun} scenario={parsed.scenario} currency={today.currency} />}
+        </div>
+        <div className="report-page report-charts">
+        <p className="report-eyebrow">Follow the numbers</p>
         <section className="share-section" aria-labelledby="share-next">
           <h2 id="share-next">The next 12 months, if you change nothing</h2>
           <figure className="share-figure">
+            <h3>Monthly profit / no change</h3>
             <SharePlanChart rows={profit} format={money} label={describeChart("What you keep each month", profit, money)} />
             <figcaption>What you keep each month. Solid line: most likely. Shaded: bad case to good case.</figcaption>
           </figure>
           <figure className="share-figure">
+            <h3>Cash in the bank / no change</h3>
             <SharePlanChart rows={cash} format={money} label={describeChart("Cash in the bank", cash, money)} />
             <figcaption>Cash in the bank at the end of each month. Solid line: most likely. Shaded: bad case to good case.</figcaption>
           </figure>
         </section>
 
-        {run.data && parsed && <ComparisonSection run={run.data} scenario={parsed.scenario} currency={today.currency} />}
 
-        <ResultAssumptions />
+
+        {selectedRun && parsed && <ComparisonChart run={selectedRun} scenario={parsed.scenario} currency={today.currency} />}
+        </div>
+        <div className="report-page report-assumptions">
+        <p className="report-eyebrow">Behind the result</p>
 
         <section className="share-section" aria-labelledby="share-built">
           <h2 id="share-built">What this is built on</h2>
@@ -190,10 +223,12 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
           </p>
         </section>
 
+        <ResultAssumptions />
         <footer className="share-footer">
           <p className="share-disclaimer">{DISCLAIMER}</p>
           <p className="share-small">Made with Business Time Machine. Nothing in this summary has been sent anywhere.</p>
         </footer>
+        </div>
       </article>
     </div>
   );

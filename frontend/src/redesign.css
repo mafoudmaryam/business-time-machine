@@ -3343,61 +3343,6 @@ button.danger:hover:not(:disabled) {
     border-radius: 0;
   }
 
-  .share-sheet h1,
-  .share-sheet h2,
-  .share-sheet h3,
-  .share-sheet p,
-  .share-sheet li,
-  .share-sheet th,
-  .share-sheet td,
-  .share-sheet figcaption,
-  .share-sheet .share-number,
-  .share-sheet .share-small,
-  .share-sheet a {
-    color: #000000 !important;
-    background: transparent !important;
-  }
-
-  .share-sheet h2 {
-    border-bottom: 1px solid #000000;
-  }
-
-  .share-table,
-  .share-table th,
-  .share-table td {
-    border-radius: 0;
-    background: #ffffff !important;
-    border-color: #bbbbbb;
-  }
-
-  .plan-band {
-    fill: #000000;
-    fill-opacity: 0.12;
-  }
-
-  .plan-median {
-    stroke: #000000;
-    stroke-width: 2.5;
-  }
-
-  .plan-baseline {
-    stroke: #444444;
-    stroke-width: 1.2;
-    stroke-dasharray: 5 4;
-  }
-
-  .plan-grid {
-    stroke: #bbbbbb;
-  }
-
-  .plan-axis {
-    fill: #000000;
-  }
-
-  .share-footer {
-    border-top: 2px solid #000000;
-  }
-
   /* The start-up plan page: plain black on white, every card open, no boxes, links printed with their address */
   .guide-plan,
   .guide-plan * {

@@ -64,6 +64,9 @@ The practice business starts at the plan's own break-even customers a day (with 
 4. **Explore one change at a time.** Today puts the financial figures first: **Money left after bills**, **Money in your bank today**, and **Least money in your bank**. The coach and charts explain the picture. Try a change, inspect the next 12 months, and confirm before saving a plan.
 5. **Learn from what happens.** Record real months in My journal, check the assumptions under How we worked it out, or print a summary from Share. Detailed tools remain under Advanced.
 
+Share now previews a branded PDF report: a current-business snapshot, dynamic saved-scenario profit/cash/customer differences, purple charts, and a separate inputs/assumptions section. Use **Print or save as PDF**. For a clean copy, disable browser **Headers and footers** and enable **Background graphics**. Standard reports use three A4 sections; long names or assumptions may flow onto extra pages.
+
+
 The homepage uses a small animated café illustration and three short steps instead of long feature sections. The header stays simple, and extra figures are revealed when requested. Motion switches off when the device requests reduced motion.
 
 ### Today: your starting picture

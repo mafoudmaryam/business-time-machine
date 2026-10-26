@@ -163,7 +163,7 @@ describe("Share: print", () => {
     expect(print).toMatch(/\.undo-region/);
   });
 
-  it("the print styles are black on white with nothing cut off", () => {
+  it("the print styles keep charts within the printable page", () => {
     const sheetCss = css();
     const print = sheetCss.slice(sheetCss.indexOf("@media print"));
     expect(print).toMatch(/background:\s*#ffffff\s*!important/);
@@ -176,6 +176,22 @@ describe("Share: print", () => {
 
   it("sets A4 page margins that look good", () => {
     expect(css()).toMatch(/@page\s*\{[^}]*size:\s*A4;[^}]*margin:\s*16mm 14mm/);
+  });
+});
+
+describe("Share: result highlights", () => {
+  it.each([
+    [82800, "Higher estimated profit", "+$15,800"],
+    [60000, "Lower estimated profit", "-$7,000"],
+    [67000, "No estimated profit difference", "$0"],
+  ])("labels the profit difference honestly for total %s", async (total, label, value) => {
+    const run = makeRun();
+    run.results[1].summary.total_profit_p50 = total;
+    vi.mocked(api.getSimulationRun).mockResolvedValue(run);
+    mount("?run=2");
+    await screen.findByText(label);
+    expect(sheet().getByText(value)).toBeTruthy();
+    expect(sheet().getByText("-39")).toBeTruthy();
   });
 });
 
@@ -202,8 +218,8 @@ describe("Share: with the change vs if you change nothing", () => {
     expect(row(/What you keep over 12 months/).getByText("$67,000")).toBeTruthy();
     expect(row(/Cash in the bank at the end/).getByText("$112,000")).toBeTruthy();
     expect(row(/Comes out ahead/).getByText("9 of 10 simulated futures")).toBeTruthy();
-    expect(compare.getByRole("img").getAttribute("aria-label")).toMatch(/with the change/);
-    expect(compare.getByRole("img").querySelector(".plan-baseline")).toBeTruthy();
+    expect(sheet().getByRole("img", { name: /with the change/ }).getAttribute("aria-label")).toMatch(/with the change/);
+    expect(sheet().getByRole("img", { name: /with the change/ }).querySelector(".plan-baseline")).toBeTruthy();
   });
 
   it("the address can pick it: ?run=2 opens with the comparison already there", async () => {

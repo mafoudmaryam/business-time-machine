@@ -71,8 +71,9 @@ describe("the 2026 look", () => {
     expect(print).toMatch(/color:\s*#000000\s*!important/);
     expect(print).toMatch(/box-shadow:\s*none\s*!important/);
     expect(print).toMatch(/\.share-sheet[^}]*border-radius:\s*0/);
-    // the chart on paper is black and grey, never green or amber
-    expect(print).toMatch(/\.plan-median\s*\{[^}]*stroke:\s*#000000/);
+    // The report has its own print-safe purple chart styling, loaded last.
+    expect(read("report.css")).toMatch(/\.plan-median\s*\{[^}]*stroke:\s*#6847c7/);
+    expect(read("report.css")).toContain("print-color-adjust: exact");
     expect(print).not.toMatch(/var\(--(green|amber|sage)/);
     // the print block really is the last thing in the file: walk its braces to the end and check nothing follows
     let depth = 0;
