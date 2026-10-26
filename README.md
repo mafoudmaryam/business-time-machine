@@ -142,7 +142,7 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 # from the project root; all three use the backend's virtual environment
 cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
 cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 679 tests
-cd ..\frontend; npm test                                        # 788 tests
+cd ..\frontend; npm test                                        # 798 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -191,18 +191,22 @@ Every full run stores its engine version, random seed and number of iterations, 
 
 ## Quality
 
-Latest frontend verification: **2026-10-25**, after the beginner-focused redesign and selected logo were implemented.
+Latest frontend verification: **2026-10-26**, after adding the decision choice page.
 
 | Check | Result |
 |---|---|
-| Frontend tests (Vitest, 56 files) | 788 passed |
+| Frontend tests (Vitest, 57 files) | 798 passed |
 | TypeScript check | clean |
 | Production build (Vite) | succeeds; existing bundle-size warning remains |
 | Lint (oxlint) | completes with existing warnings in unchanged files |
-| Visual checks | desktop and 390-pixel phone layout; 16/32-pixel favicons on light and dark backgrounds |
+| Visual checks | earlier redesign: desktop/phone layout and favicons; decision choice page: browser visual verification pending |
 | Logo consistency | navigation and favicon paths match the selected concept |
 
 The engine and backend suites were **not rerun for these frontend and logo changes**. Their last documented full-project check, on 2026-10-10, recorded 356 engine tests passing and 678 of 679 backend tests passing. The backend failure was subsequently fixed and its file rerun (70 passing tests), but the full backend suite was not repeated. Historical results are kept separate from the latest frontend verification.
+
+## Choosing a change
+
+“Explore a change” and the main “Try a change” link open `/explore`. Prices opens the existing slider at `/try`; staffing, opening days and marketing open the existing scenario form for the selected business, with the matching decision type selected. Owners still set the details, add a decision and confirm before saving. The model changes opening days per month, not individual opening hours. Marketing’s unvalidated response is explained both on its card and in the form.
 
 ## Honest limits
 
@@ -232,6 +236,7 @@ What does exist for this: the coach can be switched off (`COACH_ENABLED=false`),
 - [x] Simple four-question start, sample businesses, Today page
 - [x] Business switcher, delete with undo, "← Back" on every page
 - [x] Try a change and the 12-month view
+- [x] Explore choices for prices, staffing, opening days and marketing
 - [x] How we worked it out, a print or PDF summary, friendly empty and error states
 - [x] My journal (pilot)
 - [x] Beginner-friendly purple/lavender design with a visual homepage price experiment

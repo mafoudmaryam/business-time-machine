@@ -14,7 +14,7 @@ export const DECISION_TYPE_LABELS: Record<DecisionType, string> = {
   price: "Price change",
   hiring: "Hiring / layoffs",
   marketing: "Marketing spend",
-  hours: "Opening hours",
+  hours: "Opening days",
   menu: "Menu change",
   investment: "Investment / equipment",
 };

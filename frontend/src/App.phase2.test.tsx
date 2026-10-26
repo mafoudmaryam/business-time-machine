@@ -102,12 +102,15 @@ describe("both new pages sit inside the shared layout", () => {
 });
 
 describe("the nav and the links between the pages", () => {
-  it("'Try a change' in the top bar goes to the Try page and is marked as the current page there", async () => {
+  it("'Try a change' opens the choices and Prices still opens the existing slider", async () => {
     const { user } = open("/today");
     await settle();
     const link = within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Try a change" });
-    expect(link.getAttribute("href")).toBe("/try");
+    expect(link.getAttribute("href")).toBe("/explore");
     await user.click(link);
+    await settle();
+    expect(screen.getByRole("heading", { level: 1, name: "What would you like to change?" })).toBeTruthy();
+    await user.click(screen.getByRole("link", { name: "Prices" }));
     await settle();
     expect(screen.getByRole("heading", { level: 1, name: "What if you changed your prices?" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Try a change" }).className).toContain("active");
@@ -117,10 +120,10 @@ describe("the nav and the links between the pages", () => {
     const { user } = open("/today");
     await settle();
     const inPage = within(screen.getByRole("main")).getByRole("link", { name: "Try a change" });
-    expect(inPage.getAttribute("href")).toBe("/try");
+    expect(inPage.getAttribute("href")).toBe("/explore");
     await user.click(inPage);
     await settle();
-    expect(screen.getByRole("heading", { level: 1, name: "What if you changed your prices?" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 1, name: "What would you like to change?" })).toBeTruthy();
   });
 
   it("the old scenario builder is still there, under Advanced", async () => {

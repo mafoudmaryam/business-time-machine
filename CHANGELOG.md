@@ -30,6 +30,13 @@ frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 - Sample failures appear beside the hero action and support retry. Existing sample actions, onboarding, startup guide and confirmation rules are retained.
 - Validation: 783 frontend tests in 55 files, production build and lint pass. Lint reports warnings in unchanged files. Engine and backend were not changed or re-tested.
 
+## Choose which business decision to explore (26 Oct 2026)
+
+- “Explore a change” and generic Try links open four clear choices: Prices, Staffing, Opening days and Marketing. Keep the direct price slider and timeline addresses working.
+- Staffing, days and marketing choices open their existing form with the selected business and decision type. Choosing a card does not add, confirm, save or simulate a decision. Unsupported type queries fall back to the usual price form.
+- Describe the engine’s days-per-month setting as Opening days. Show the unvalidated marketing-response caveat on the choice card and whenever the marketing form is selected.
+- Add route, business-context, confirmation, keyboard and accessibility checks. Existing navigation tests exercise the choice page and the path onward to the price slider. All 798 frontend tests passed; final form/accessibility checks passed again after the label and selected-state refinement (26 tests). Build passed; lint retained warnings in unchanged files. Browser visual verification is pending.
+
 ## Pictures labelled and credited (Oct 2026)
 
 - The four start-page pictures are now labelled as AI-generated illustrations (ChatGPT, October 2026): a new `frontend/public/images/redesign/CREDITS.md`, alt text that starts "Illustration of ...", and one line in the start-page footer. The café, restaurant and bakery photos are still credited to their Pexels photographers. README has an "Images" section. Docs and text only.
