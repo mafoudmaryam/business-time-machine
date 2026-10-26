@@ -12,10 +12,10 @@ import { SharePage } from "./pages/Share/SharePage";
 import { StartPage } from "./pages/Start/StartPage";
 import { TimelinePage } from "./pages/Timeline/TimelinePage";
 import { TodayPage } from "./pages/Today/TodayPage";
+import { ExplorePage } from "./pages/Explore/ExplorePage";
 import { TryPage } from "./pages/Try/TryPage";
 
-/** The front page. Every visit to it (the header title, "New business", a typed address) is a new location, so the
- * form starts over; without the key, being on the page already would leave a half-filled form in place. */
+/** Each visit offers a saved tab-local setup draft rather than silently reopening a half-filled form. */
 function FrontPage() {
   return <StartPage key={useLocation().key} />;
 }
@@ -29,6 +29,7 @@ export function App() {
         <Route path="/" element={<FrontPage />} />
         <Route path="/start" element={<FrontPage />} />
         <Route path="/today" element={<TodayPage />} />
+        <Route path="/explore" element={<ExplorePage />} />
         <Route path="/try" element={<TryPage />} />
         <Route path="/timeline" element={<TimelinePage />} />
         <Route path="/how" element={<HowPage />} />

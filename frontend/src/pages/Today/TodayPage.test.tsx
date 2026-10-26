@@ -56,7 +56,7 @@ describe("Today: the financial position comes first", () => {
     expect(await screen.findByRole("heading", { name: "Today at My café" })).toBeTruthy();
     const coach = screen.getByRole("region", { name: "Your coach says" });
     expect(coach.textContent).toContain("you keep about $5,820");
-    expect(screen.getByRole("link", { name: "Explore a change →" }).getAttribute("href")).toBe("/try");
+    expect(screen.getByRole("link", { name: "Explore a change →" }).getAttribute("href")).toBe("/explore");
     // The figures lead, with the explanation immediately after them.
     const tiles = screen.getByRole("heading", { name: /Money left after bills/ });
     expect(tiles.compareDocumentPosition(coach) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -132,7 +132,7 @@ describe("Today: the financial position comes first", () => {
   it("links to the Try a change page", async () => {
     mount();
     const link = await screen.findByRole("link", { name: "Try a change" });
-    expect(link.getAttribute("href")).toBe("/try");
+    expect(link.getAttribute("href")).toBe("/explore");
   });
 });
 

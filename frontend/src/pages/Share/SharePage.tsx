@@ -1,3 +1,4 @@
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { getHow, getSimulationRun, getSummary, listSimulationRuns, type HowOut, type SimulationRunOut, type TodayOut } from "../../api";
@@ -113,7 +114,7 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
           </div>
         ) : (
           <p className="field-help">
-            Want to compare a change? <Link to="/try">Try a change</Link> and save it as a scenario, then come back here.
+            Want to compare a change? <Link to="/explore">Try a change</Link> and save it as a scenario, then come back here.
           </p>
         )}
         {run.loading && parsed && <p className="try-status" role="status">Loading that scenario…</p>}
@@ -155,6 +156,8 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
 
         {run.data && parsed && <ComparisonSection run={run.data} scenario={parsed.scenario} currency={today.currency} />}
 
+        <ResultAssumptions />
+
         <section className="share-section" aria-labelledby="share-built">
           <h2 id="share-built">What this is built on</h2>
           {how.told.length > 0 && (
@@ -183,7 +186,7 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
             </>
           )}
           <p className="share-small">
-            Worked out from {how.run.iterations.toLocaleString()} possible futures, month by month (program version {how.run.engine_version}).
+            Worked out from {how.run.iterations.toLocaleString()} simulated futures, month by month (program version {how.run.engine_version}).
           </p>
         </section>
 

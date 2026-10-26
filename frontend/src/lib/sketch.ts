@@ -77,7 +77,7 @@ export function catchText(visitsChange: number): string {
 }
 
 export function futuresText(aheadOf10: number): string {
-  return `You come out ahead in ${aheadOf10} of 10 possible futures.`;
+  return `The change comes out ahead in ${aheadOf10} of 10 simulated futures.`;
 }
 
 /** Ten dots: filled for each future that comes out ahead. */

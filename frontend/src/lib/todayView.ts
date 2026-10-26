@@ -71,7 +71,7 @@ export function safetyTile(t: TodayOut["tiles"], currency: string): Tile {
     help: "The cash you have in the bank today, and how long it would pay your bills.",
     headline: formatMoney(t.cash_now, currency),
     detail: `In the bank today. ${covers}`,
-    risk: risky ? `Cash runs out in ${t.cash_runs_out_of_10} of 10 possible futures.` : null,
+    risk: risky ? `Cash runs out in ${t.cash_runs_out_of_10} of 10 simulated futures.` : null,
     tone: risky ? "bad" : "neutral",
   };
 }

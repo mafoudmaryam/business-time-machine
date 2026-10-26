@@ -54,7 +54,9 @@ describe("right-hand card", () => {
   });
 
   it("futuresText and dots agree", () => {
-    expect(futuresText(9)).toBe("You come out ahead in 9 of 10 possible futures.");
+    expect(futuresText(9)).toBe("The change comes out ahead in 9 of 10 simulated futures.");
+    expect(futuresText(0)).toBe("The change comes out ahead in 0 of 10 simulated futures.");
+    expect(futuresText(10)).toBe("The change comes out ahead in 10 of 10 simulated futures.");
     const d = dots(9);
     expect(d).toHaveLength(10);
     expect(d.filter(Boolean)).toHaveLength(9);

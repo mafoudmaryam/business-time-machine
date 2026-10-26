@@ -38,6 +38,9 @@ describe("the landing price demo", () => {
     await userEvent.click(screen.getByRole("button", { name: "See what happens →" }));
     await screen.findByText("+£534", { exact: true });
     expect(screen.getByText(/About 382 fewer visits/).closest("details")).toBeNull();
+    const note = screen.getByRole("complementary", { name: "What these estimates depend on" });
+    expect(note.closest("details")).toBeNull();
+    expect(note.textContent).toContain("not a measured chance of real-world success");
     expect(screen.getByRole("heading", { name: "Money in the bank" }).closest("details")?.hasAttribute("open")).toBe(false);
     await userEvent.click(screen.getByText("What else could happen?"));
     expect(screen.getByRole("heading", { name: "Money in the bank" }).closest("details")?.hasAttribute("open")).toBe(true);
@@ -51,6 +54,27 @@ describe("the landing price demo", () => {
     fireEvent.change(screen.getByRole("slider"), { target: { value: "4" } });
     await waitFor(() => expect(previewChange).toHaveBeenLastCalledWith(99, { type: "price", amount: 4, start_month: 1 }, expect.any(AbortSignal)));
     expect(createSampleBusiness).toHaveBeenCalledTimes(1);
+  });
+
+  it("blocks exploration until the selected price has a successful result", async () => {
+    const open = vi.fn();
+    render(<HeroDemo currency="GBP" onOpen={open} />);
+    await userEvent.click(screen.getByRole("button", { name: "See what happens →" }));
+    await screen.findByText("+£534", { exact: true });
+    let finish!: (value: ReturnType<typeof makeSketch>) => void;
+    vi.mocked(previewChange).mockImplementation(() => new Promise((resolve) => { finish = resolve; }));
+    fireEvent.change(screen.getByRole("slider"), { target: { value: "10" } });
+    expect(screen.getByText(/Previous result: a 7%/)).toBeTruthy();
+    const next = screen.getByRole("button", { name: /Keep exploring this café/ }) as HTMLButtonElement;
+    expect(next.disabled).toBe(true);
+    await userEvent.click(next);
+    expect(open).not.toHaveBeenCalled();
+    await waitFor(() => expect(previewChange).toHaveBeenLastCalledWith(99, { type: "price", amount: 10, start_month: 1 }, expect.any(AbortSignal)));
+    finish(makeSketch({ amount: 10 }));
+    await waitFor(() => expect(next.disabled).toBe(false));
+    expect(screen.getByText(/Showing a 10%/)).toBeTruthy();
+    await userEvent.click(next);
+    expect(open).toHaveBeenCalledWith(sample);
   });
 
   it("allows a failed sample creation to be retried", async () => {
@@ -71,5 +95,7 @@ describe("the landing price demo", () => {
     fireEvent.change(screen.getByRole("slider"), { target: { value: "9" } });
     expect(await screen.findByText(/We couldn’t update/)).toBeTruthy();
     expect(screen.getByText("+£534", { exact: true })).toBeTruthy();
+    expect(screen.getByText(/Previous result: a 7%/)).toBeTruthy();
+    expect((screen.getByRole("button", { name: /Keep exploring this café/ }) as HTMLButtonElement).disabled).toBe(true);
   });
 });

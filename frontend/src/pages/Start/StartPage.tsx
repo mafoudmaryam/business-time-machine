@@ -18,6 +18,7 @@ import { track } from "../../lib/events";
 import { DEFAULT_CURRENCY, formatMoney, formatUnit } from "../../lib/format";
 import { heroImage } from "../../lib/images";
 import { getRememberedBusinessId, rememberBusiness } from "../../lib/session";
+import { clearSetupDraft, readSetupDraft, saveSetupDraft } from "../../lib/setupDraft";
 import { describeStartingMonth } from "../../lib/startSummary";
 import { defaultBusinessName, toAnswers, validateAnswers, type AnswerDraft } from "../../lib/todayView";
 import { Landing, LandingFooter } from "./Landing";
@@ -51,6 +52,8 @@ export function StartPage() {
     };
   }, []);
 
+  const [pendingDraft, setPendingDraft] = useState(readSetupDraft);
+  const [saveFailed, setSaveFailed] = useState(false);
   const [step, setStep] = useState(0);
   const [industryId, setIndustryId] = useState<string | null>(null);
   const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
@@ -62,6 +65,44 @@ export function StartPage() {
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [pickError, setPickError] = useState(false);
+
+  useEffect(() => {
+    if (pendingDraft) return; // Opening the homepage must not overwrite an unanswered resume offer.
+    const hasInput = industryId !== null || currency !== DEFAULT_CURRENCY || name !== "" || Object.values(answers).some(Number.isFinite);
+    const saved = hasInput
+      ? saveSetupDraft({ industryId, currency, answers, name, step: step === 0 ? 0 : 1 })
+      : clearSetupDraft();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- report the result of the external browser-storage write
+    setSaveFailed(!saved);
+  }, [pendingDraft, industryId, currency, answers, name, step]);
+
+  function startOver() {
+    clearSetupDraft();
+    setPendingDraft(null);
+    setIndustryId(null);
+    setCurrency(DEFAULT_CURRENCY);
+    setAnswers({ ...EMPTY });
+    setName("");
+    setStep(0);
+    setQuick(null);
+    setErrors({});
+    setFailure(null);
+    setPickError(false);
+    setPickingCurrency(false);
+    document.getElementById("start-here")?.focus();
+  }
+
+  function continueSetup() {
+    if (!pendingDraft || !industries.data) return;
+    const known = industries.data.some((i) => i.id === pendingDraft.industryId);
+    setIndustryId(known ? pendingDraft.industryId : null);
+    setCurrency(pendingDraft.currency);
+    setAnswers(pendingDraft.answers);
+    setName(pendingDraft.name);
+    setStep(known ? pendingDraft.step : 0);
+    setPendingDraft(null);
+    document.getElementById("start-here")?.focus();
+  }
 
   // The business that is open in this tab (if the server still has it) is reached from "Today" in the top bar; the rest go in the list.
   const openId = getRememberedBusinessId();
@@ -120,7 +161,9 @@ export function StartPage() {
     setBusy(true);
     setFailure(null);
     try {
-      enter(await createQuickBusiness(name.trim() || defaultBusinessName(industryId), industryId, currency, quick), "quick");
+      const business = await createQuickBusiness(name.trim() || defaultBusinessName(industryId), industryId, currency, quick);
+      clearSetupDraft();
+      enter(business, "quick");
     } catch (err) {
       setFailure(err instanceof Error ? err.message : String(err));
     } finally {
@@ -149,7 +192,22 @@ export function StartPage() {
         </section>
       )}
 
-      <section id="start-here" className="start-form" aria-labelledby="start-heading" tabIndex={-1}>
+      <section id="start-here" className="start-form" aria-labelledby={pendingDraft ? "resume-setup-title" : "start-heading"} tabIndex={-1}>
+      {pendingDraft ? (
+        <div className="continue-box" aria-labelledby="resume-setup-title">
+          <h2 id="resume-setup-title">You have an unfinished setup</h2>
+          <p>Your answers are kept in this browser tab. Continue where you stopped, or start with a blank form.</p>
+          <p>We’ll recalculate your summary before you confirm it.</p>
+          <div className="wizard-nav">
+            <button type="button" disabled={!industries.data || busy} onClick={continueSetup}>Continue setup</button>
+            <button type="button" className="secondary" disabled={busy} onClick={startOver}>Start over</button>
+          </div>
+          {industries.loading && <Spinner label="Loading business types…" />}
+          <ErrorBanner message={industries.error} />
+          {industries.error && <button type="button" className="link-button" onClick={industries.reload}>Try again</button>}
+        </div>
+      ) : (
+      <>
       <Heading id="start-heading">{step === 0 ? "What kind of business do you run?" : step === 1 ? `Tell us about your ${noun}` : "Here is what we worked out"}</Heading>
       <p className="step-indicator">
         Step {step + 1} of 3
@@ -159,6 +217,8 @@ export function StartPage() {
           Change currency
         </button>
       </p>
+      <p className="field-help">{saveFailed ? "Keep this page open to finish setup." : "Unfinished answers are kept in this browser tab."} <button type="button" className="link-button" disabled={busy} onClick={startOver}>Start over</button></p>
+      {saveFailed && <p role="status" className="field-help">Your browser couldn’t save these answers. Keep this page open until you finish setup.</p>}
       {pickingCurrency && (
         <div className="field currency-pick">
           <label htmlFor="start-currency">Currency</label>
@@ -340,6 +400,8 @@ export function StartPage() {
             ))}
           </ul>
         </section>
+      )}
+      </>
       )}
       </section>
       {step === 0 && <LandingFooter />}

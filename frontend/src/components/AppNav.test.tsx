@@ -42,10 +42,10 @@ describe("AppNav", () => {
     expect(hrefs).toEqual({ Compare: "/compare", "Run history": "/history", "Full business setup": "/setup" });
   });
 
-  it("Try a change opens the Try page, with or without a business open (the page itself sends you to the start screen if none)", () => {
+  it("Try a change opens the choice page, with or without a business open (the page itself sends you to the start screen if none)", () => {
     rememberBusiness(4);
     nav();
-    expect(screen.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/try");
+    expect(screen.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/explore");
   });
 
   it("the old scenario builder is under Advanced", () => {
@@ -54,7 +54,7 @@ describe("AppNav", () => {
   });
 
   it("Try a change is marked as current on the Try page and on the 12-month page", () => {
-    for (const path of ["/try", "/timeline"]) {
+    for (const path of ["/explore", "/try", "/timeline"]) {
       const { unmount } = render(
         <MemoryRouter initialEntries={[path]}>
           <AppNav />

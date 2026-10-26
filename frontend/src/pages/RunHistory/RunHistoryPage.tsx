@@ -1,3 +1,4 @@
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getSimulationRun, listBusinesses, listIndustries, listSimulationRuns, type SimulationRunOut } from "../../api";
@@ -122,7 +123,7 @@ export function RunHistoryPage() {
           {runs.data && runs.data.length === 0 && (
             <EmptyState
               title="No runs yet"
-              action={{ label: "Try a change", to: "/try" }}
+              action={{ label: "Try a change", to: "/explore" }}
               secondary={{ label: "Compare scenarios", to: "/compare" }}
             >
               <p>A run is one full simulation. When you save a change from Try a change, or run a comparison, its result is kept here.</p>
@@ -187,6 +188,7 @@ export function RunHistoryPage() {
                 <Link to="/how" onClick={() => rememberBusiness(openedRun.business_id)}>How did we get these numbers?</Link> ·{" "}
                 <Link to={`/share?run=${openedRun.id}`} onClick={() => rememberBusiness(openedRun.business_id)}>Print or share this result</Link>
               </p>
+              <ResultAssumptions />
               <CoachCard key={openedRun.id} runId={openedRun.id} businessId={openedRun.business_id} currency={currency} />
               <RiskAlerts results={openedRun.results} />
               <ChartCaption />
