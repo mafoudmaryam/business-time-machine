@@ -97,7 +97,7 @@ describe("tiles", () => {
     expect(safetyTile({ ...t, months_of_bills_covered: 1 }, "USD").detail).toContain("about 1 month of bills");
     expect(safetyTile({ ...t, months_of_bills_covered: 0 }, "USD").detail).toContain("less than one month");
     const risky = safetyTile({ ...t, cash_runs_out_of_10: 3 }, "USD");
-    expect(risky.risk).toBe("Cash runs out in 3 of 10 possible futures.");
+    expect(risky.risk).toBe("Cash runs out in 3 of 10 simulated futures.");
     expect(risky.tone).toBe("bad");
   });
 

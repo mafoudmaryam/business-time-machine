@@ -3288,6 +3288,35 @@ button.danger:hover:not(:disabled) {
 /* ---------- Printing: plain black on white, no decoration (the Share page's rule, kept on purpose) ----------
    This block is last on purpose: it beats every colour, card and shadow above. Only fonts and layout survive. */
 
+/* Decision choices use the current theme and keep the existing price tool's address. */
+.explore-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding: 0;
+  margin: 32px 0;
+  list-style: none;
+}
+.explore-choice {
+  display: block;
+  padding: 28px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  color: var(--charcoal);
+  text-decoration: none;
+}
+.explore-choice:hover,
+.explore-choice:focus-visible {
+  border-color: var(--green);
+  background: var(--sage);
+}
+.explore-choice h2 { margin-top: 0; }
+.explore-choice span { color: var(--green); font-weight: 700; }
+@media (max-width: 760px) {
+  .explore-choices { grid-template-columns: minmax(0, 1fr); }
+}
+
 @media print {
   *,
   *::before,

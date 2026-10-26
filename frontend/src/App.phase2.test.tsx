@@ -102,12 +102,15 @@ describe("both new pages sit inside the shared layout", () => {
 });
 
 describe("the nav and the links between the pages", () => {
-  it("'Try a change' in the top bar goes to the Try page and is marked as the current page there", async () => {
+  it("'Try a change' opens the choices and Prices still opens the existing slider", async () => {
     const { user } = open("/today");
     await settle();
     const link = within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Try a change" });
-    expect(link.getAttribute("href")).toBe("/try");
+    expect(link.getAttribute("href")).toBe("/explore");
     await user.click(link);
+    await settle();
+    expect(screen.getByRole("heading", { level: 1, name: "What would you like to change?" })).toBeTruthy();
+    await user.click(screen.getByRole("link", { name: "Prices" }));
     await settle();
     expect(screen.getByRole("heading", { level: 1, name: "What if you changed your prices?" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Try a change" }).className).toContain("active");
@@ -117,10 +120,35 @@ describe("the nav and the links between the pages", () => {
     const { user } = open("/today");
     await settle();
     const inPage = within(screen.getByRole("main")).getByRole("link", { name: "Try a change" });
-    expect(inPage.getAttribute("href")).toBe("/try");
+    expect(inPage.getAttribute("href")).toBe("/explore");
     await user.click(inPage);
     await settle();
-    expect(screen.getByRole("heading", { level: 1, name: "What if you changed your prices?" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 1, name: "What would you like to change?" })).toBeTruthy();
+  });
+
+  it("keeps uncertainty and result guards working after choosing Prices from Explore", async () => {
+    const { user } = open("/today");
+    await settle();
+    await user.click(screen.getByRole("link", { name: "Explore a change →" }));
+    await settle();
+    await user.click(screen.getByRole("link", { name: "Prices" }));
+    await settle();
+    expect(screen.getByRole("complementary", { name: "What these estimates depend on" }).textContent)
+      .toContain("not a measured chance of real-world success");
+    vi.mocked(api.previewChange).mockRejectedValueOnce(new Error("offline"));
+    fireEvent.change(screen.getByRole("slider"), { target: { value: "9" } });
+    await settle(250);
+    expect(screen.getByText(/Previous result: a 7%/)).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "Watch the next 12 months →" })).toBeNull();
+    expect((screen.getByRole("button", { name: "Save as a plan" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.change(screen.getByRole("slider"), { target: { value: "10" } });
+    await settle(250);
+    const watch = screen.getByRole("link", { name: "Watch the next 12 months →" });
+    expect(watch.getAttribute("href")).toBe("/timeline?change=price&amount=10&start=1");
+    await user.click(watch);
+    await settle();
+    expect(screen.getByRole("heading", { level: 1, name: "The next 12 months" })).toBeTruthy();
+    expect(screen.getByRole("complementary", { name: "What these estimates depend on" })).toBeTruthy();
   });
 
   it("the old scenario builder is still there, under Advanced", async () => {

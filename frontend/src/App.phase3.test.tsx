@@ -148,7 +148,7 @@ describe("empty states: each shows its one next step", () => {
     vi.mocked(api.listScenarios).mockResolvedValue([]);
     open("/compare?business=1");
     const box = within(await screen.findByRole("region", { name: "No scenarios yet" }));
-    expect(box.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/try");
+    expect(box.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/explore");
     expect(box.getByRole("link", { name: "Describe one in your own words" }).getAttribute("href")).toBe("/scenarios");
     expect(box.getByText(/A scenario is one idea you want to test/)).toBeTruthy();
   });
@@ -163,7 +163,7 @@ describe("empty states: each shows its one next step", () => {
     vi.mocked(api.listSimulationRuns).mockResolvedValue([]);
     open("/history?business=1");
     const box = within(await screen.findByRole("region", { name: "No runs yet" }));
-    expect(box.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/try");
+    expect(box.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/explore");
     expect(box.getByRole("link", { name: "Compare scenarios" }).getAttribute("href")).toBe("/compare");
   });
 
@@ -181,7 +181,7 @@ describe("empty states: each shows its one next step", () => {
     vi.mocked(api.getBusinessImpact).mockResolvedValue({ scenarios: 0, runs: 0 });
     open("/today");
     const box = within(await screen.findByRole("region", { name: "You haven't tried a change yet" }));
-    expect(box.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/try");
+    expect(box.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/explore");
     expect(screen.queryByText("Thinking about a change?")).toBeNull();
   });
 

@@ -30,6 +30,16 @@ frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 - Sample failures appear beside the hero action and support retry. Existing sample actions, onboarding, startup guide and confirmation rules are retained.
 - Validation: 783 frontend tests in 55 files, production build and lint pass. Lint reports warnings in unchanged files. Engine and backend were not changed or re-tested.
 
+## Combine the website improvements (26 Oct 2026)
+
+- Combine the prepared updates from PRs #6, #10, #12, #13 and #14 on one review branch, preserving their history and reconciling documentation.
+- Explain simulated outcomes consistently across the demo, results and printable summary; keep marketing-response limitations visible.
+- Label previous slider results and require a successful matching calculation before saving or continuing.
+- Save unfinished setup in the current browser tab, with Continue setup / Start over; recalculate the summary before confirmation and clear the draft only after successful creation or explicit reset.
+- Offer Prices, Staffing, Opening days and Marketing through Explore; keep the direct price slider and existing confirmation process.
+- Run Project checks on pull requests, master updates and manual dispatch with separate engine/backend/frontend jobs, pinned actions and no API keys or real business database.
+- Reconcile the documentation and test counts. Add a cross-feature Explore → price → failed update → recovery → timeline regression check. Final local validation passed 813 frontend tests, 356 engine tests and 678 backend tests (one expected skip), plus build, lint and actionlint. Browser and printed-layout verification remain pending.
+
 ## Pictures labelled and credited (Oct 2026)
 
 - The four start-page pictures are now labelled as AI-generated illustrations (ChatGPT, October 2026): a new `frontend/public/images/redesign/CREDITS.md`, alt text that starts "Illustration of ...", and one line in the start-page footer. The café, restaurant and bakery photos are still credited to their Pexels photographers. README has an "Images" section. Docs and text only.

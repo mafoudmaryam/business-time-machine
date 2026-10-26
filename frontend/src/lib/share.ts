@@ -64,7 +64,7 @@ export function compareRows(change: ScenarioResultOut, nothing: ScenarioResultOu
     { label: "Cash in the bank at the end", withChange: money(a.end_cash_p50), without: money(b.end_cash_p50) },
     { label: "Regular customers at the end", withChange: formatCount(a.end_customers_p50), without: formatCount(b.end_customers_p50) },
   ];
-  if (ahead !== null) rows.push({ label: "Comes out ahead of changing nothing", withChange: `${ahead} of 10 possible futures`, without: "-" });
+  if (ahead !== null) rows.push({ label: "Comes out ahead of changing nothing", withChange: `${ahead} of 10 simulated futures`, without: "-" });
   return rows;
 }
 

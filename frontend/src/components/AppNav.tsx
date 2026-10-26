@@ -53,7 +53,7 @@ export function AppNav() {
           </NavLink>
         </li>
         <li>
-          <NavLink to="/try" className={() => (location.pathname === "/try" || location.pathname === "/timeline" ? "active" : "")}>
+          <NavLink to="/explore" className={() => (location.pathname === "/explore" || location.pathname === "/try" || location.pathname === "/timeline" ? "active" : "")}>
             Try a change
           </NavLink>
         </li>

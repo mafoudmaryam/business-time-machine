@@ -142,7 +142,7 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 # from the project root; all three use the backend's virtual environment
 cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
 cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 679 tests
-cd ..\frontend; npm test                                        # 788 tests
+cd ..\frontend; npm test                                        # 813 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -191,20 +191,34 @@ Every full run stores its engine version, random seed and number of iterations, 
 
 ## Quality
 
-Latest frontend verification: **2026-10-25**, after the beginner-focused redesign and selected logo were implemented.
+Latest local verification: **2026-10-26**, using fresh Python 3.12 environments and a clean frontend install while checking the combined website improvements.
 
 | Check | Result |
 |---|---|
-| Frontend tests (Vitest, 56 files) | 788 passed |
+| Engine tests (Python 3.12) | 356 passed |
+| Backend tests (Python 3.12) | 678 passed, 1 skipped (no development database) |
+| Frontend tests (Vitest, 57 files) | 813 passed |
 | TypeScript check | clean |
 | Production build (Vite) | succeeds; existing bundle-size warning remains |
 | Lint (oxlint) | completes with existing warnings in unchanged files |
-| Visual checks | desktop and 390-pixel phone layout; 16/32-pixel favicons on light and dark backgrounds |
+| Earlier visual checks | original redesign only; combined browser and printed-layout verification pending |
 | Logo consistency | navigation and favicon paths match the selected concept |
 
-The engine and backend suites were **not rerun for these frontend and logo changes**. Their last documented full-project check, on 2026-10-10, recorded 356 engine tests passing and 678 of 679 backend tests passing. The backend failure was subsequently fixed and its file rerun (70 passing tests), but the full backend suite was not repeated. Historical results are kept separate from the latest frontend verification.
+### Automatic checks
+
+`.github/workflows/checks.yml` runs **Project checks** on pull requests, pushes to `master`, and manual runs. Its three jobs are **Engine tests**, **Backend tests**, and **Frontend tests and build**. Open a pull request’s Checks tab to see the result and failing command. After the workflow is merged into the default branch, it is also available through Actions → Project checks → Run workflow.
+
+Python jobs use Python 3.12 and the checked-in requirements; the frontend uses Node 24 and `npm ci` with its lockfile, then tests, lint and build. Jobs have time limits, cancel superseded runs and cache downloaded packages. Official setup actions are pinned to commit SHAs. These checks use read-only repository permissions, temporary databases and a rule-based coach, with no API keys or business database. The development-database round-trip test intentionally skips on a fresh checkout; synthetic migration tests still run.
+
+This workflow reports results; it does not change branch protection or automatically merge/deploy anything. The Python requirements allow newer compatible package versions, so this is not a fully locked Python environment. This combined branch includes the uncertainty wording, slider consistency, resumable setup, decision choices and automatic checks. Other unrelated branches are not included.
+
+## Choosing a change
+
+“Explore a change” and the main “Try a change” link open `/explore`. Prices opens the existing slider at `/try`; staffing, opening days and marketing open the existing scenario form for the selected business, with the matching decision type selected. Owners still set the details, add a decision and confirm before saving. The model changes opening days per month, not individual opening hours. Marketing’s unvalidated response is explained both on its card and in the form.
 
 ## Honest limits
+
+The demo, result screens and printable summary explain that outcome shares describe simulated futures under the model’s assumptions. For example, 9 out of 10 simulated futures does not establish a measured 90% real-world chance of success. Marketing-dependent results also rely on customer response and available capacity; that response has not been validated against real business data.
 
 - **It is a simplified model.** The answers are scenarios, not forecasts, and this is not financial advice.
 - **Some settings are guesses.** The marketing and word-of-mouth settings are not calibrated against real data and look too optimistic; they are reused for all three industries. Restaurant and bakery defaults are typical-small-business estimates. The four-question start fills in the rest with rough rules (for example "other bills are a third of the rent"); the app shows every guess and lets you change it.
@@ -232,6 +246,11 @@ What does exist for this: the coach can be switched off (`COACH_ENABLED=false`),
 - [x] Simple four-question start, sample businesses, Today page
 - [x] Business switcher, delete with undo, "← Back" on every page
 - [x] Try a change and the 12-month view
+- [x] Clear choices for prices, staffing, opening days and marketing
+- [x] Resume unfinished setup in the same browser tab
+- [x] Match slider results before saving or continuing
+- [x] Explain uncertainty across results and printed summaries
+- [x] Automatic engine/backend/frontend checks on GitHub
 - [x] How we worked it out, a print or PDF summary, friendly empty and error states
 - [x] My journal (pilot)
 - [x] Beginner-friendly purple/lavender design with a visual homepage price experiment
@@ -250,6 +269,8 @@ What does exist for this: the coach can be switched off (`COACH_ENABLED=false`),
 See [CHANGELOG.md](CHANGELOG.md) for what changed and when.
 
 ## Privacy and data
+
+- **Unfinished setup stays in this tab.** Business type, currency, entered amounts, name and question step are saved in browser session storage. Refreshing or returning offers “Continue setup” or “Start over”. A restored summary is recalculated before confirmation; saved calculations are not reused. The draft is cleared after successful business creation or Start over, and is kept if creation fails or you explore a sample instead. It is not an account backup or cross-device sync. Blocked storage leaves the form usable and shows a message; empty or incomplete nonnumeric fields restore as blank.
 
 - **Stored on your computer.** In the default setup everything lives in a local SQLite file, `backend/btm.db`. Nothing is sent anywhere, and the app loads no outside fonts or scripts. If you switch on the **cloud AI coach**, the engine's facts and any text you type into the "say it in your own words" or "Ask the coach" boxes are sent to that provider; the local Ollama mode keeps everything on your machine.
 - **Keep experiments separate.** Use `.\start.ps1 -TempDb` for a throwaway preview database. Samples created by clicking the app are stored in whichever database the backend is using; the inline price estimate does not save a plan. Automated tests use their own temporary databases. Databases and backups are ignored by Git.

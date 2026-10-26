@@ -37,12 +37,12 @@ export function SummaryTable({ results, customerNoun = "customers", currency = D
             <InfoTip text={`How many ${customerNoun} are still coming back, in the middle-outcome future.`} />
           </th>
           <th>
-            Chance cash runs out{" "}
-            <InfoTip text="The chance that cash drops below zero at some point during the simulation." />
+            Simulated futures where cash runs out{" "}
+            <InfoTip text="The share of simulated futures where cash drops below zero, under the model’s assumptions. This is not a measured real-world probability." />
           </th>
           <th>
-            Chance this beats doing nothing{" "}
-            <InfoTip text="The chance this scenario ends up more profitable than doing nothing." />
+            Simulated futures where this beats doing nothing{" "}
+            <InfoTip text="The share of simulated futures where this scenario is more profitable than changing nothing, under the model’s assumptions. This is not a measured real-world probability." />
           </th>
         </tr>
       </thead>

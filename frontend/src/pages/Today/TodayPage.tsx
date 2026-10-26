@@ -1,3 +1,4 @@
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { getBusinessImpact, getJournal, getToday, getTodayNote, type TodayNote, type TodayOut } from "../../api";
@@ -108,7 +109,7 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
           <h1>Today at {today.name}{today.is_sample && <span className="sample-tag">Sample business</span>}</h1>
           <p className="today-subtitle">Try a small change to see what could be different.</p>
         </div>
-        <Link className="btn btn-green" to="/try" onClick={() => track("try_a_change_clicked", "today")}>Explore a change →</Link>
+        <Link className="btn btn-green" to="/explore" onClick={() => track("try_a_change_clicked", "today")}>Explore a change →</Link>
       </header>
       {today.setup_source === "guide" && <StartingPictureBanner />}
       {today.is_sample && (
@@ -140,15 +141,16 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
       )}
 
       <TodayChart today={today} />
+      <ResultAssumptions marketing={false} />
 
       {nothingSaved ? (
-        <EmptyState compact title="You haven't tried a change yet" action={{ label: "Try a change", to: "/try" }}>
+        <EmptyState compact title="You haven't tried a change yet" action={{ label: "Try a change", to: "/explore" }}>
           <p>Everything above is how things stand today. When you try a change, you'll see here what it could do.</p>
         </EmptyState>
       ) : (
         <p className="today-try">
           Thinking about a change?{" "}
-          <Link to="/try" onClick={() => track("try_a_change_clicked", "today")}>
+          <Link to="/explore" onClick={() => track("try_a_change_clicked", "today")}>
             Try a change
           </Link>
         </p>

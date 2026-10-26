@@ -17,6 +17,7 @@ import { ErrorBanner } from "../../components/ErrorBanner";
 import { LoadError } from "../../components/LoadError";
 import { Spinner } from "../../components/Spinner";
 import { useDeleteFlow } from "../../components/useDeleteFlow";
+import { DECISION_TYPES } from "../../constants";
 import { useAsync } from "../../hooks/useAsync";
 import type { ScenarioPrefill } from "../../lib/coachIdea";
 import { DEFAULT_CURRENCY } from "../../lib/format";
@@ -34,6 +35,7 @@ export function ScenarioBuilderPage() {
   const deleteFlow = useDeleteFlow();
   const [params, setParams] = useSearchParams();
   const businessId = params.get("business") ? Number(params.get("business")) : null;
+  const initialType = DECISION_TYPES.find((type) => type === params.get("type"));
 
   const businesses = useAsync(listBusinesses, []);
   const industries = useAsync(listIndustries, []);
@@ -305,6 +307,8 @@ export function ScenarioBuilderPage() {
                   onEdit={editStep}
                 />
                 <DecisionForm
+                  key={`${businessId}-${initialType ?? "price"}`}
+                  initialType={initialType}
                   industryId={industry.id}
                   staffNoun={industry.staff_noun}
                   currency={selectedBusiness?.currency ?? DEFAULT_CURRENCY}

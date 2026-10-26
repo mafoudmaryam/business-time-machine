@@ -1,3 +1,4 @@
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { Area, CartesianGrid, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -89,6 +90,7 @@ export function TimelinePage() {
               The line is the most likely path; the shaded area runs from a bad case to a good case
               {compare ? "; the thin dashed line is what happens if you change nothing" : ""}.
             </p>
+            <ResultAssumptions marketing={false} />
             <div
               role="img"
               aria-label={`${tab.label}, month by month. In ${label}: most likely ${fmt(rows[month - 1].p50)}${compare ? `, or ${fmt(rows[month - 1].baseline)} if you change nothing` : ""}.`}

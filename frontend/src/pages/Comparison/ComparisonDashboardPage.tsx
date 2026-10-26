@@ -1,3 +1,4 @@
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -146,7 +147,7 @@ export function ComparisonDashboardPage() {
             {scenarios.data && scenarios.data.length === 0 && (
               <EmptyState
                 title="No scenarios yet"
-                action={{ label: "Try a change", to: "/try" }}
+                action={{ label: "Try a change", to: "/explore" }}
                 secondary={{ label: "Describe one in your own words", to: "/scenarios" }}
               >
                 <p>A scenario is one idea you want to test, like raising your prices. Try one and it will appear here, ready to compare.</p>
@@ -196,6 +197,7 @@ export function ComparisonDashboardPage() {
 
           {run && (
             <section className="run-results">
+              <ResultAssumptions />
               <CoachCard
                 key={run.id}
                 runId={run.id}
