@@ -63,11 +63,11 @@ describe("Share: the one-page summary", () => {
     expect((await screen.findByRole("heading", { level: 1 })).textContent).toBe("My café: plan summary");
     expect(sheet().getByText(/^Prepared on /)).toBeTruthy();
     const today = within(screen.getByRole("region", { name: "Where the business stands today" }));
-    expect(today.getByRole("heading", { name: "What you keep each month" })).toBeTruthy();
+    expect(today.getByRole("heading", { name: "Money left after bills" })).toBeTruthy();
     expect(today.getByText("$5,820")).toBeTruthy();
-    expect(today.getByRole("heading", { name: "Your safety net" })).toBeTruthy();
+    expect(today.getByRole("heading", { name: "Money in your bank today" })).toBeTruthy();
     expect(today.getAllByText("$51,400").length).toBeGreaterThanOrEqual(1);       // the bank today, and the lowest point
-    expect(today.getByRole("heading", { name: "Your lowest cash point" })).toBeTruthy();
+    expect(today.getByRole("heading", { name: "Least money in your bank" })).toBeTruthy();
   });
 
   it("has the 12-month charts, as pictures with a spoken description", async () => {
@@ -88,7 +88,7 @@ describe("Share: the one-page summary", () => {
     expect(built.getByText(/Monthly rent:/)).toBeTruthy();
     expect(built.getByRole("heading", { name: "Numbers we assumed" })).toBeTruthy();
     expect(built.getByText(/Cash in the bank:/).textContent).toContain("two months of your monthly costs");
-    expect(built.getByText(/1,000 possible futures/)).toBeTruthy();
+    expect(built.getByText(/1,000 simulated futures/)).toBeTruthy();
   });
 
   it("contains the 'scenarios, not forecasts' disclaimer and says nothing was sent anywhere", async () => {
@@ -141,6 +141,19 @@ describe("Share: print", () => {
     expect(screen.getByRole("article").querySelector("button, select")).toBeNull();
   });
 
+  it.each([0, 1])("keeps the assumptions beside an extreme simulated share (%s) in the printable sheet", async (share) => {
+    const run = makeRun();
+    run.results[1].summary.prob_beats_baseline_profit = share;
+    vi.mocked(api.getSimulationRun).mockResolvedValue(run);
+    mount("?run=2");
+    await screen.findByRole("region", { name: `With “${SCENARIO}” and without it` });
+    expect(sheet().getByText(`${share * 10} of 10 simulated futures`)).toBeTruthy();
+    const note = sheet().getByRole("complementary", { name: "What these estimates depend on" });
+    expect(note.textContent).toContain("not a measured chance of real-world success");
+    expect(note.textContent).toContain("marketing response has not been checked against real business data");
+    expect(note.closest(".no-print, details")).toBeNull();
+  });
+
   it("the print styles hide the top bar, the Back button and the controls", () => {
     const sheetCss = css();
     const print = sheetCss.slice(sheetCss.indexOf("@media print"));
@@ -188,7 +201,7 @@ describe("Share: with the change vs if you change nothing", () => {
     expect(row(/What you keep over 12 months/).getByText("$82,800")).toBeTruthy();
     expect(row(/What you keep over 12 months/).getByText("$67,000")).toBeTruthy();
     expect(row(/Cash in the bank at the end/).getByText("$112,000")).toBeTruthy();
-    expect(row(/Comes out ahead/).getByText("9 of 10 possible futures")).toBeTruthy();
+    expect(row(/Comes out ahead/).getByText("9 of 10 simulated futures")).toBeTruthy();
     expect(compare.getByRole("img").getAttribute("aria-label")).toMatch(/with the change/);
     expect(compare.getByRole("img").querySelector(".plan-baseline")).toBeTruthy();
   });
@@ -305,3 +318,4 @@ describe("SharePlanChart", () => {
     expect(container.querySelector(".plan-baseline")).toBeNull();
   });
 });
+

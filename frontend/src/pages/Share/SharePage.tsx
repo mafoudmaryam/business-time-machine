@@ -1,3 +1,4 @@
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { getHow, getSimulationRun, getSummary, listSimulationRuns, type HowOut, type SimulationRunOut, type TodayOut } from "../../api";
@@ -155,6 +156,8 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
 
         {run.data && parsed && <ComparisonSection run={run.data} scenario={parsed.scenario} currency={today.currency} />}
 
+        <ResultAssumptions />
+
         <section className="share-section" aria-labelledby="share-built">
           <h2 id="share-built">What this is built on</h2>
           {how.told.length > 0 && (
@@ -183,7 +186,7 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
             </>
           )}
           <p className="share-small">
-            Worked out from {how.run.iterations.toLocaleString()} possible futures, month by month (program version {how.run.engine_version}).
+            Worked out from {how.run.iterations.toLocaleString()} simulated futures, month by month (program version {how.run.engine_version}).
           </p>
         </section>
 

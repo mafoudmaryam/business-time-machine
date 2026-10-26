@@ -1,9 +1,9 @@
-/** Keep the assumptions visible beside results, including reopened runs. */
-export function ResultAssumptions() {
+/** Visible context for simulated results; also stays inside the printed summary. */
+export function ResultAssumptions({ marketing = true }: { marketing?: boolean }) {
   return (
     <aside className="chart-caption" aria-label="What these estimates depend on">
-      <p><strong>These are simulated outcomes.</strong> The results depend on the numbers and assumptions used. A result such as 100% describes the simulated futures, not a measured chance of success for your business.</p>
-      <p><strong>If you change marketing:</strong> the estimate depends on how many extra customers advertising attracts and whether your business can serve them. The model's marketing response has not been checked against real business data. Extra spending can reduce profit if it brings too few customers or you are already at capacity.</p>
+      <p>These results depend on your numbers and the model’s assumptions. Shares such as 9 out of 10 describe simulated futures, not a measured chance of real-world success.</p>
+      {marketing && <p>If you change marketing, the estimate depends on how many extra customers advertising attracts and whether your business can serve them. The model’s marketing response has not been checked against real business data. Extra spending can reduce profit if it brings too few customers or you are already at capacity.</p>}
     </aside>
   );
 }

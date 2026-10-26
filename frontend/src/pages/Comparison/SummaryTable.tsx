@@ -38,11 +38,11 @@ export function SummaryTable({ results, customerNoun = "customers", currency = D
           </th>
           <th>
             Simulated futures where cash runs out{" "}
-            <InfoTip text="The share of simulated futures where cash drops below zero. This depends on the model's assumptions; it is not a measured real-world probability." />
+            <InfoTip text="The share of simulated futures where cash drops below zero, under the model’s assumptions. This is not a measured real-world probability." />
           </th>
           <th>
             Simulated futures where this beats doing nothing{" "}
-            <InfoTip text="The share of simulated futures where this scenario is more profitable than changing nothing, under the model's assumptions. This is not a measured real-world probability." />
+            <InfoTip text="The share of simulated futures where this scenario is more profitable than changing nothing, under the model’s assumptions. This is not a measured real-world probability." />
           </th>
         </tr>
       </thead>

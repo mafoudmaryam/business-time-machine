@@ -23,7 +23,7 @@ export function exampleText(example: Sketch["example"], currency: string): strin
   return `A typical ${formatMoneyCents(example.before, currency)} visit would cost ${formatMoneyCents(example.after, currency)}.`;
 }
 
-function formatMoneyCents(value: number, currency: string): string {
+export function formatMoneyCents(value: number, currency: string): string {
   try {
     return new Intl.NumberFormat(undefined, { style: "currency", currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
   } catch {
@@ -77,7 +77,7 @@ export function catchText(visitsChange: number): string {
 }
 
 export function futuresText(aheadOf10: number): string {
-  return `You come out ahead in ${aheadOf10} of 10 possible futures.`;
+  return `The change comes out ahead in ${aheadOf10} of 10 simulated futures.`;
 }
 
 /** Ten dots: filled for each future that comes out ahead. */
@@ -178,3 +178,4 @@ export function timelineRows(sketch: Sketch, metric: TimelineMetric): TimelineRo
     baseline: sketch.baseline[metric].p50[i],
   }));
 }
+

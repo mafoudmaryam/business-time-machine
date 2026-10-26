@@ -29,15 +29,15 @@ describe("contrast", () => {
   });
 
   it("uses the approved direction-B colours", () => {
-    expect(token("cream")).toBe("#fff9f0");
-    expect(token("green")).toBe("#2e7d50");
-    expect(token("green-heading")).toBe("#226b41");
-    expect(token("sage")).toBe("#e3f0e4");
-    expect(token("amber")).toBe("#f2a33a");
-    expect(token("amber-soft")).toBe("#fff1d6");
-    expect(token("charcoal")).toBe("#26302a");
-    expect(token("body")).toBe("#4a544d");
-    expect(token("card-border")).toBe("#ddebdf");
+    expect(token("cream")).toBe("#fbfaff");
+    expect(token("green")).toBe("#5146c8");
+    expect(token("green-heading")).toBe("#272250");
+    expect(token("sage")).toBe("#f0eefb");
+    expect(token("amber")).toBe("#ffbd69");
+    expect(token("amber-soft")).toBe("#fff2df");
+    expect(token("charcoal")).toBe("#202236");
+    expect(token("body")).toBe("#525365");
+    expect(token("card-border")).toBe("#e2e1ec");
   });
 
   const surfaces = ["cream", "white", "sage", "amber-soft"] as const;
@@ -120,3 +120,4 @@ describe("contrast", () => {
     expect(contrastRatio(token("muted-1"), token("amber-soft"))).toBeGreaterThanOrEqual(BODY);
   });
 });
+

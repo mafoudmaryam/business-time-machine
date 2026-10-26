@@ -3,12 +3,39 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
-## Clearer simulation and marketing estimates (24 Oct 2026)
+## A clearer first experiment for beginners (2026-10-25)
 
-- New and reopened comparison results show a visible explanation above the coach: simulated shares are conditional on the model's inputs and assumptions, not measured real-world success probabilities.
-- The same note explains that marketing needs customer response and spare service capacity, and that its response assumptions have not been checked against real business data.
-- The summary table labels its percentages as shares of simulated futures and explains this in the tooltips. No engine equations or default values change.
-- Validation: all 782 frontend tests passed; production build passed; lint completed with warnings in unchanged files. Browser visual checking was unavailable because no browser executable is installed.
+- Replace the green-heavy brand treatment with violet, coral and warm white, using the existing shared tokens so charts and controls remain consistent.
+- Lead with “Big idea? Try it first.”, a short everyday description, and a gently animated café illustration. Remove the long feature/photo sections, team quote, repeated guide link and duplicate header link. The business switcher remains available when a business is open; saved businesses remain reachable on the start screen.
+- In the demo, show a concrete order-price example, money left after bills and the possible downside immediately. Reveal bank figures and uncertainty through “What else could happen?”. Use everyday labels on Today, Share and Try. Keep engine calculations and confirmation rules unchanged.
+- Validation: 788 frontend tests across 56 files, accessibility/contrast checks and production build; existing warnings remain. Animation respects reduced-motion settings.
+
+## Brand palette and clock mark (2026-10-25)
+
+- Retain Business Time Machine, with the descriptor “Explore tomorrow’s business decisions.” in the wordmark and page description.
+- Use a deeper forest green, neutral cream, quieter sage and muted amber. Primary landing/dashboard actions are green; amber remains for selected controls, saved-plan actions and caution. Remove the orange button glow.
+- Replace the generic clock and default Vite favicon with a matching clock whose hands branch into a forward direction. The mark stays decorative beside the accessible brand link.
+- Palette, chart and contrast checks are updated to the new tokens; all readability assertions remain in place.
+
+## Interactive landing demo and visual refinement (2026-10-24)
+
+- The hero now uses a shorter headline, a neutral surface and an opt-in sample café price slider. It creates a sample only when Run this example is clicked; all displayed financial figures come from the existing preview-change endpoint through useSketch.
+- Loading, stale results, retry, the sample's currency and a full-simulator handoff are covered. The earlier direct sample entry and figures-first Today dashboard remain.
+- Validation: 787 frontend tests in 56 files pass, including accessibility checks, engine-response display and slider updates. Production build and lint complete with existing bundle-size and unchanged-file lint warnings. Backend and engine are unchanged.
+
+## Faster first sample and clearer dashboard (2026-10-24)
+
+- The hero names the food businesses the simulator serves, offers setup with your own numbers and a one-click sample café, and replaces the fixed money example with a decision-flow preview containing no financial results.
+- Today shows key financial figures before the coach, with an explicit Key figures heading and a prominent Explore a change action. Secondary cards use lighter borders and less decoration.
+- Sample failures appear beside the hero action and support retry. Existing sample actions, onboarding, startup guide and confirmation rules are retained.
+- Validation: 783 frontend tests in 55 files, production build and lint pass. Lint reports warnings in unchanged files. Engine and backend were not changed or re-tested.
+
+## Explain what simulated futures mean (26 Oct 2026)
+
+- Replace “How sure are we?” with “What happened in the simulations?” and label outcome shares as simulated futures. Keep the calculated values unchanged.
+- Share one visible explanation across the sample demo, Try, Today, timeline, comparisons, saved runs and printable summary: shares depend on inputs and assumptions, not measured real-world success probabilities.
+- Comparison, saved-run and printed summaries retain the marketing note: response is unvalidated, capacity matters, and extra spending can reduce profit.
+- Add print coverage for 0-of-10 and 10-of-10 results; the explanation remains inside the printable sheet. Homepage coverage checks that the note is visible without opening extra details. All 790 frontend tests passed; build passed; lint completed with existing warnings in unchanged files. Browser and PDF layout verification remain pending.
 
 ## Pictures labelled and credited (Oct 2026)
 
@@ -78,3 +105,4 @@ frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 - Plain-language decision input ("describe it in your own words").
 - Café, restaurant and bakery in one engine; per-business currency; plain wording with "?" tips.
 - The first FastAPI backend, React frontend and simulation engine.
+

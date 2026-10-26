@@ -1,11 +1,10 @@
-/** The little clock in the top bar: a round clock face with a curved arrow going back in time. Decorative, so hidden from screen readers. */
-export function Logo({ size = 32 }: { size?: number }) {
+/** Concept C: a replay loop and play symbol for trying a decision before committing. */
+export function Logo({ size = 36 }: { size?: number }) {
   return (
-    <svg className="logo" width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-      <circle cx="16" cy="16" r="15" fill="var(--green)" />
-      <circle cx="16" cy="16" r="11.5" fill="var(--cream)" />
-      <path d="M16 9.5V16l4.2 2.6" fill="none" stroke="var(--green-heading)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M3.6 9.2 6.9 8l.4 3.4" fill="none" stroke="var(--amber)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    <svg className="logo" width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
+      <path d="M25.5 9.5A11.5 11.5 0 1 0 27 21" stroke="var(--green)" strokeWidth="3.2" strokeLinecap="round" />
+      <path d="M19 9.5h7v-7" stroke="var(--green)" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13 10.5v11l8.5-5.5z" fill="var(--green)" strokeLinejoin="round" />
     </svg>
   );
 }

@@ -52,7 +52,7 @@ export function profitTile(t: TodayOut["tiles"], currency: string): Tile {
   const money = (v: number) => formatMoney(Math.abs(v), currency);
   const phrase = (v: number) => (v >= 0 ? `keep ${money(v)}` : `lose ${money(v)}`);
   return {
-    title: "What you keep each month",
+    title: "Money left after bills",
     help: "What is left of your sales after paying for ingredients, staff, rent and everything else, in a normal month.",
     headline: money(t.profit_a_month),
     detail: `${loss ? "You lose" : "You keep"} about this in a normal month. In a bad month you might ${phrase(t.profit_a_month_bad_case)}; in a good month, ${phrase(t.profit_a_month_good_case)}.`,
@@ -67,11 +67,11 @@ export function safetyTile(t: TodayOut["tiles"], currency: string): Tile {
     n < 1 ? "That is less than one month of bills." : n === 1 ? "That covers about 1 month of bills." : `That covers about ${n} months of bills.`;
   const risky = t.cash_runs_out_of_10 > 0;
   return {
-    title: "Your safety net",
+    title: "Money in your bank today",
     help: "The cash you have in the bank today, and how long it would pay your bills.",
     headline: formatMoney(t.cash_now, currency),
     detail: `In the bank today. ${covers}`,
-    risk: risky ? `Cash runs out in ${t.cash_runs_out_of_10} of 10 possible futures.` : null,
+    risk: risky ? `Cash runs out in ${t.cash_runs_out_of_10} of 10 simulated futures.` : null,
     tone: risky ? "bad" : "neutral",
   };
 }
@@ -81,7 +81,7 @@ export function lowestCashTile(t: TodayOut["tiles"], currency: string): Tile {
   // For a business that earns money, cash only grows: its "lowest" is just the first month-end, higher than today.
   const neverDips = t.lowest_cash_amount >= t.cash_now;
   return {
-    title: "Your lowest cash point",
+    title: "Least money in your bank",
     help: "The month when the money in your bank is at its lowest over the next 12 months, if you change nothing.",
     headline: formatMoney(neverDips ? t.cash_now : t.lowest_cash_amount, currency),
     detail: neverDips
@@ -164,3 +164,4 @@ export function validateAssumption(a: Assumption, entered: number): string | nul
 export function noteIsPending(note: TodayOut["note"]): boolean {
   return note !== null && note.ai_status === "pending";
 }
+

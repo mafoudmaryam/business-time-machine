@@ -28,7 +28,7 @@ describe("the 2026 look", () => {
 
   it("defines the approved palette in theme.css and nowhere else", () => {
     const theme = read("theme.css");
-    for (const [name, value] of [["cream", "#fff9f0"], ["green", "#2e7d50"], ["green-heading", "#226b41"], ["sage", "#e3f0e4"], ["amber", "#f2a33a"], ["amber-soft", "#fff1d6"], ["charcoal", "#26302a"], ["body", "#4a544d"], ["card-border", "#ddebdf"]] as const) {
+    for (const [name, value] of [["cream", "#fbfaff"], ["green", "#5146c8"], ["green-heading", "#272250"], ["sage", "#f0eefb"], ["amber", "#ffbd69"], ["amber-soft", "#fff2df"], ["charcoal", "#202236"], ["body", "#525365"], ["card-border", "#e2e1ec"]] as const) {
       expect(theme).toContain(`--${name}: ${value}`);
     }
     for (const css of ["index.css", "beginner.css", "redesign.css"]) {
@@ -95,3 +95,4 @@ describe("the 2026 look", () => {
     expect(css.slice(start, end)).toContain("@media screen {");
   });
 });
+

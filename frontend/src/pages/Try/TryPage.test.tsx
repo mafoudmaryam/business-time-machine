@@ -120,7 +120,7 @@ describe("Try a change: the answer", () => {
     expect(screen.getByText("more each month")).toBeTruthy();
     expect(screen.getByText("That is $6,096 a month, instead of $5,562.")).toBeTruthy();
     expect(screen.getByText("About 382 fewer visits a month, because some people will come less often.")).toBeTruthy();
-    expect(screen.getByText("You come out ahead in 9 of 10 possible futures.")).toBeTruthy();
+    expect(screen.getByText("The change comes out ahead in 9 of 10 simulated futures.")).toBeTruthy();
     const dotsBox = document.querySelector(".try-dots")!;
     expect(dotsBox.children).toHaveLength(10);
     expect(dotsBox.querySelectorAll(".try-dot-on")).toHaveLength(9);
@@ -137,7 +137,7 @@ describe("Try a change: the answer", () => {
   it("uses the headings from the brief", async () => {
     mount();
     await settle();
-    for (const h of ["What you keep", "Money in the bank", "The catch", "How sure are we?"]) {
+    for (const h of ["Money left after bills", "Money in the bank", "The catch", "What happened in the simulations?"]) {
       expect(screen.getByRole("heading", { name: h })).toBeTruthy();
     }
   });
@@ -380,3 +380,4 @@ describe("Try a change: keyboard, phone and accessibility", () => {
     setItem.mockRestore();
   });
 });
+

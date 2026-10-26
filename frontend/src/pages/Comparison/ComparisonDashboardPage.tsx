@@ -1,3 +1,4 @@
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -9,7 +10,6 @@ import {
   type SimulationRunOut,
 } from "../../api";
 import { CoachCard } from "../../components/CoachCard";
-import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { LoadError } from "../../components/LoadError";
