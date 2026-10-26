@@ -122,7 +122,7 @@ export function RunHistoryPage() {
           {runs.data && runs.data.length === 0 && (
             <EmptyState
               title="No runs yet"
-              action={{ label: "Try a change", to: "/try" }}
+              action={{ label: "Try a change", to: "/explore" }}
               secondary={{ label: "Compare scenarios", to: "/compare" }}
             >
               <p>A run is one full simulation. When you save a change from Try a change, or run a comparison, its result is kept here.</p>

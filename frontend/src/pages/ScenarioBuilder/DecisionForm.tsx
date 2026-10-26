@@ -58,12 +58,14 @@ interface Props {
   onAdd: (decision: DecisionFormValues) => void;
   /** Editing an existing step: start from its values, keep them after saving, and offer a way out. */
   initial?: DecisionFormValues;
+  /** A choice from Explore changes the form type, without adding or confirming a decision. */
+  initialType?: DecisionType;
   submitLabel?: string;
   onCancel?: () => void;
 }
 
-export function DecisionForm({ industryId, staffNoun, currency, onAdd, initial, submitLabel, onCancel }: Props) {
-  const [draft, setDraft] = useState<DecisionFormValues>(initial ?? defaultsFor("price"));
+export function DecisionForm({ industryId, staffNoun, currency, onAdd, initial, initialType, submitLabel, onCancel }: Props) {
+  const [draft, setDraft] = useState<DecisionFormValues>(initial ?? defaultsFor(initialType ?? "price"));
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   function changeType(type: DecisionType) {
@@ -95,6 +97,7 @@ export function DecisionForm({ industryId, staffNoun, currency, onAdd, initial, 
               key={t}
               type="button"
               className={t === draft.type ? "decision-tile selected" : "decision-tile"}
+              aria-pressed={t === draft.type}
               style={{ backgroundImage: `url(${decisionTypeImage(industryId, t)})` }}
               onClick={() => changeType(t)}
             >
@@ -104,6 +107,8 @@ export function DecisionForm({ industryId, staffNoun, currency, onAdd, initial, 
         </div>
         <p className="field-help">{DECISION_TYPE_HELP[draft.type]}</p>
       </div>
+
+      {draft.type === "marketing" && <p className="field-help">Marketing response is a rough estimate that has not been checked against real business data. Extra spending can reduce profit if it brings too few customers or you are already at capacity.</p>}
 
       <NumberField
         label="Start month"

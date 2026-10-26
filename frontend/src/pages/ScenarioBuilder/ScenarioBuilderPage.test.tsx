@@ -47,9 +47,9 @@ const reading: api.Interpretation = {
   ],
 };
 
-function renderPage() {
+function renderPage(extra = "") {
   return render(
-    <MemoryRouter initialEntries={["/scenarios?business=1"]}>
+    <MemoryRouter initialEntries={[`/scenarios?business=1${extra}`]}>
       <ScenarioBuilderPage />
     </MemoryRouter>,
   );
@@ -73,6 +73,28 @@ describe("ScenarioBuilderPage: describe it in your own words", () => {
     vi.mocked(api.listScenarios).mockResolvedValue([]);
     vi.mocked(api.interpretText).mockResolvedValue(reading);
     vi.mocked(api.logInterpretOutcome).mockResolvedValue(undefined);
+  });
+
+  it.each([
+    ["hiring", /Staff change/], ["hours", /Open days/], ["marketing", /Spend change/],
+  ])("opens the selected %s form without adding or confirming a decision", async (type, label) => {
+    const user = userEvent.setup();
+    renderPage(`&type=${type}`);
+    expect(await screen.findByLabelText(label)).toBeTruthy();
+    const selectedName = type === "hiring" ? "Hire a baker" : type === "hours" ? "Opening days" : "Marketing spend";
+    expect(screen.getByRole("button", { name: selectedName }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
+    expect(api.createScenario).not.toHaveBeenCalled();
+    if (type === "marketing") expect(screen.getByText(/Marketing response is a rough estimate/)).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Add decision" }));
+    expect((screen.getByRole("checkbox") as HTMLInputElement).checked).toBe(false);
+    expect(api.createScenario).not.toHaveBeenCalled();
+  });
+
+  it("ignores an unsupported type query and keeps the usual price form", async () => {
+    renderPage("&type=unsupported");
+    expect(await screen.findByLabelText(/Price change/)).toBeTruthy();
+    expect(api.createScenario).not.toHaveBeenCalled();
   });
 
   it("turns the owner's words into UNTICKED steps, and names the scenario after them", async () => {
