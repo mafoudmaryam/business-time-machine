@@ -38,6 +38,15 @@ def create_sample_business(payload: schemas.SampleBusinessIn, db: Session = Depe
         template = engine_bridge.get_template(payload.industry)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    # Reopen the latest active example without resetting its saved edits or runs.
+    existing = db.query(models.Business).filter(
+        models.Business.is_sample.is_(True),
+        models.Business.deleted_at.is_(None),
+        models.Business.industry == payload.industry,
+        models.Business.currency == payload.currency,
+    ).order_by(models.Business.id.desc()).first()
+    if existing is not None and existing.baseline is not None:
+        return existing
     values, assumed = engine_bridge.sample_start(payload.industry)
     business = models.Business(name=f"Sample {template.display_name.lower()}", industry=payload.industry,
                                currency=payload.currency, setup_source="sample", is_sample=True)

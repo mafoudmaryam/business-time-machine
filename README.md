@@ -141,8 +141,8 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 ```powershell
 # from the project root; all three use the backend's virtual environment
 cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
-cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 679 tests
-cd ..\frontend; npm test                                        # 788 tests
+cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 682 tests (681 passed, 1 skipped)
+cd ..\frontend; npm test                                        # 789 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -195,7 +195,7 @@ Latest frontend verification: **2026-10-25**, after the beginner-focused redesig
 
 | Check | Result |
 |---|---|
-| Frontend tests (Vitest, 56 files) | 788 passed |
+| Frontend tests (Vitest, 56 files) | 789 passed |
 | TypeScript check | clean |
 | Production build (Vite) | succeeds; existing bundle-size warning remains |
 | Lint (oxlint) | completes with existing warnings in unchanged files |

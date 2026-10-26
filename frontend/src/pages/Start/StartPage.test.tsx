@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { axe } from "vitest-axe";
@@ -245,7 +245,7 @@ describe("start screen: businesses that already exist", () => {
     BUSINESS({ id: 3, name: "Sample café", is_sample: true, setup_source: "sample" }),
   ];
 
-  it("lists them all under \"My businesses\", but opens none of them by itself", async () => {
+  it("lists saved businesses and examples without opening them automatically", async () => {
     vi.mocked(api.listBusinesses).mockResolvedValue(MANY);
     mount();
     expect(await screen.findByRole("heading", { name: "My businesses" })).toBeTruthy();
@@ -273,7 +273,24 @@ describe("start screen: businesses that already exist", () => {
     vi.mocked(api.listBusinesses).mockResolvedValue(MANY);
     mount();
     await screen.findByRole("heading", { name: "My businesses" });
-    expect(screen.getAllByText("Sample business")).toHaveLength(1);
+    expect(within(screen.getByRole("region", { name: "My businesses" })).queryByText("Continue with Sample café")).toBeNull();
+    expect(within(screen.getByRole("region", { name: "Examples" })).getByText("Continue with Sample café")).toBeTruthy();
+  });
+
+  it("shows only the latest example per industry and currency, while keeping real businesses", async () => {
+    vi.mocked(api.listBusinesses).mockResolvedValue([
+      ...MANY,
+      BUSINESS({ id: 4, name: "Sample café", is_sample: true }),
+      BUSINESS({ id: 5, name: "Sample café", is_sample: true, currency: "EUR" }),
+      BUSINESS({ id: 6, name: "Sample café", is_sample: false }),
+    ]);
+    const { user } = mount();
+    const examples = await screen.findByRole("region", { name: "Examples" });
+    const buttons = within(examples).getAllByRole("button", { name: "Continue with Sample café" });
+    expect(buttons).toHaveLength(2);
+    expect(within(screen.getByRole("region", { name: "My businesses" })).getByText("Continue with Sample café")).toBeTruthy();
+    await user.click(buttons[1]);
+    expect(getRememberedBusinessId()).toBe(4);
   });
 
   it("opens one only when it is picked, and remembers that choice", async () => {

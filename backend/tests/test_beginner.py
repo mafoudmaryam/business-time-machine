@@ -108,6 +108,31 @@ def test_sample_business_in_another_currency(client):
     assert client.post("/sample_business", json={"industry": "bakery", "currency": "eur"}).json()["currency"] == "EUR"
 
 
+def test_sample_reopens_without_resetting_edits_or_creating_duplicates(client):
+    first = client.post("/sample_business", json={"industry": "cafe"}).json()
+    client.patch(f"/businesses/{first['id']}/baseline", json={"cash": 12345})
+    again = client.post("/sample_business", json={"industry": "cafe"}).json()
+    assert again["id"] == first["id"]
+    assert again["baseline"]["cash"] == 12345
+    assert len(client.get("/businesses").json()) == 1
+
+
+def test_sample_reuse_keeps_currencies_industries_and_real_businesses_separate(client):
+    real = client.post("/businesses", json={"name": "Sample café"}).json()
+    ids = [client.post("/sample_business", json=payload).json()["id"] for payload in [
+        {"industry": "cafe"}, {"industry": "cafe", "currency": "EUR"}, {"industry": "bakery"},
+    ]]
+    assert len(set(ids + [real["id"]])) == 4
+    assert len(client.get("/businesses").json()) == 4
+
+
+def test_deleted_sample_is_not_reopened(client):
+    first = client.post("/sample_business", json={"industry": "cafe"}).json()
+    assert client.delete(f"/businesses/{first['id']}").status_code < 300
+    second = client.post("/sample_business", json={"industry": "cafe"}).json()
+    assert second["id"] != first["id"]
+
+
 def test_sample_business_rejects_unknown_industry(client):
     assert client.post("/sample_business", json={"industry": "pizzeria"}).status_code == 422
 

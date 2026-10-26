@@ -66,7 +66,11 @@ export function StartPage() {
   // The business that is open in this tab (if the server still has it) is reached from "Today" in the top bar; the rest go in the list.
   const openId = getRememberedBusinessId();
   const current = existing.find((b) => b.id === openId) ?? null;
-  const others = existing.filter((b) => b.id !== current?.id);
+  const others = existing.filter((b) => !b.is_sample && b.id !== current?.id);
+  // Keep older saved examples intact; show one recent example per industry/currency.
+  const examples = [...existing].sort((a, b) => b.id - a.id).filter((b, index, all) =>
+    b.is_sample && all.findIndex((other) => other.is_sample && other.industry === b.industry && other.currency === b.currency) === index,
+  ).filter((b) => b.id !== current?.id);
   const industry = industries.data?.find((i) => i.id === industryId) ?? null;
   const noun = industry ? industry.display_name.toLowerCase() : "business";
   const who = industryId ? (WHO[industryId] ?? "customers") : "customers";
@@ -325,6 +329,22 @@ export function StartPage() {
         )}
       </div>
 
+      {step === 0 && examples.length > 0 && (
+        <section className="continue-box saved-examples" aria-labelledby="saved-examples">
+          <h2 id="saved-examples">Examples</h2>
+          <p className="field-help">Made-up businesses to practise with. Your own businesses are listed separately.</p>
+          <ul>
+            {examples.map((b) => (
+              <li key={b.id}>
+                <button type="button" className="secondary" onClick={() => enter(b, "continue")}>
+                  Continue with {b.name}
+                </button>
+                <span className="sample-tag">Sample business · {b.currency}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {step === 0 && others.length > 0 && (
         <section className="continue-box" aria-labelledby="my-businesses">
           <h2 id="my-businesses">My businesses</h2>
@@ -335,7 +355,6 @@ export function StartPage() {
                 <button type="button" className="secondary" onClick={() => enter(b, "continue")}>
                   Continue with {b.name}
                 </button>
-                {b.is_sample && <span className="sample-tag">Sample business</span>}
               </li>
             ))}
           </ul>
