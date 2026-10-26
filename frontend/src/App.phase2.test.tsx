@@ -105,31 +105,31 @@ describe("the nav and the links between the pages", () => {
   it("'Try a change' opens the choices and Prices still opens the existing slider", async () => {
     const { user } = open("/today");
     await settle();
-    const link = within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Try a change" });
+    const link = within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Try an idea" });
     expect(link.getAttribute("href")).toBe("/explore");
     await user.click(link);
     await settle();
-    expect(screen.getByRole("heading", { level: 1, name: "What would you like to change?" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 1, name: "Try an idea" })).toBeTruthy();
     await user.click(screen.getByRole("link", { name: "Prices" }));
     await settle();
     expect(screen.getByRole("heading", { level: 1, name: "What if you changed your prices?" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Try a change" }).className).toContain("active");
+    expect(screen.getByRole("link", { name: "Try an idea" }).className).toContain("active");
   });
 
   it("the Today page's own 'Try a change' link goes there too", async () => {
     const { user } = open("/today");
     await settle();
-    const inPage = within(screen.getByRole("main")).getByRole("link", { name: "Try a change" });
+    const inPage = within(screen.getByRole("main")).getByRole("link", { name: "Try an idea →" });
     expect(inPage.getAttribute("href")).toBe("/explore");
     await user.click(inPage);
     await settle();
-    expect(screen.getByRole("heading", { level: 1, name: "What would you like to change?" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 1, name: "Try an idea" })).toBeTruthy();
   });
 
   it("keeps uncertainty and result guards working after choosing Prices from Explore", async () => {
     const { user } = open("/today");
     await settle();
-    await user.click(screen.getByRole("link", { name: "Explore a change →" }));
+    await user.click(screen.getByRole("link", { name: "Try an idea →" }));
     await settle();
     await user.click(screen.getByRole("link", { name: "Prices" }));
     await settle();
@@ -154,8 +154,8 @@ describe("the nav and the links between the pages", () => {
   it("the old scenario builder is still there, under Advanced", async () => {
     open("/today");
     await settle();
-    const advanced = screen.getByRole("link", { name: "Scenario builder", hidden: true });
-    expect(advanced.getAttribute("href")).toBe("/scenarios");
+    const advanced = screen.getByRole("link", { name: "Detailed plan builder", hidden: true });
+    expect(advanced.getAttribute("href")).toBe("/scenarios?business=1");
   });
 
   it("'Watch the next 12 months' goes to the timeline for the same change, and Back returns to Try", async () => {
@@ -179,7 +179,7 @@ describe("the nav and the links between the pages", () => {
     await settle();
     await user.click(screen.getByRole("button", { name: "Go back" }));
     await settle();
-    expect(screen.getByRole("heading", { name: "Today at noah" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Overview: noah" })).toBeTruthy();
   });
 
   it("with no business chosen, both pages send you to the start screen", async () => {

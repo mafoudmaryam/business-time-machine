@@ -73,6 +73,7 @@ export function ComparisonDashboardPage() {
   const resultCurrency = currentRun?.results.find(r => r.summary.explanation_context)?.summary.explanation_context?.currency ?? selectedBusiness?.currency ?? DEFAULT_CURRENCY;
 
   function selectBusiness(id: number) {
+    rememberBusiness(id);
     setParams({ business: String(id) });
     setSelectedIds([]);
     setRun(null);
@@ -117,10 +118,12 @@ export function ComparisonDashboardPage() {
     <div className="page">
       {industry && (
         <div className="hero-banner" style={{ backgroundImage: `url(${heroImage(industry.id, "compare")})` }}>
-          <h1>Comparison dashboard</h1>
+          <h1>Compare plans</h1>
         </div>
       )}
-      {!industry && <h1>Comparison dashboard</h1>}
+      {!industry && <h1>Compare plans</h1>}
+
+      <p className="try-lead">Choose saved ideas to compare with changing nothing. Look at the trade-offs before deciding what matters to you.</p>
 
       <div className="field">
         <label htmlFor="business-select">Business</label>
@@ -158,7 +161,7 @@ export function ComparisonDashboardPage() {
             {scenarios.data && scenarios.data.length === 0 && (
               <EmptyState
                 title="No scenarios yet"
-                action={{ label: "Try a change", to: "/explore" }}
+                action={{ label: "Try an idea", to: "/explore" }}
                 secondary={{ label: "Describe one in your own words", to: "/scenarios" }}
               >
                 <p>A scenario is one idea you want to test, like raising your prices. Try one and it will appear here, ready to compare.</p>
@@ -201,7 +204,7 @@ export function ComparisonDashboardPage() {
           </div>
 
           <button type="button" onClick={runSimulation} disabled={selectedIds.length === 0 || running}>
-            {running ? "Running…" : "Run simulation"}
+            {running ? "Comparing…" : "Compare plans"}
           </button>
 
           <ErrorBanner message={runError} />
@@ -242,8 +245,8 @@ export function ComparisonDashboardPage() {
               <RunMeta run={currentRun} />
               </details>
               <p className="result-links">
-                <Link to="/how" onClick={() => rememberBusiness(currentRun.business_id)}>How did we get these numbers?</Link> ·{" "}
-                <Link to={`/share?run=${currentRun.id}`} onClick={() => rememberBusiness(currentRun.business_id)}>Print or share this result</Link>
+                <Link to="/how" onClick={() => rememberBusiness(currentRun.business_id)}>Inputs and assumptions</Link> ·{" "}
+                <Link to={`/share?run=${currentRun.id}`} onClick={() => rememberBusiness(currentRun.business_id)}>Print or save PDF</Link>
               </p>
             </section>
           )}

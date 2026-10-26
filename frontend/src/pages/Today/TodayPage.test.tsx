@@ -53,10 +53,14 @@ afterEach(() => {
 describe("Today: the financial position comes first", () => {
   it("shows three tiles before the coach, followed by the chart and assumptions", async () => {
     mount();
-    expect(await screen.findByRole("heading", { name: "Today at My café" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Overview: My café" })).toBeTruthy();
     const coach = screen.getByRole("region", { name: "Your coach says" });
     expect(coach.textContent).toContain("you keep about $5,820");
-    expect(screen.getByRole("link", { name: "Explore a change →" }).getAttribute("href")).toBe("/explore");
+    expect(screen.getByRole("link", { name: "Try an idea →" }).getAttribute("href")).toBe("/explore");
+    for (const label of ["See the monthly picture", "Read an explanation of these figures", "Check or change assumptions"]) {
+      expect(screen.getByText(label).closest("details")?.open).toBe(false);
+    }
+    expect(screen.queryByRole("dialog")).toBeNull();
     // The figures lead, with the explanation immediately after them.
     const tiles = screen.getByRole("heading", { name: /Money left after bills/ });
     expect(tiles.compareDocumentPosition(coach) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -68,7 +72,7 @@ describe("Today: the financial position comes first", () => {
 
   it("puts the Ask box behind a small link", async () => {
     const { user } = mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     expect(screen.queryByText(/Ask box for run/)).toBeNull();
     await user.click(screen.getByRole("button", { name: "Ask a question" }));
     const dialog = screen.getByRole("dialog", { name: "Ask a question" });
@@ -80,7 +84,7 @@ describe("Today: the financial position comes first", () => {
   it("with the coach switched off (no note) shows the numbers but no coach and no Ask link", async () => {
     vi.mocked(api.getToday).mockResolvedValue(makeToday({ note: null }));
     mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     expect(screen.queryByRole("region", { name: "Your coach says" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Ask a question" })).toBeNull();
     expect(screen.getByRole("heading", { name: /Money left after bills/ })).toBeTruthy();
@@ -89,7 +93,7 @@ describe("Today: the financial position comes first", () => {
   it("also hides the coach when the app settings say it is off", async () => {
     config.coachEnabled = false;
     mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     expect(screen.queryByRole("region", { name: "Your coach says" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Ask a question" })).toBeNull();
   });
@@ -107,19 +111,19 @@ describe("Today: the financial position comes first", () => {
   it("for a business made from the start-up guide, says it is a starting picture", async () => {
     vi.mocked(api.getToday).mockResolvedValue(makeToday({ setup_source: "guide" }));
     mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     expect(screen.getByText("This is a starting picture. It assumes your business is open and running smoothly.")).toBeTruthy();
   });
 
   it("shows no starting-picture banner for other businesses", async () => {
     mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     expect(screen.queryByText(/This is a starting picture/)).toBeNull();
   });
 
   it("shows no sample tag for a real business", async () => {
     mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     expect(screen.queryByText("Sample business")).toBeNull();
     expect(screen.queryByRole("button", { name: "Start with my own numbers" })).toBeNull();
   });
@@ -131,7 +135,7 @@ describe("Today: the financial position comes first", () => {
 
   it("links to the Try a change page", async () => {
     mount();
-    const link = await screen.findByRole("link", { name: "Try a change" });
+    const link = await screen.findByRole("link", { name: "Try an idea →" });
     expect(link.getAttribute("href")).toBe("/explore");
   });
 });
@@ -146,7 +150,7 @@ describe("Today: the better note arrives later", () => {
       .mockResolvedValueOnce({ ...pending().note! })
       .mockResolvedValue({ ...pending().note!, text: "A warmer, fuller note.", ai_status: "done", mode: "ollama" });
     mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     expect(screen.getByRole("status").textContent).toContain("Your coach is adding more detail");
     expect(screen.getByText(/you keep about \$5,820/)).toBeTruthy();
 
@@ -168,7 +172,7 @@ describe("Today: the better note arrives later", () => {
     vi.mocked(api.getToday).mockResolvedValue(pending());
     vi.mocked(api.getTodayNote).mockResolvedValue({ ...pending().note!, ai_status: "failed", fallback: true });
     mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3100);
     });
@@ -186,7 +190,7 @@ describe("Today: the better note arrives later", () => {
     vi.mocked(api.getToday).mockResolvedValue(pending());
     vi.mocked(api.getTodayNote).mockRejectedValue(new Error("down"));
     mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3100);
     });
@@ -197,7 +201,7 @@ describe("Today: the better note arrives later", () => {
   it("does not poll when no AI is writing", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     await act(async () => {
       await vi.advanceTimersByTimeAsync(10_000);
     });
@@ -206,9 +210,12 @@ describe("Today: the better note arrives later", () => {
 });
 
 describe("Today: the first-time tour", () => {
-  it("opens the first time, and is not shown again once skipped", async () => {
+  it("opens only on request and stays closed on return", async () => {
     window.localStorage.removeItem("btm.tourSeen");
     const { user, unmount } = mount();
+    await screen.findByRole("heading", { name: "Overview: My café" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Show me around" }));
     const tour = await screen.findByRole("dialog", { name: "A quick look around" });
     expect(within(tour).getByText("Step 1 of 3")).toBeTruthy();
     await user.click(within(tour).getByRole("button", { name: "Skip tour" }));
@@ -217,7 +224,7 @@ describe("Today: the first-time tour", () => {
     unmount();
 
     mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 });
@@ -291,14 +298,14 @@ describe("Today: what we assumed", () => {
   it("shows the full-width empty card for a business with nothing saved", async () => {
     vi.mocked(api.getBusinessImpact).mockResolvedValue({ scenarios: 0, runs: 0 });
     mount();
-    const card = (await screen.findByText("You haven't tried a change yet")).closest(".empty-state");
-    expect(card?.classList.contains("empty-state-compact")).toBe(true);
+    expect(await screen.findByText(/No saved plans yet/)).toBeTruthy();
+    expect(screen.getAllByRole("link", { name: "Try an idea →" })).toHaveLength(1);
   });
 
   it("is not shown when the owner typed every number", async () => {
     vi.mocked(api.getToday).mockResolvedValue(makeToday({ assumptions: [], assumed_by_app: false }));
     mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     expect(screen.queryByRole("heading", { name: "What we assumed" })).toBeNull();
   });
 });
@@ -340,20 +347,20 @@ describe("Today: finding the business", () => {
   it("shows a calm waiting line while loading", () => {
     vi.mocked(api.getToday).mockReturnValue(new Promise(() => undefined));
     mount();
-    expect(screen.getByRole("status").textContent).toContain("Your coach is looking at your numbers");
+    expect(screen.getByRole("status").textContent).toContain("Loading your business overview");
   });
 });
 
 describe("Today: accessibility", () => {
   it("has no automatic accessibility violations", async () => {
     const { container } = mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     expect((await axe(container)).violations).toEqual([]);
   });
 
   it("has exactly one h1, and the tiles are headed", async () => {
     mount();
-    await screen.findByRole("heading", { name: "Today at My café" });
+    await screen.findByRole("heading", { name: "Overview: My café" });
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getAllByRole("heading", { level: 3 }).length).toBeGreaterThanOrEqual(3);
   });

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { useInAppDepth } from "../hooks/useInAppDepth";
 import { isStartScreen } from "../lib/backTarget";
@@ -9,8 +9,16 @@ import { ErrorBoundary } from "./ErrorBoundary";
 /** The frame around every page: skip link, top bar, a "← Back" button (on every page except the start screen), then the page.
  *  Pages do not add their own Back button; they just render inside this. */
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const depth = useInAppDepth(); // mounted here, so it keeps counting on the start screen too
+
+  useEffect(() => {
+    // A new page starts at its introduction, including for keyboard users.
+    // Deep links such as /today#assumed keep their own target and disclosure.
+    if (hash) return;
+    document.getElementById("main")?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname, hash]);
 
   return (
     <>

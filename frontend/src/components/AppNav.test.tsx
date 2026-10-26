@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as api from "../api";
-import { rememberBusiness } from "../lib/session";
+import { getRememberedBusinessId, rememberBusiness } from "../lib/session";
 import { AppNav } from "./AppNav";
 
 vi.mock("../api", async (importOriginal) => {
@@ -29,28 +29,28 @@ describe("AppNav", () => {
   it("shows Today, Try a change and Advanced", () => {
     nav();
     const main = screen.getByRole("navigation", { name: "Main" });
-    expect(within(main).getByRole("link", { name: "Today" }).getAttribute("href")).toBe("/today");
-    expect(within(main).getByRole("link", { name: "Try a change" })).toBeTruthy();
+    expect(within(main).getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/today");
+    expect(within(main).getByRole("link", { name: "Try an idea" })).toBeTruthy();
     expect(within(main).getByText("Advanced")).toBeTruthy();
   });
 
   it("keeps the old pages reachable under Advanced, at their old addresses", () => {
     nav();
     const hrefs = Object.fromEntries(
-      ["Compare", "Run history", "Full business setup"].map((name) => [name, screen.getByRole("link", { name, hidden: true }).getAttribute("href")]),
+      ["Compare plans", "Saved plans and results", "Detailed business setup"].map((name) => [name, screen.getByRole("link", { name, hidden: true }).getAttribute("href")]),
     );
-    expect(hrefs).toEqual({ Compare: "/compare", "Run history": "/history", "Full business setup": "/setup" });
+    expect(hrefs).toEqual({ "Compare plans": "/compare", "Saved plans and results": "/history", "Detailed business setup": "/setup" });
   });
 
   it("Try a change opens the choice page, with or without a business open (the page itself sends you to the start screen if none)", () => {
     rememberBusiness(4);
     nav();
-    expect(screen.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/explore");
+    expect(screen.getByRole("link", { name: "Try an idea" }).getAttribute("href")).toBe("/explore");
   });
 
   it("the old scenario builder is under Advanced", () => {
     nav();
-    expect(screen.getByRole("link", { name: "Scenario builder", hidden: true }).getAttribute("href")).toBe("/scenarios");
+    expect(screen.getByRole("link", { name: "Detailed plan builder", hidden: true }).getAttribute("href")).toBe("/scenarios");
   });
 
   it("Try a change is marked as current on the Try page and on the 12-month page", () => {
@@ -60,16 +60,16 @@ describe("AppNav", () => {
           <AppNav />
         </MemoryRouter>,
       );
-      expect(screen.getByRole("link", { name: "Try a change" }).className).toContain("active");
-      expect(screen.getByRole("link", { name: "Today" }).className).not.toContain("active");
+      expect(screen.getByRole("link", { name: "Try an idea" }).className).toContain("active");
+      expect(screen.getByRole("link", { name: "Overview" }).className).not.toContain("active");
       unmount();
     }
   });
 
   it("marks the current page", () => {
     nav("/today");
-    expect(screen.getByRole("link", { name: "Today" }).className).toContain("active");
-    expect(screen.getByRole("link", { name: "Try a change" }).className).not.toContain("active");
+    expect(screen.getByRole("link", { name: "Overview" }).className).toContain("active");
+    expect(screen.getByRole("link", { name: "Try an idea" }).className).not.toContain("active");
   });
 
   it("the title always takes you to the start screen, whatever is open", async () => {
@@ -115,7 +115,46 @@ describe("AppNav on the start screen", () => {
   it("keeps the app's own links on every other page", () => {
     nav("/today");
     expect(screen.queryByRole("link", { name: "How it works" })).toBeNull();
-    expect(screen.getByRole("link", { name: "Today" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Overview" })).toBeTruthy();
   });
 });
 
+
+describe("task navigation and keyboard access", () => {
+  it.each(["/explore", "/try", "/timeline", "/scenarios", "/compare", "/history"])("keeps Try an idea current on %s", path => {
+    nav(path);
+    const main = screen.getByRole("navigation", { name: "Main" });
+    expect(within(main).getByRole("link", { name: "Try an idea" }).getAttribute("aria-current")).toBe(path === "/explore" ? "page" : "location");
+    expect(screen.getAllByRole("navigation")).toHaveLength(1);
+    expect(within(main).queryByText("Tools")).toBeNull();
+  });
+  it("keeps assumptions and reports within Overview", () => {
+    nav("/share");
+    expect(screen.getByRole("link", { name: "Overview" }).getAttribute("aria-current")).toBe("location");
+  });
+  it("opens Advanced with the keyboard and Escape closes it with focus restored", async () => {
+    nav();
+    const user = userEvent.setup();
+    const summary = screen.getByText("Advanced");
+    summary.focus();
+    // jsdom does not implement the browser’s native Enter-to-toggle for summary.
+    await user.click(summary);
+    expect(summary.parentElement?.hasAttribute("open")).toBe(true);
+    await user.tab();
+    expect(document.activeElement).toBe(screen.getByRole("link", { name: "Detailed plan builder" }));
+    await user.keyboard("{Escape}");
+    expect(summary.parentElement?.hasAttribute("open")).toBe(false);
+    expect(document.activeElement).toBe(summary);
+  });
+  it("carries a URL-selected business into saved plans and remembers it when leaving", async () => {
+    rememberBusiness(4);
+    nav("/compare?business=9");
+    const user = userEvent.setup();
+    await user.click(screen.getByText("Advanced"));
+    expect(screen.getByRole("link", { name: "Saved plans and results" }).getAttribute("href")).toBe("/history?business=9");
+    await user.click(screen.getByRole("link", { name: "Track results" }));
+    expect(getRememberedBusinessId()).toBe(9);
+    expect(screen.getByRole("link", { name: "Track results" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByText("Advanced").parentElement?.hasAttribute("open")).toBe(false);
+  });
+});

@@ -79,7 +79,7 @@ describe("Try a change: the page", () => {
     mount();
     await settle();
     expect(screen.getByRole("heading", { level: 1, name: "What if you changed your prices?" })).toBeTruthy();
-    expect(screen.getByText("Move the slider. The answer on the right changes as you drag.")).toBeTruthy();
+    expect(screen.getByText("Move the slider to test a price rise. Read the result, then explore the months ahead.")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "How much would you raise your prices?" })).toBeTruthy();
     expect(screen.getByText("7%")).toBeTruthy();
     expect(screen.getByText("A typical $6.50 visit would cost $6.96.")).toBeTruthy();

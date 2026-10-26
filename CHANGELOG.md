@@ -3,6 +3,13 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## Clearer navigation for business owners (2026-10-26)
+
+- Rename the existing main navigation to Overview, Try an idea and Track results while preserving every route. Keep detailed setup and specialist pages in Advanced, with saved-work, assumptions and PDF shortcuts.
+- Add short page introductions, one prominent next action and context-preserving links to saved plans and comparisons. Keep essential figures and the journal form first; disclose optional charts and explanations. Make the tour opt-in.
+- Keep keyboard focus and scrolling with page introductions, preserve assumptions deep links, and support Escape in Advanced. Document future Tools placement without adding an empty Tools entry or calculators.
+- Validation: 853 frontend tests across 61 files, production build, lint and whitespace checks. Existing lint/bundle warnings remain. Backend, engine, saved records and PDF print styling are unchanged.
+
 ## Beginner-friendly result explanations (2026-10-26)
 
 - Add a shared four-part explanation to sketches, timelines, comparisons, saved runs and the printable report, with optional numbers and assumptions details. Preserve the purple design and the designed PDF export from the preceding branch.

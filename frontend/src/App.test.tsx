@@ -49,7 +49,7 @@ describe("a first visit always begins at the start screen", () => {
       expect(await screen.findByRole("heading", { name: "What kind of business do you run?" })).toBeTruthy();
       expect(api.getToday).not.toHaveBeenCalled(); // no business was opened, not even the first one
       expect(getRememberedBusinessId()).toBeNull();
-      expect(screen.queryByText(/Today at/)).toBeNull();
+      expect(screen.queryByText(/Overview:/)).toBeNull();
     });
   }
 
@@ -71,7 +71,7 @@ describe("a first visit always begins at the start screen", () => {
 
   it("the Today link in the menu also lands on the start screen when nothing is chosen", async () => {
     const user = open("/compare");
-    await user.click(await screen.findByRole("link", { name: "Today" }));
+    await user.click(await screen.findByRole("link", { name: "Overview" }));
     expect(await screen.findByRole("heading", { name: "What kind of business do you run?" })).toBeTruthy();
     expect(api.getToday).not.toHaveBeenCalled();
   });
@@ -81,7 +81,7 @@ describe("after the owner chooses", () => {
   it("picking from My businesses opens that business, and / then goes to Today", async () => {
     const user = open("/");
     await user.click(await screen.findByRole("button", { name: "Continue with Demo Cafe" }));
-    expect(await screen.findByRole("heading", { name: /Today at/ })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: /Overview:/ })).toBeTruthy();
     expect(api.getToday).toHaveBeenCalledWith(2);
   });
 });
@@ -92,7 +92,7 @@ describe("getting back to the front page", () => {
     vi.mocked(api.getToday).mockResolvedValue(makeToday({ business_id: 2, name: "Demo Cafe" }));
     const user = open("/");
     await user.click(await screen.findByRole("button", { name: "Continue with Demo Cafe" }));
-    await screen.findByRole("heading", { name: /Today at/ });
+    await screen.findByRole("heading", { name: /Overview:/ });
     return user;
   }
 

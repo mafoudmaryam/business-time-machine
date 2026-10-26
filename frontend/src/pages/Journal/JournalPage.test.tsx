@@ -63,7 +63,7 @@ async function fill(user: ReturnType<typeof userEvent.setup>, profit: string, ca
 describe("the journal page", () => {
   it("has a heading, a pilot label, and a Back button", async () => {
     mount();
-    expect(await screen.findByRole("heading", { level: 1, name: /My journal/ })).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 1, name: /Track results/ })).toBeTruthy();
     expect(screen.getByText("Pilot feature")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Go back" })).toBeTruthy();
   });
@@ -71,13 +71,13 @@ describe("the journal page", () => {
   it("goes to the start screen when no business is open", async () => {
     window.sessionStorage.clear();
     mount();
-    await waitFor(() => expect(screen.queryByRole("heading", { name: /My journal/ })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("heading", { name: /Track results/ })).toBeNull());
     expect(api.getJournal).not.toHaveBeenCalled();
   });
 
   it("shows a friendly empty state when nothing is written down", async () => {
     mount();
-    expect(await screen.findByRole("region", { name: "Nothing written down yet" })).toBeTruthy();
+    expect(await screen.findByText("No months recorded yet. Use the form above to write down a month.")).toBeTruthy();
   });
 
   it("explains the figures in plain words, with no jargon", async () => {
@@ -178,7 +178,7 @@ describe("the journal page", () => {
 
   it("has no download button and no summary when nothing is written down", async () => {
     mount();
-    await screen.findByRole("region", { name: "Nothing written down yet" });
+    await screen.findByText("No months recorded yet. Use the form above to write down a month.");
     expect(screen.queryByRole("button", { name: /Download/ })).toBeNull();
     expect(screen.queryByText(/You have recorded/)).toBeNull();
   });
@@ -186,7 +186,7 @@ describe("the journal page", () => {
   it("is the fourth link in the top bar", async () => {
     mount();
     await screen.findByRole("heading", { level: 1 });
-    const link = within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "My journal" });
+    const link = within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Track results" });
     expect(link.getAttribute("href")).toBe("/journal");
     expect(link.className).toContain("active");
   });
@@ -222,7 +222,7 @@ describe("writing a month down", () => {
     expect(celebrate).not.toHaveBeenCalled(); // opening the page, or seeing numbers, is never celebrated
     await fill(user, "5900", "52000", "4200");
     await user.click(screen.getByRole("button", { name: "Save this month" }));
-    await screen.findByText(/^Saved /);
+    await screen.findByText(/^Saved November/);
     expect(celebrate).toHaveBeenCalledTimes(1);
   });
 
@@ -302,7 +302,7 @@ describe("writing a month down", () => {
     await fill(user, "5900", "52000", "4200");
     await user.type(screen.getByLabelText(/A note for yourself/), "private words");
     await user.click(screen.getByRole("button", { name: "Save this month" }));
-    await screen.findByText(/^Saved /);
+    await screen.findByText(/^Saved November/);
     const calls = vi.mocked(track).mock.calls.filter((c) => c[0] === "journal_saved");
     expect(calls).toEqual([["journal_saved", "journal", { edited: false, compared: true }]]);
     expect(JSON.stringify(vi.mocked(track).mock.calls)).not.toMatch(/private words|5900|52000/);
@@ -368,7 +368,7 @@ describe("when the journal cannot be loaded", () => {
     expect(alert.textContent).not.toMatch(/sqlite|500|Internal/);
     vi.mocked(api.getJournal).mockResolvedValue(makeJournal());
     await user.click(within(alert).getByRole("button", { name: "Try again" }));
-    expect(await screen.findByRole("heading", { level: 1, name: /My journal/ })).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 1, name: /Track results/ })).toBeTruthy();
   });
 });
 
@@ -382,7 +382,7 @@ describe("accessibility", () => {
 
   it("has no violations when empty", async () => {
     const { container } = mount();
-    await screen.findByRole("region", { name: "Nothing written down yet" });
+    await screen.findByText("No months recorded yet. Use the form above to write down a month.");
     expect((await axe(container)).violations).toEqual([]);
   });
 
@@ -444,6 +444,6 @@ describe("the prompt on Today", () => {
 
   it("always has a link to the journal", async () => {
     mount("/today");
-    expect((await screen.findByRole("link", { name: "My journal" })).getAttribute("href")).toBe("/journal");
+    expect((await screen.findByRole("link", { name: "Track results" })).getAttribute("href")).toBe("/journal");
   });
 });

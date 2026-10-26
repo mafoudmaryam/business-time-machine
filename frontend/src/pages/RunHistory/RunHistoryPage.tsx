@@ -72,6 +72,7 @@ export function RunHistoryPage() {
   }, [runFromAddress]);
 
   function selectBusiness(id: number) {
+    rememberBusiness(id);
     openingRequest.current++;
     setOpeningId(null);
     setParams({ business: String(id) });
@@ -98,7 +99,8 @@ export function RunHistoryPage() {
 
   return (
     <div className="page">
-      <h1>Run history</h1>
+      <h1>Saved plans and results</h1>
+      <p className="try-lead">Reopen an idea you saved and see what the model estimated.</p>
 
       <div className="field">
         <label htmlFor="business-select">Business</label>
@@ -135,32 +137,32 @@ export function RunHistoryPage() {
           {runs.data && runs.data.length === 0 && (
             <EmptyState
               title="No runs yet"
-              action={{ label: "Try a change", to: "/explore" }}
-              secondary={{ label: "Compare scenarios", to: "/compare" }}
+              action={{ label: "Try an idea", to: "/explore" }}
+              secondary={{ label: "Compare plans", to: "/compare" }}
             >
-              <p>A run is one full simulation. When you save a change from Try a change, or run a comparison, its result is kept here.</p>
+              <p>A saved result is one model calculation. When you save an idea from Try an idea or compare plans, its result is kept here.</p>
             </EmptyState>
           )}
           {runs.data && runs.data.length > 0 && (
             <table className="run-history-table">
+              <caption className="visually-hidden">Saved results</caption>
               <thead>
                 <tr>
-                  <th>Run</th>
-                  <th>Created</th>
-                  <th>Months simulated</th>
-                  <th>Scenarios</th>
-                  <th>Seed</th>
-                  <th></th>
+                  <th scope="col">Result</th>
+                  <th scope="col">Plans</th>
+                  <th scope="col">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {runs.data.map((r) => (
                   <tr key={r.id}>
                     <td>#{r.id}</td>
-                    <td>{new Date(r.created_at).toLocaleString()}</td>
-                    <td>{r.horizon} months</td>
-                    <td>{r.scenario_names.map(displayScenarioName).join(", ")}</td>
-                    <td>{r.seed}</td>
+                    <td>{r.scenario_names.filter(name => name !== "baseline").map(displayScenarioName).join(", ") || "No proposed change"}
+                      <details><summary>Calculation details</summary>
+                        <p>Created {new Date(r.created_at).toLocaleString()} · {r.horizon} months explored</p>
+                        <p>Random starting value (seed): {r.seed}. Reusing this value with the same inputs and calculation settings repeats the result.</p>
+                        <p>{r.iterations.toLocaleString()} simulated futures · program version {r.engine_version}</p>
+                      </details></td>
                     <td>
                       <button type="button" className="link-button" onClick={() => openRun(r.id)}>
                         {openingId === r.id ? "Opening…" : "Reopen"}
@@ -195,10 +197,10 @@ export function RunHistoryPage() {
 
           {openedRun && openingId === null && openedRun.business_id === businessId && (!(pickedRunId ?? runFromAddress) || openedRun.id === (pickedRunId ?? runFromAddress)) && (
             <section className="run-results">
-              <h2>Run #{openedRun.id}</h2>
+              <h2>Result #{openedRun.id}</h2>
               <p className="result-links">
-                <Link to="/how" onClick={() => rememberBusiness(openedRun.business_id)}>How did we get these numbers?</Link> ·{" "}
-                <Link to={`/share?run=${openedRun.id}`} onClick={() => rememberBusiness(openedRun.business_id)}>Print or share this result</Link>
+                <Link to="/how" onClick={() => rememberBusiness(openedRun.business_id)}>Inputs and assumptions</Link> ·{" "}
+                <Link to={`/share?run=${openedRun.id}`} onClick={() => rememberBusiness(openedRun.business_id)}>Print or save PDF</Link>
               </p>
               <SavedResultExplanation key={openedRun.id} run={openedRun} currency={currency} />
               <details className="result-explanation-details"><summary>See the numbers</summary>

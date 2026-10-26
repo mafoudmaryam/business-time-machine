@@ -26,7 +26,7 @@ describe("Tour", () => {
     expect(screen.getByRole("button", { name: "Back" }).hasAttribute("disabled")).toBe(true);
     await user.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText("Step 2 of 3")).toBeTruthy();
-    expect(screen.getByText("Try a change")).toBeTruthy();
+    expect(screen.getByText("Try an idea")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByText("Step 1 of 3")).toBeTruthy();
   });

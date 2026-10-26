@@ -247,3 +247,22 @@ describe("what it does not do", () => {
     expect(within(main).getByRole("heading", { level: 1 })).toBeTruthy();
   });
 });
+
+describe("page introductions and keyboard focus", () => {
+  it("starts a new page at the top and moves focus into its main content", async () => {
+    const scroll = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
+    const { user } = mount(["/today"]);
+    expect(document.activeElement).toBe(screen.getByRole("main"));
+    await user.click(screen.getByRole("link", { name: "to history" }));
+    expect(where()).toBe("/history");
+    expect(document.activeElement).toBe(screen.getByRole("main"));
+    expect(scroll).toHaveBeenLastCalledWith({ top: 0, left: 0, behavior: "instant" });
+    scroll.mockRestore();
+  });
+  it("leaves assumptions deep links in control of their own scroll target", () => {
+    const scroll = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
+    mount(["/today#assumed"]);
+    expect(scroll).not.toHaveBeenCalled();
+    scroll.mockRestore();
+  });
+});

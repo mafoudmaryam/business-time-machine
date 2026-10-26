@@ -14,8 +14,8 @@ export function ExplorePage() {
 
   return (
     <div className="page explore-page">
-      <h1>What would you like to change?</h1>
-      <p>Choose one thing to explore. You’ll review the change before saving a plan.</p>
+      <h1>Try an idea</h1>
+      <p>Choose a change and see what might happen. You’ll review the idea before saving a plan.</p>
       <ul className="explore-choices">
         {CHOICES.map((choice) => (
           <li key={choice.type}>
@@ -36,6 +36,10 @@ export function ExplorePage() {
         ))}
       </ul>
       <p><Link to={`/scenarios?business=${businessId}`}>Combine changes or describe your own idea →</Link></p>
+      <section className="idea-saved" aria-labelledby="idea-saved-title">
+        <h2 id="idea-saved-title">Already saved an idea?</h2>
+        <p><Link to={`/history?business=${businessId}`}>Open saved plans and results</Link> or <Link to={`/compare?business=${businessId}`}>compare plans side by side</Link>.</p>
+      </section>
     </div>
   );
 }

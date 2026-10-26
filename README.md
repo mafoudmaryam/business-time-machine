@@ -26,6 +26,15 @@ Created and maintained by **[Maryam Mafoud (@mafoudmaryam)](https://github.com/m
 
 ---
 
+## Find your way around
+
+- **Overview** shows where your business stands. Open the monthly picture or check assumptions when you need more detail.
+- **Try an idea** lets you explore a change, reopen saved plans and compare them with changing nothing.
+- **Track results** is your existing journal: record what actually happened and compare it with the estimate.
+- **Advanced** keeps detailed setup and specialist pages available, alongside shortcuts to assumptions, saved work and PDF export.
+
+All existing addresses still work. Tools will join this same navigation when the first working calculator is ready; there is no empty Tools page. See [the navigation structure and future tools plan](docs/navigation-structure.md).
+
 ## What it does
 
 Most small food businesses make big choices on instinct: raise prices, hire a baker, run a promotion, change opening hours. Business Time Machine lets an owner try a choice first, in plain words, and see what could happen.
@@ -145,7 +154,7 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 # from the project root; all three use the backend's virtual environment
 cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
 cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 683 tests (682 passed, 1 skipped)
-cd ..\frontend; npm test                                        # 835 tests
+cd ..\frontend; npm test                                        # 853 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -198,7 +207,7 @@ Results now lead with a short, AI-free explanation: what changes, why it may hel
 
 New results save their original actions, dates, currency and engine profit breakdown alongside the existing JSON result. Reasons use the central calculation only when its direction agrees with the displayed simulated comparison; otherwise the uncertainty is explicit. Investment and loan payments stay in the cash trade-off, separate from operating profit. Historical runs without saved context show their calculated results but do not infer the original action or its cause from a name. Monthly sketch changes are averages across the full sketch period; saved reports compare middle total profits over the actual run horizon. Neither simulated shares nor higher profit establish real-world success or the best choice for every owner.
 
-Validation: 835 frontend tests, 682 backend tests plus one expected skip, and 356 engine tests pass. Build and lint complete with existing warnings. Desktop and 390px mobile views were reviewed using a separate preview database. PDF rendering could not be completed on this machine because the renderer’s GObject/Pango system libraries are unavailable; the report structure and print disclosure rules are checked, but final PDF pagination still needs browser verification.
+Validation: 853 frontend tests, 682 backend tests plus one expected skip, and 356 engine tests pass. Build and lint complete with existing warnings. Desktop and 390px mobile views were reviewed using a separate preview database. PDF rendering could not be completed on this machine because the renderer’s GObject/Pango system libraries are unavailable; the report structure and print disclosure rules are checked, but final PDF pagination still needs browser verification.
 
 ## Quality
 
@@ -208,7 +217,7 @@ Latest local verification: **2026-10-26**, using fresh Python 3.12 environments 
 |---|---|
 | Engine tests (Python 3.12) | 356 passed |
 | Backend tests (Python 3.12) | 682 passed, 1 skipped (no development database) |
-| Frontend tests (Vitest, 60 files) | 835 passed |
+| Frontend tests (Vitest, 61 files) | 853 passed |
 | TypeScript check | clean |
 | Production build (Vite) | succeeds; existing bundle-size warning remains |
 | Lint (oxlint) | completes with existing warnings in unchanged files |
