@@ -1,3 +1,4 @@
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { useState } from "react";
 import { createSampleBusiness, type BusinessOut } from "../../api";
 import { useSketch } from "../../hooks/useSketch";
@@ -57,6 +58,7 @@ export function HeroDemo({ currency, onOpen }: { currency: string; onOpen: (busi
                 <div><h3>Money left after bills</h3><p className="demo-result-number">{keep.amount}</p><p>{keep.direction} each month</p></div>
               </div>
               <p className="demo-catch"><strong>But there’s a catch</strong> {catchText(sketch.visits_change_per_month)}</p>
+              <ResultAssumptions marketing={false} />
               <details className="demo-more">
               <summary>What else could happen?</summary>
               <h3>Money in the bank</h3><p className="demo-result-number">{bank.amount}</p><p>{bank.detail}</p>

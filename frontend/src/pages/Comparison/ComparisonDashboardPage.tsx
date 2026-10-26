@@ -1,3 +1,4 @@
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -196,6 +197,7 @@ export function ComparisonDashboardPage() {
 
           {run && (
             <section className="run-results">
+              <ResultAssumptions />
               <CoachCard
                 key={run.id}
                 runId={run.id}

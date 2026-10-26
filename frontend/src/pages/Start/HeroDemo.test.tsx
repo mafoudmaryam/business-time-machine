@@ -38,6 +38,9 @@ describe("the landing price demo", () => {
     await userEvent.click(screen.getByRole("button", { name: "See what happens →" }));
     await screen.findByText("+£534", { exact: true });
     expect(screen.getByText(/About 382 fewer visits/).closest("details")).toBeNull();
+    const note = screen.getByRole("complementary", { name: "What these estimates depend on" });
+    expect(note.closest("details")).toBeNull();
+    expect(note.textContent).toContain("not a measured chance of real-world success");
     expect(screen.getByRole("heading", { name: "Money in the bank" }).closest("details")?.hasAttribute("open")).toBe(false);
     await userEvent.click(screen.getByText("What else could happen?"));
     expect(screen.getByRole("heading", { name: "Money in the bank" }).closest("details")?.hasAttribute("open")).toBe(true);

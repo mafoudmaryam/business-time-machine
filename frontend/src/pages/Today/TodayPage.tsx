@@ -1,3 +1,4 @@
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { getBusinessImpact, getJournal, getToday, getTodayNote, type TodayNote, type TodayOut } from "../../api";
@@ -140,6 +141,7 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
       )}
 
       <TodayChart today={today} />
+      <ResultAssumptions marketing={false} />
 
       {nothingSaved ? (
         <EmptyState compact title="You haven't tried a change yet" action={{ label: "Try a change", to: "/try" }}>

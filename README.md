@@ -142,7 +142,7 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 # from the project root; all three use the backend's virtual environment
 cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
 cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 679 tests
-cd ..\frontend; npm test                                        # 788 tests
+cd ..\frontend; npm test                                        # 790 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -191,20 +191,22 @@ Every full run stores its engine version, random seed and number of iterations, 
 
 ## Quality
 
-Latest frontend verification: **2026-10-25**, after the beginner-focused redesign and selected logo were implemented.
+Latest frontend verification: **2026-10-26**, after the uncertainty wording update.
 
 | Check | Result |
 |---|---|
-| Frontend tests (Vitest, 56 files) | 788 passed |
+| Frontend tests (Vitest, 56 files) | 790 passed |
 | TypeScript check | clean |
 | Production build (Vite) | succeeds; existing bundle-size warning remains |
 | Lint (oxlint) | completes with existing warnings in unchanged files |
-| Visual checks | desktop and 390-pixel phone layout; 16/32-pixel favicons on light and dark backgrounds |
+| Visual checks | earlier redesign: desktop and 390-pixel phone layout and favicons; uncertainty wording: browser and PDF layout verification pending |
 | Logo consistency | navigation and favicon paths match the selected concept |
 
 The engine and backend suites were **not rerun for these frontend and logo changes**. Their last documented full-project check, on 2026-10-10, recorded 356 engine tests passing and 678 of 679 backend tests passing. The backend failure was subsequently fixed and its file rerun (70 passing tests), but the full backend suite was not repeated. Historical results are kept separate from the latest frontend verification.
 
 ## Honest limits
+
+The demo, result screens and printable summary explain that outcome shares describe simulated futures under the model’s assumptions. For example, 9 out of 10 simulated futures does not establish a measured 90% real-world chance of success. Marketing-dependent results also rely on customer response and available capacity; that response has not been validated against real business data.
 
 - **It is a simplified model.** The answers are scenarios, not forecasts, and this is not financial advice.
 - **Some settings are guesses.** The marketing and word-of-mouth settings are not calibrated against real data and look too optimistic; they are reused for all three industries. Restaurant and bakery defaults are typical-small-business estimates. The four-question start fills in the rest with rough rules (for example "other bills are a third of the rent"); the app shows every guess and lets you change it.

@@ -113,7 +113,7 @@ describe("share: with the change vs if you change nothing", () => {
     expect(rows[1]).toMatchObject({ withChange: "$61,000 to $99,000", without: "$50,000 to $82,000" });
     expect(rows[2]).toMatchObject({ withChange: "$112,000", without: "$90,000" });
     expect(rows[3]).toMatchObject({ withChange: "861", without: "900" });
-    expect(rows[4]).toMatchObject({ withChange: "9 of 10 possible futures" });
+    expect(rows[4]).toMatchObject({ withChange: "9 of 10 simulated futures" });
   });
 
   it("leaves out the odds row if the run has none", () => {

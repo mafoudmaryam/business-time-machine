@@ -1,3 +1,4 @@
+import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { getBusiness, getStartOptions } from "../../api";
@@ -130,9 +131,10 @@ export function TryPage() {
                 </div>
 
                 <div className="try-sure">
-                  <h3 className="try-eyebrow">How sure are we?</h3>
+                  <h3 className="try-eyebrow">What happened in the simulations?</h3>
                   <Dots ahead={sketch.ahead_of_10} />
                   <p>{futuresText(sketch.ahead_of_10)}</p>
+                  <ResultAssumptions marketing={false} />
                 </div>
               </div>
             )}

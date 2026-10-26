@@ -30,6 +30,13 @@ frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 - Sample failures appear beside the hero action and support retry. Existing sample actions, onboarding, startup guide and confirmation rules are retained.
 - Validation: 783 frontend tests in 55 files, production build and lint pass. Lint reports warnings in unchanged files. Engine and backend were not changed or re-tested.
 
+## Explain what simulated futures mean (26 Oct 2026)
+
+- Replace “How sure are we?” with “What happened in the simulations?” and label outcome shares as simulated futures. Keep the calculated values unchanged.
+- Share one visible explanation across the sample demo, Try, Today, timeline, comparisons, saved runs and printable summary: shares depend on inputs and assumptions, not measured real-world success probabilities.
+- Comparison, saved-run and printed summaries retain the marketing note: response is unvalidated, capacity matters, and extra spending can reduce profit.
+- Add print coverage for 0-of-10 and 10-of-10 results; the explanation remains inside the printable sheet. Homepage coverage checks that the note is visible without opening extra details. All 790 frontend tests passed; build passed; lint completed with existing warnings in unchanged files. Browser and PDF layout verification remain pending.
+
 ## Pictures labelled and credited (Oct 2026)
 
 - The four start-page pictures are now labelled as AI-generated illustrations (ChatGPT, October 2026): a new `frontend/public/images/redesign/CREDITS.md`, alt text that starts "Illustration of ...", and one line in the start-page footer. The café, restaurant and bakery photos are still credited to their Pexels photographers. README has an "Images" section. Docs and text only.
