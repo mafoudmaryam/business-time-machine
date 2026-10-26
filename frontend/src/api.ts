@@ -314,7 +314,18 @@ export interface MetricBands {
   p90: number[];
 }
 
+/** Frozen evidence attached to new results; absent on historical runs. */
+export interface ExplanationContext {
+  version: 1;
+  currency: string;
+  month_labels: string[];
+  decisions: Pick<DecisionOut, "type" | "start_month" | "value" | "unit" | "extra">[];
+  central: { total: number; drivers: Record<string, number> };
+  cash_effect?: number;
+}
+
 export interface ScenarioSummary {
+  explanation_context?: ExplanationContext;
   total_profit_p10: number;
   total_profit_p50: number;
   total_profit_p90: number;
@@ -811,6 +822,7 @@ export interface SketchPath {
 
 /** The answer to a slider position. It is only a sketch: nothing is saved, and the AI never explains it. */
 export interface Sketch {
+  explanation_context?: ExplanationContext;
   just_a_sketch: boolean;
   type: SketchKind;
   amount: number;

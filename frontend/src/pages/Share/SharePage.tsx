@@ -1,3 +1,5 @@
+import { ResultExplanation } from "../../components/ResultExplanation";
+import { explainRun } from "../../lib/resultExplanation";
 import { ResultAssumptions } from "../../components/ResultAssumptions";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
@@ -6,7 +8,7 @@ import { LoadError } from "../../components/LoadError";
 import { Spinner } from "../../components/Spinner";
 import { useAsync } from "../../hooks/useAsync";
 import { track } from "../../lib/events";
-import { formatCount, formatMoney } from "../../lib/format";
+import { formatMoney } from "../../lib/format";
 import { DISCLAIMER, formatHowValue } from "../../lib/how";
 import { getRememberedBusinessId } from "../../lib/session";
 import { compareRows, initialChoice, parseChoice, scenarioChoices, type PlanRow } from "../../lib/share";
@@ -26,27 +28,17 @@ function rowsFrom(today: TodayOut, metric: "profit" | "cash"): PlanRow[] {
   }));
 }
 
-function ComparisonSection({ run, scenario, currency }: { run: SimulationRunOut; scenario: string; currency: string }) {
+function ComparisonSection({ run, scenario, currency: fallbackCurrency }: { run: SimulationRunOut; scenario: string; currency: string }) {
   const change = run.results.find((r) => r.scenario_name === scenario);
   const nothing = run.results.find((r) => r.scenario_name === "baseline");
   if (!change || !nothing) return null;
-  const money = (v: number) => formatMoney(v, currency);
-  const difference = change.summary.total_profit_p50 - nothing.summary.total_profit_p50;
-  const cashDifference = change.summary.end_cash_p50 - nothing.summary.end_cash_p50;
-  const customerDifference = change.summary.end_customers_p50 - nothing.summary.end_customers_p50;
-  const signedMoney = (value: number) => `${value > 0 ? "+" : ""}${money(value)}`;
+  const currency = change.summary.explanation_context?.currency ?? fallbackCurrency;
+  const explanation = explainRun(run, scenario, currency);
   return (
     <section className="share-section" aria-labelledby="share-compare">
       <h2 id="share-compare">With “{displayScenarioName(scenario)}” and without it</h2>
-      <div className="report-highlight">
-        <p className="report-eyebrow">{difference > 0 ? "Higher estimated profit" : difference < 0 ? "Lower estimated profit" : "No estimated profit difference"}</p>
-        <p className="report-delta">{signedMoney(difference)}</p>
-        <p>Difference in total profit over {run.horizon} months, comparing the most likely results.</p>
-      </div>
-      <div className="report-deltas">
-        <p><strong>{signedMoney(cashDifference)}</strong><span>Cash difference at month {run.horizon}</span></p>
-        <p><strong>{customerDifference > 0 ? "+" : ""}{formatCount(customerDifference)}</strong><span>Regular customer difference at month {run.horizon}</span></p>
-      </div>
+      {explanation && <ResultExplanation explanation={explanation} />}
+      <details className="result-explanation-details"><summary>See the numbers</summary>
       <table className="share-table">
         <thead>
           <tr>
@@ -65,15 +57,16 @@ function ComparisonSection({ run, scenario, currency }: { run: SimulationRunOut;
           ))}
         </tbody>
       </table>
-
+      </details>
     </section>
   );
 }
 
-function ComparisonChart({ run, scenario, currency }: { run: SimulationRunOut; scenario: string; currency: string }) {
+function ComparisonChart({ run, scenario, currency: fallbackCurrency }: { run: SimulationRunOut; scenario: string; currency: string }) {
   const change = run.results.find((r) => r.scenario_name === scenario);
   const nothing = run.results.find((r) => r.scenario_name === "baseline");
   if (!change || !nothing) return null;
+  const currency = change.summary.explanation_context?.currency ?? fallbackCurrency;
   const money = (v: number) => formatMoney(v, currency);
   const rows: PlanRow[] = change.bands.profit.p50.map((p50, i) => ({
     label: `Month ${i + 1}`, p10: change.bands.profit.p10[i], p50, p90: change.bands.profit.p90[i], baseline: nothing.bands.profit.p50[i],
@@ -99,7 +92,29 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
     track("screen_view", "share", { sample: today.is_sample });
   }, [today.is_sample]);
 
-  const selectedRun = parsed && !run.loading && !run.error && run.data?.id === parsed.runId ? run.data : null;
+  useEffect(() => {
+    // Older browsers may hide closed details even under print CSS.
+    const previous = new Map<HTMLDetailsElement, boolean>();
+    function beforePrint() {
+      document.querySelectorAll<HTMLDetailsElement>(".share-sheet details").forEach(detail => {
+        if (!previous.has(detail)) previous.set(detail, detail.open);
+        detail.open = true;
+      });
+    }
+    function afterPrint() {
+      previous.forEach((open, detail) => { detail.open = open; });
+      previous.clear();
+    }
+    window.addEventListener("beforeprint", beforePrint);
+    window.addEventListener("afterprint", afterPrint);
+    return () => {
+      window.removeEventListener("beforeprint", beforePrint);
+      window.removeEventListener("afterprint", afterPrint);
+      afterPrint();
+    };
+  }, []);
+
+  const selectedRun = parsed && !run.loading && !run.error && run.data?.id === parsed.runId && run.data.business_id === businessId ? run.data : null;
   const money = (v: number) => formatMoney(v, today.currency);
   const profit = rowsFrom(today, "profit");
   const cash = rowsFrom(today, "cash");
@@ -223,7 +238,7 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
           </p>
         </section>
 
-        <ResultAssumptions />
+        {!selectedRun && <ResultAssumptions />}
         <footer className="share-footer">
           <p className="share-disclaimer">{DISCLAIMER}</p>
           <p className="share-small">Made with Business Time Machine. Nothing in this summary has been sent anywhere.</p>
@@ -248,12 +263,12 @@ export function SharePage() {
       </div>
     );
   }
-  if (!summary.data || !how.data) {
+  if (!summary.data || !how.data || summary.data.business_id !== id || how.data.business_id !== id) {
     return (
       <div className="page">
         <Spinner label="Preparing your summary…" />
       </div>
     );
   }
-  return <Sheet today={summary.data} how={how.data} />;
+  return <Sheet key={id} today={summary.data} how={how.data} />;
 }

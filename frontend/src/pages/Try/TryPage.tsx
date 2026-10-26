@@ -1,4 +1,5 @@
-import { ResultAssumptions } from "../../components/ResultAssumptions";
+import { ResultExplanation } from "../../components/ResultExplanation";
+import { explainSketch } from "../../lib/resultExplanation";
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { getBusiness, getStartOptions } from "../../api";
@@ -9,7 +10,7 @@ import { DEFAULT_CURRENCY } from "../../lib/format";
 import { getRememberedBusinessId } from "../../lib/session";
 import { SaveDialog } from "./SaveDialog";
 import {
-  PRICE_DEFAULT, PRICE_MAX, PRICE_MIN, bankTile, catchText, dots, exampleText, futuresText, keepText, priceNote, timelineLink,
+  PRICE_DEFAULT, PRICE_MAX, PRICE_MIN, bankTile, catchText, dots, exampleText, futuresText, keepText, timelineLink,
 } from "../../lib/sketch";
 
 function Dots({ ahead }: { ahead: number }) {
@@ -89,15 +90,7 @@ export function TryPage() {
             </div>
           </section>
 
-          <aside className="try-note" aria-label="A quick thought">
-            <span className="try-note-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="22" height="22" focusable="false">
-                <path d="M12 3a6.5 6.5 0 0 0-3.6 11.9c.5.4.8 1 .8 1.6V17h5.6v-.5c0-.6.3-1.2.8-1.6A6.5 6.5 0 0 0 12 3Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                <path d="M9.8 20.2h4.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-              </svg>
-            </span>
-            <p>{priceNote(percent)}</p>
-          </aside>
+
         </div>
 
         <div className="try-right">
@@ -109,7 +102,11 @@ export function TryPage() {
             {!sketch && !failed && <p className="try-working">Working it out…</p>}
             {!sketch && failed && <p className="try-failed" role="alert">We couldn't work that out just now. Try moving the slider again.</p>}
 
+            {fresh && sketch && business.data?.id === businessId && (
+              <ResultExplanation key={`${businessId}:${sketch.amount}:${sketch.start_month}`} explanation={explainSketch(sketch, currency)} />
+            )}
             {sketch && keep && bank && (
+              <details className="result-explanation-details"><summary>See the numbers</summary>
               <div aria-busy={updating} className={!fresh ? "try-numbers try-numbers-updating" : "try-numbers"}>
                 <p className="field-help">{fresh ? "Showing" : "Previous result:"} a {sketch.amount}% price rise from {sketch.start_label} (month {sketch.start_month}).</p>
                 <div className="try-tile try-tile-keep">
@@ -135,9 +132,9 @@ export function TryPage() {
                   <h3 className="try-eyebrow">What happened in the simulations?</h3>
                   <Dots ahead={sketch.ahead_of_10} />
                   <p>{futuresText(sketch.ahead_of_10)}</p>
-                  <ResultAssumptions marketing={false} />
                 </div>
               </div>
+              </details>
             )}
 
             <p className="try-status" role="status">

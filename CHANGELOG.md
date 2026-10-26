@@ -3,6 +3,13 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## Beginner-friendly result explanations (2026-10-26)
+
+- Add a shared four-part explanation to sketches, timelines, comparisons, saved runs and the printable report, with optional numbers and assumptions details. Preserve the purple design and the designed PDF export from the preceding branch.
+- Freeze original action inputs, date labels, currency and the existing engine’s central profit breakdown with new results. Keep Monte Carlo comparisons separate from central-run causes and state when evidence is missing or disagrees. Existing runs are not reconstructed from mutable scenarios.
+- Hide explanations during updates, mismatched selections or failed calculations. Guard late history/comparison responses and business changes. Remove unsupported generic “low risk” price advice.
+- Validation: 835 frontend tests across 60 files; 682 backend tests passed and one expected skip; 356 engine tests passed; build/lint complete with existing warnings. Desktop and 390px mobile views reviewed. Final PDF rendering remains unverified because GObject/Pango is unavailable on this machine.
+
 ## A designed PDF export from Share (2026-10-26)
 
 - Replace monochrome print styling with purple summary cards, comparison highlights, coloured SVG charts and separate overview, charts and assumptions sections. Values come from the selected saved run and business currency; loss and unchanged outcomes are labelled honestly.

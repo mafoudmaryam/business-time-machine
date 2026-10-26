@@ -189,3 +189,11 @@ class TestStartOptions:
         options = {o["month"]: o["name"] for o in client.get("/start_options").json()["options"]}
         body = sketch(client, business["id"], start_month=3).json()
         assert options[3] == body["start_label"]
+
+
+def test_sketch_explanation_uses_same_action_currency_and_model_evidence(client, business):
+    result = client.post(f"/businesses/{business['id']}/preview_change", json={"type": "price", "amount": 5, "start_month": 3}).json()
+    context = result["explanation_context"]
+    assert context["decisions"][0] == {"type": "price", "value": 5, "start_month": 3, "unit": "percent", "extra": {}}
+    assert context["month_labels"][2] == result["start_label"]
+    assert abs(sum(context["central"]["drivers"].values()) - context["central"]["total"]) < .001

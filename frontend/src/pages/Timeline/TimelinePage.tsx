@@ -1,4 +1,5 @@
-import { ResultAssumptions } from "../../components/ResultAssumptions";
+import { ResultExplanation } from "../../components/ResultExplanation";
+import { explainSketch } from "../../lib/resultExplanation";
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { Area, CartesianGrid, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -23,7 +24,7 @@ export function TimelinePage() {
   const [params] = useSearchParams();
   const query = useMemo(() => parseTimelineQuery(params), [params]);
   const business = useAsync(() => (businessId ? getBusiness(businessId) : Promise.reject(new Error("none"))), [businessId]);
-  const { sketch, failed } = useSketch(businessId, { type: query.type, amount: query.amount, start_month: query.start });
+  const { sketch: received, failed, updating } = useSketch(businessId, { type: query.type, amount: query.amount, start_month: query.start });
   const [month, setMonth] = useState(1);
   const [compare, setCompare] = useState(true);
   const [metric, setMetric] = useState<TimelineMetric>("profit");
@@ -35,6 +36,7 @@ export function TimelinePage() {
 
   if (!businessId) return <Navigate to="/" replace />;
 
+  const sketch = received && !updating && !failed && received.type === query.type && received.amount === query.amount && received.start_month === query.start && business.data?.id === businessId ? received : null;
   const currency = business.data?.currency ?? DEFAULT_CURRENCY;
   const money = (v: number) => formatMoney(v, currency);
   const horizon = sketch?.horizon ?? 12;
@@ -58,6 +60,8 @@ export function TimelinePage() {
 
       {sketch && card && (
         <>
+          <ResultExplanation key={`${businessId}:${sketch.type}:${sketch.amount}:${sketch.start_month}`} explanation={explainSketch(sketch, currency)} />
+          <details className="result-explanation-details" open><summary>See the numbers</summary>
           <section className="try-card timeline-controls" aria-label="Pick a month">
             <div className="timeline-month-row">
               <label htmlFor="timeline-month" className="try-eyebrow">Pick a month</label>
@@ -90,7 +94,6 @@ export function TimelinePage() {
               The line is the most likely path; the shaded area runs from a bad case to a good case
               {compare ? "; the thin dashed line is what happens if you change nothing" : ""}.
             </p>
-            <ResultAssumptions marketing={false} />
             <div
               role="img"
               aria-label={`${tab.label}, month by month. In ${label}: most likely ${fmt(rows[month - 1].p50)}${compare ? `, or ${fmt(rows[month - 1].baseline)} if you change nothing` : ""}.`}
@@ -162,6 +165,7 @@ export function TimelinePage() {
               {compare && <p>{formatCount(card.customersBaseline)} if you change nothing.</p>}
             </div>
           </div>
+          </details>
           {query.type === "price" && (
             <div className="timeline-actions">
               <button
