@@ -1370,13 +1370,6 @@ button.danger {
     color: #000000;
   }
 
-  .share-sheet *,
-  .share-sheet h1,
-  .share-sheet h2,
-  .share-sheet h3 {
-    color: #000000 !important;
-  }
-
   .share-section,
   .share-figure,
   .share-fact,
