@@ -241,7 +241,7 @@ describe("Share: with the change vs if you change nothing", () => {
     mount();
     await screen.findByRole("article");
     expect(screen.queryByLabelText("Add a saved scenario to compare (optional)")).toBeNull();
-    expect(screen.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/explore");
+    expect(screen.getByRole("link", { name: "Try an idea" }).getAttribute("href")).toBe("/explore");
   });
 
   it("if that scenario cannot load, says so calmly and keeps the summary", async () => {

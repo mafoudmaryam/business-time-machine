@@ -34,10 +34,10 @@ beforeEach(() => {
   vi.mocked(api.getHow).mockResolvedValue(makeHow());
 });
 
-describe("How we worked it out", () => {
+describe("Inputs and assumptions", () => {
   it("has four plain sections in order", async () => {
     mount();
-    expect(await screen.findByRole("heading", { level: 1, name: "How we worked it out" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 1, name: "Inputs and assumptions" })).toBeTruthy();
     const headings = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
     expect(headings).toEqual(["What you told us", "What we assumed", "How the answer is made", "What we do not know"]);
   });
@@ -96,7 +96,7 @@ describe("How we worked it out", () => {
   it("never mentions the AI as the author of anything but says it did not write the page", async () => {
     mount();
     await screen.findByRole("heading", { level: 1 });
-    expect(screen.getByText(/Nothing on this page is written by an AI/)).toBeTruthy();
+    expect(screen.getByText(/Check the numbers you entered/)).toBeTruthy();
     expect(api.requestCoach).not.toHaveBeenCalled();
     expect(api.askCoach).not.toHaveBeenCalled();
     expect(api.getTodayNote).not.toHaveBeenCalled();
@@ -106,7 +106,7 @@ describe("How we worked it out", () => {
     mount();
     await screen.findByRole("heading", { level: 1 });
     expect(screen.getByRole("link", { name: "Print or share a summary" }).getAttribute("href")).toBe("/share");
-    expect(screen.getByRole("link", { name: "Back to Today" }).getAttribute("href")).toBe("/today");
+    expect(screen.getByRole("link", { name: "Back to Overview" }).getAttribute("href")).toBe("/today");
   });
 });
 
@@ -169,7 +169,7 @@ describe("How we worked it out: states and accessibility", () => {
     expect(alert.textContent).toContain("We couldn't load this page");
     expect(alert.textContent).not.toContain("Internal Server Error");
     screen.getByRole("button", { name: "Try again" }).click();
-    expect(await screen.findByRole("heading", { level: 1, name: "How we worked it out" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 1, name: "Inputs and assumptions" })).toBeTruthy();
   });
 
   it("when the program is not running, says what to do", async () => {

@@ -1,3 +1,4 @@
+import { rememberBusiness } from "../../lib/session";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import {
@@ -62,6 +63,7 @@ export function ScenarioBuilderPage() {
   const [interpretationId, setInterpretationId] = useState<number | null>(null);
 
   function selectBusiness(id: number) {
+    rememberBusiness(id);
     setParams({ business: String(id) });
     resetForm();
   }
@@ -186,7 +188,8 @@ export function ScenarioBuilderPage() {
 
   return (
     <div className="page">
-      <h1>Scenario builder</h1>
+      <h1>Build a plan</h1>
+      <p className="try-lead">Describe an idea or combine changes. Check each change before saving your plan.</p>
 
       <div className="field">
         <label htmlFor="business-select">Business</label>
@@ -223,7 +226,7 @@ export function ScenarioBuilderPage() {
             {scenarios.loading && <Spinner label="Loading scenarios…" />}
             {scenarios.error && <LoadError message={scenarios.error} what="your scenarios" onRetry={scenarios.reload} />}
             {scenarios.data && scenarios.data.length === 0 && (
-              <EmptyState compact title="No scenarios yet" secondary={{ label: "Or use the sliders on Try a change", to: "/try" }}>
+              <EmptyState compact title="No scenarios yet" secondary={{ label: "Or try the price slider", to: "/try" }}>
                 <p>Describe a change in your own words below, or build one step by step. It will be listed here once you save it.</p>
               </EmptyState>
             )}

@@ -92,7 +92,7 @@ describe("The next 12 months: the page", () => {
     await settle();
     const alert = screen.getByRole("alert");
     expect(alert.textContent).toContain("We couldn't work that out just now");
-    expect(within(alert).getByRole("link", { name: "Go back to Try a change" }).getAttribute("href")).toBe("/try");
+    expect(within(alert).getByRole("link", { name: "Go back to Try an idea" }).getAttribute("href")).toBe("/try");
   });
 
   it("never calls the coach or anything AI", async () => {

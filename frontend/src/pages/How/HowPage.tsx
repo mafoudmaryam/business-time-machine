@@ -19,8 +19,8 @@ function Loaded({ how }: { how: HowOut }) {
 
   return (
     <div className="page how-page">
-      <h1>How we worked it out</h1>
-      <p className="try-lead">Here is where every number on your screens comes from, in plain words. Nothing on this page is written by an AI.</p>
+      <h1>Inputs and assumptions</h1>
+      <p className="try-lead">Check the numbers you entered and the estimates we filled in. Change anything that does not match your business.</p>
 
       <section className="how-section" aria-labelledby="how-told">
         <h2 id="how-told">What you told us</h2>
@@ -94,7 +94,7 @@ function Loaded({ how }: { how: HowOut }) {
       </section>
 
       <p className="how-links">
-        <Link to="/share">Print or share a summary</Link> · <Link to="/today">Back to Today</Link>
+        <Link to="/share">Print or share a summary</Link> · <Link to="/today">Back to Overview</Link>
       </p>
     </div>
   );

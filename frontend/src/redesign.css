@@ -3273,6 +3273,19 @@ button.danger:hover:not(:disabled) {
   .result-explanation { padding: 1rem; }
 }
 
+.run-history-table { table-layout: fixed; }
+.run-history-table th:first-child { width: 15%; }
+.run-history-table th:last-child { width: 25%; }
+.run-history-table td { overflow-wrap: anywhere; vertical-align: top; }
+
+/* Task-focused pages keep optional explanations and charts out of the first view. */
+.page-details { margin: 1rem 0; }
+.page-details > summary { min-height: 44px; padding: .7rem .2rem; cursor: pointer; font-weight: 800; color: var(--green-heading); }
+.page-details > summary:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+.idea-saved { margin: 2rem 0 0; padding-top: 1rem; border-top: 1px solid var(--card-border); }
+.idea-saved h2 { font-size: 1.25rem; }
+.appnav-more ul { max-width: calc(100vw - 32px); }
+
 @media (prefers-reduced-motion: reduce) {
   .result-explanation { animation: none; }
   .guide-choice:hover {

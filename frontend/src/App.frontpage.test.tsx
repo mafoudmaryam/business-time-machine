@@ -60,7 +60,7 @@ describe("the front page is always reachable, even with a business open", () => 
   it("/ shows the start screen and never redirects to Today", async () => {
     open("/");
     expect(await screen.findByRole("heading", { name: FRONT_PAGE })).toBeTruthy();
-    expect(screen.queryByRole("heading", { name: /Today at/ })).toBeNull();
+    expect(screen.queryByRole("heading", { name: /Overview:/ })).toBeNull();
     expect(api.getToday).not.toHaveBeenCalled();
     expect(getRememberedBusinessId()).toBe(5); // looking at it changes nothing
   });
@@ -73,10 +73,10 @@ describe("the front page is always reachable, even with a business open", () => 
 
   it("clicking the header title on Today goes to the start screen", async () => {
     const user = open("/today");
-    await screen.findByRole("heading", { name: "Today at noah" });
+    await screen.findByRole("heading", { name: "Overview: noah" });
     await user.click(screen.getByRole("link", { name: "Business Time Machine" }));
     expect(await screen.findByRole("heading", { name: FRONT_PAGE })).toBeTruthy();
-    expect(screen.queryByRole("heading", { name: /Today at/ })).toBeNull();
+    expect(screen.queryByRole("heading", { name: /Overview:/ })).toBeNull();
     expect(getRememberedBusinessId()).toBe(5);
   });
 
@@ -106,9 +106,9 @@ describe("the start screen with a business open", () => {
     const user = open("/");
     const nav = within(await screen.findByRole("navigation", { name: "Main" }));
     const labels = nav.getAllByRole("link").map((a) => a.textContent);
-    expect(labels).toEqual(expect.arrayContaining(["How it works", "Today"]));
-    await user.click(nav.getByRole("link", { name: "Today" }));
-    expect(await screen.findByRole("heading", { name: "Today at noah" })).toBeTruthy();
+    expect(labels).toEqual(expect.arrayContaining(["How it works", "Overview"]));
+    await user.click(nav.getByRole("link", { name: "Overview" }));
+    expect(await screen.findByRole("heading", { name: "Overview: noah" })).toBeTruthy();
     expect(api.getToday).toHaveBeenCalledWith(5);
   });
 
@@ -116,7 +116,7 @@ describe("the start screen with a business open", () => {
     window.sessionStorage.clear();
     open("/");
     const nav = within(await screen.findByRole("navigation", { name: "Main" }));
-    expect(nav.queryByRole("link", { name: "Today" })).toBeNull();
+    expect(nav.queryByRole("link", { name: "Overview" })).toBeNull();
     expect(nav.getByRole("link", { name: "How it works" })).toBeTruthy();
   });
 
@@ -128,7 +128,7 @@ describe("the start screen with a business open", () => {
     expect(list.queryByRole("button", { name: "Continue with noah" })).toBeNull(); // noah is reached from Today in the top bar
     expect(api.getToday).not.toHaveBeenCalled();
     await user.click(list.getByRole("button", { name: "Continue with Demo Cafe" }));
-    expect(await screen.findByRole("heading", { name: "Today at other" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Overview: other" })).toBeTruthy();
     expect(getRememberedBusinessId()).toBe(1);
   });
 
@@ -157,7 +157,7 @@ describe("the start screen with a business open", () => {
 describe("'New business' in the header menu", () => {
   it("from Today reaches the start screen with the form", async () => {
     const user = open("/today");
-    await screen.findByRole("heading", { name: "Today at noah" });
+    await screen.findByRole("heading", { name: "Overview: noah" });
     await user.click(screen.getByRole("button", { name: /noah/ }));
     await user.click(screen.getByRole("button", { name: "New business" }));
     expect(await screen.findByRole("heading", { name: FRONT_PAGE })).toBeTruthy();
@@ -187,8 +187,8 @@ describe("'New business' in the header menu", () => {
 describe("the Back button in the real app", () => {
   it("from Today, Back returns to the start screen you came from", async () => {
     const user = open("/");
-    await user.click(within(await screen.findByRole("navigation", { name: "Main" })).getByRole("link", { name: "Today" }));
-    await screen.findByRole("heading", { name: "Today at noah" });
+    await user.click(within(await screen.findByRole("navigation", { name: "Main" })).getByRole("link", { name: "Overview" }));
+    await screen.findByRole("heading", { name: "Overview: noah" });
     await user.click(screen.getByRole("button", { name: "Go back" }));
     expect(await screen.findByRole("heading", { name: FRONT_PAGE })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Go back" })).toBeNull(); // none on the start screen
@@ -197,7 +197,7 @@ describe("the Back button in the real app", () => {
 
   it("with no earlier page (Today opened directly), Back goes to the start screen", async () => {
     const user = open("/today");
-    await screen.findByRole("heading", { name: "Today at noah" });
+    await screen.findByRole("heading", { name: "Overview: noah" });
     await user.click(screen.getByRole("button", { name: "Go back" }));
     expect(await screen.findByRole("heading", { name: FRONT_PAGE })).toBeTruthy();
   });

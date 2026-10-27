@@ -25,12 +25,12 @@ describe("matching saved-result explanations", () => {
   it("hides a comparison as soon as its horizon changes and while the next run loads", async () => {
     const user = mount("compare");
     await user.click(await screen.findByRole("checkbox", { name: new RegExp(NAME) }));
-    await user.click(screen.getByRole("button", { name: "Run simulation" }));
+    await user.click(screen.getByRole("button", { name: "Compare plans" }));
     expect(await screen.findByRole("region", { name: `Understand “${NAME}”` })).toBeTruthy();
     await user.selectOptions(screen.getByLabelText("Months to simulate"), "36");
     expect(screen.queryByRole("region", { name: `Understand “${NAME}”` })).toBeNull();
     const next = deferred<api.SimulationRunOut>(); vi.mocked(api.simulateBusiness).mockReturnValue(next.promise);
-    await user.click(screen.getByRole("button", { name: "Run simulation" }));
+    await user.click(screen.getByRole("button", { name: "Compare plans" }));
     expect(screen.queryByText(/Comparing the middle simulated totals/)).toBeNull();
     await act(async () => next.resolve(makeRun({ horizon: 36, id: 3 })));
     expect(screen.getByRole("region", { name: `Understand “${NAME}”` }).textContent).toContain("36 months in total");

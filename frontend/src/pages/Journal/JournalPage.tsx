@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { getJournal, type JournalMonthOut, type JournalOut } from "../../api";
-import { EmptyState } from "../../components/EmptyState";
 import { LoadError } from "../../components/LoadError";
 import { Spinner } from "../../components/Spinner";
 import { useDeleteFlow } from "../../components/useDeleteFlow";
@@ -85,15 +84,16 @@ function Loaded({ journal, reload }: { journal: JournalOut; reload: () => void }
   return (
     <div className="page journal-page">
       <h1>
-        My journal<span className="sample-tag">Pilot feature</span>
+        Track results<span className="sample-tag">Pilot feature</span>
       </h1>
       <p className="try-lead">
-        Write down what really happened each month. We put it next to what we expected, so you can see how close we were. This is a
-        pilot: a few months of figures can't prove the forecasts right or wrong, but they show whether they are useful.
+        Record what actually happened each month. Your journal compares it with the estimate so you can learn from the difference.
       </p>
+      <p className="field-help">This is a pilot. A few months of figures cannot prove the model right or wrong.</p>
       {journal.is_sample && <p className="currency-notice" role="note">This is a sample business, so anything you write here is just practice.</p>}
 
       {olderDue.length > 0 && (
+        <details className="page-details"><summary>Other months to record</summary>
         <section className="journal-due" aria-label="Months waiting for your figures">
           {olderDue.map((d) => (
             <p key={d.month}>
@@ -111,6 +111,7 @@ function Loaded({ journal, reload }: { journal: JournalOut; reload: () => void }
             </p>
           ))}
         </section>
+        </details>
       )}
 
       <JournalForm
@@ -130,23 +131,19 @@ function Loaded({ journal, reload }: { journal: JournalOut; reload: () => void }
       </p>
 
       {journal.forecast && (
+        <details className="page-details"><summary>Compare recorded months with the estimate</summary>
         <section className="journal-chart-section" aria-labelledby="journal-chart-title">
-          <h2 id="journal-chart-title">Our forecast, and what really happened</h2>
+          <h2 id="journal-chart-title">What we estimated and what happened</h2>
           <JournalChart months={journal.forecast.months} entries={journal.entries} currency={journal.currency} />
         </section>
+        </details>
       )}
 
       <section className="journal-entries" aria-labelledby="journal-entries-title">
         <h2 id="journal-entries-title">What you wrote down</h2>
         {journal.entries.length > 0 && <p className="journal-summary">{journalSummary(journal.entries)}</p>}
         {journal.entries.length === 0 ? (
-          <EmptyState
-            compact
-            title="Nothing written down yet"
-            action={{ label: "Write down a month", onClick: () => document.getElementById("journal-month")?.focus() }}
-          >
-            <p>After a month ends, come back and enter three figures. We'll show how they compare with what we expected.</p>
-          </EmptyState>
+          <p>No months recorded yet. Use the form above to write down a month.</p>
         ) : (
           <ul className="journal-list">
             {journal.entries.map((m) => (
@@ -194,7 +191,7 @@ function Loaded({ journal, reload }: { journal: JournalOut; reload: () => void }
         financial advice.
       </p>
       <p className="how-links">
-        <Link to="/today">Back to Today</Link>
+        <Link to="/today">Back to Overview</Link>
       </p>
       {dialog}
     </div>

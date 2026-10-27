@@ -52,7 +52,7 @@ export function TryPage() {
   return (
     <div className="page try-page">
       <h1>What if you changed your prices?</h1>
-      <p className="try-lead">Move the slider. The answer on the right changes as you drag.</p>
+      <p className="try-lead">Move the slider to test a price rise. Read the result, then explore the months ahead.</p>
 
       <div className="try-grid">
         <div className="try-left">
@@ -157,7 +157,7 @@ export function TryPage() {
             </button>
           )}
           <button
-            type="button" className="btn btn-amber try-save" disabled={!fresh}
+            type="button" className="btn btn-secondary try-save" disabled={!fresh}
             onClick={() => {
               track("save_opened", "try");
               setSaving(true);

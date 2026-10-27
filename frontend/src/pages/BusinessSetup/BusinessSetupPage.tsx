@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   baselineApiToForm,
   createBusiness,
@@ -159,6 +159,7 @@ export function BusinessSetupPage() {
       ) : (
         <h1>{heading}</h1>
       )}
+      <p className="try-lead">Enter your business numbers in detail. <Link to="/">Use the shorter setup instead</Link>.</p>
       <p className="step-indicator">
         Step {step + 1} of {totalSteps}: {step === 0 ? "Business type" : current!.title}
       </p>

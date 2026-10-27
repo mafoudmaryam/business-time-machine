@@ -54,14 +54,14 @@ export function TimelinePage() {
       {!sketch && !failed && <p className="try-working">Working it out…</p>}
       {!sketch && failed && (
         <p className="try-failed" role="alert">
-          We couldn't work that out just now. <Link to="/try">Go back to Try a change</Link> and try again.
+          We couldn't work that out just now. <Link to="/try">Go back to Try an idea</Link> and try again.
         </p>
       )}
 
       {sketch && card && (
         <>
           <ResultExplanation key={`${businessId}:${sketch.type}:${sketch.amount}:${sketch.start_month}`} explanation={explainSketch(sketch, currency)} />
-          <details className="result-explanation-details" open><summary>See the numbers</summary>
+          <details className="result-explanation-details"><summary>See the numbers</summary>
           <section className="try-card timeline-controls" aria-label="Pick a month">
             <div className="timeline-month-row">
               <label htmlFor="timeline-month" className="try-eyebrow">Pick a month</label>

@@ -55,4 +55,13 @@ describe("Explore a change", () => {
     expect(screen.getByText(/more or fewer days each month/)).toBeTruthy();
     expect(screen.getByRole("link", { name: /Combine changes/ }).getAttribute("href")).toBe("/scenarios?business=7");
   });
+  it.each([
+    ["Open saved plans and results", "/history?business=7"],
+    ["compare plans side by side", "/compare?business=7"],
+  ])("keeps saved work reachable through %s", async (name, destination) => {
+    const user = userEvent.setup(); mount();
+    await user.click(screen.getByRole("link", { name }));
+    expect(await screen.findByTestId("destination")).toHaveProperty("textContent", destination);
+  });
+
 });

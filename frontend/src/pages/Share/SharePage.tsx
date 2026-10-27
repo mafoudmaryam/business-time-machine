@@ -150,7 +150,7 @@ function Sheet({ today, how }: { today: TodayOut; how: HowOut }) {
           </div>
         ) : (
           <p className="field-help">
-            Want to compare a change? <Link to="/explore">Try a change</Link> and save it as a scenario, then come back here.
+            Want to compare a change? <Link to="/explore">Try an idea</Link> and save it as a scenario, then come back here.
           </p>
         )}
         {run.loading && parsed && <p className="try-status" role="status">Loading that scenario…</p>}

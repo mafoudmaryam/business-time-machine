@@ -5,7 +5,6 @@ import { getBusinessImpact, getJournal, getToday, getTodayNote, type TodayNote, 
 import { AskCoach } from "../../components/AskCoach";
 import { useConfig } from "../../components/config";
 import { StartingPictureBanner } from "../../components/StartingPictureBanner";
-import { EmptyState } from "../../components/EmptyState";
 import { InfoTip } from "../../components/InfoTip";
 import { LoadError } from "../../components/LoadError";
 import { Modal } from "../../components/Modal";
@@ -14,7 +13,7 @@ import { Tour } from "../../components/Tour";
 import { useAsync } from "../../hooks/useAsync";
 import { track } from "../../lib/events";
 import { monthOptions } from "../../lib/journalView";
-import { dismissJournalReminder, forgetBusiness, getRememberedBusinessId, journalReminderDismissed, rememberBusiness, tourSeen } from "../../lib/session";
+import { dismissJournalReminder, forgetBusiness, getRememberedBusinessId, journalReminderDismissed, rememberBusiness } from "../../lib/session";
 import { industryWord, lowestCashTile, noteIsPending, profitTile, safetyTile, type Tile } from "../../lib/todayView";
 import { Assumptions } from "./Assumptions";
 import { TodayChart } from "./TodayChart";
@@ -83,7 +82,7 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
   const config = useConfig();
   const navigate = useNavigate();
   const [asking, setAsking] = useState(false);
-  const [touring, setTouring] = useState(() => !tourSeen());
+  const [touring, setTouring] = useState(false);
   const industryName = industryWord(today.industry);
   const { hash } = useLocation();
   // Nothing saved yet (no scenarios, no runs)? Then say so kindly and point at the one next step. If the count cannot be loaded, say nothing.
@@ -106,16 +105,16 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
       <header className="today-heading">
         <div>
           <p className="page-eyebrow">YOUR BUSINESS AT A GLANCE</p>
-          <h1>Today at {today.name}{today.is_sample && <span className="sample-tag">Sample business</span>}</h1>
-          <p className="today-subtitle">Try a small change to see what could be different.</p>
+          <h1>Overview: {today.name}{today.is_sample && <span className="sample-tag">Sample business</span>}</h1>
+          <p className="today-subtitle">See where your business stands before trying an idea.</p>
         </div>
-        <Link className="btn btn-green" to="/explore" onClick={() => track("try_a_change_clicked", "today")}>Explore a change →</Link>
+        <Link className="btn btn-green" to="/explore" onClick={() => track("try_a_change_clicked", "today")}>Try an idea →</Link>
       </header>
       {today.setup_source === "guide" && <StartingPictureBanner />}
       {today.is_sample && (
         <div className="sample-banner">
           <p>This is a sample {industryName}: example numbers, not a real business.</p>
-          <button type="button" onClick={() => navigate("/")}>
+          <button type="button" className="secondary" onClick={() => navigate("/")}>
             Start with my own numbers
           </button>
         </div>
@@ -129,6 +128,7 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
       </section>
 
       {coachOn && today.note && (
+        <details className="page-details"><summary>Read an explanation of these figures</summary>
         <CoachNote
           key={today.run_id}
           note={today.note}
@@ -138,31 +138,26 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
             setAsking(true);
           }}
         />
+        </details>
       )}
 
-      <TodayChart today={today} />
       <ResultAssumptions marketing={false} />
+      <details className="page-details"><summary>See the monthly picture</summary>
+        <TodayChart today={today} />
+      </details>
 
-      {nothingSaved ? (
-        <EmptyState compact title="You haven't tried a change yet" action={{ label: "Try a change", to: "/explore" }}>
-          <p>Everything above is how things stand today. When you try a change, you'll see here what it could do.</p>
-        </EmptyState>
-      ) : (
-        <p className="today-try">
-          Thinking about a change?{" "}
-          <Link to="/explore" onClick={() => track("try_a_change_clicked", "today")}>
-            Try a change
-          </Link>
-        </p>
-      )}
+      {nothingSaved && <p className="field-help">No saved plans yet. Try an idea when you are ready to explore a change.</p>}
 
       <JournalPrompt businessId={today.business_id} />
 
       <p className="today-links">
-        <Link to="/how">How did we get these numbers?</Link> · <Link to="/share">Print or share this summary</Link> ·{" "}
-        <Link to="/journal">My journal</Link>
+        <Link to="/how">Inputs and assumptions</Link> · <Link to="/share">Print or save PDF</Link> ·{" "}
+        <Link to="/journal">Track results</Link>
       </p>
 
+      {today.assumed_by_app && <p className="field-help">Some starting numbers are estimates. Check or change assumptions below before relying on the result.</p>}
+      <details className="page-details" open={hash === "#assumed" || undefined}>
+        <summary>Check or change assumptions</summary>
       <Assumptions
         businessId={today.business_id}
         currency={today.currency}
@@ -172,6 +167,7 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
         fromGuide={today.setup_source === "guide"}
         onChanged={reload}
       />
+      </details>
 
       <p className="disclaimer">
         Scenarios, not forecasts. Built from typical numbers and the ones you gave us. Not financial advice.
@@ -182,6 +178,7 @@ function Loaded({ today, reload }: { today: TodayOut; reload: () => void }) {
           <AskCoach runId={today.run_id} />
         </Modal>
       )}
+      <button type="button" className="link-button" onClick={() => setTouring(true)}>Show me around</button>
       {touring && <Tour onClose={() => setTouring(false)} />}
     </div>
   );
@@ -227,7 +224,7 @@ export function TodayPage() {
   if (today.loading && !today.data) {
     return (
       <div className="page">
-        <Spinner label="Your coach is looking at your numbers…" />
+        <Spinner label="Loading your business overview…" />
       </div>
     );
   }

@@ -71,7 +71,7 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks());
 
 describe("the new pages sit inside the shared layout", () => {
-  for (const [path, title] of [["/how", "How we worked it out"], ["/share", "noah: plan summary"]] as const) {
+  for (const [path, title] of [["/how", "Inputs and assumptions"], ["/share", "noah: plan summary"]] as const) {
     it(`${path} has the top bar and the Back button above the content`, async () => {
       open(path);
       const h1 = await screen.findByRole("heading", { level: 1, name: title });
@@ -98,7 +98,7 @@ describe("the new pages sit inside the shared layout", () => {
     open("/how");
     await screen.findByRole("heading", { level: 1 });
     const links = within(screen.getByRole("navigation", { name: "Main" })).getAllByRole("link").filter((l) => !l.closest("details"));
-    expect(links.map((l) => l.getAttribute("aria-label") ?? l.textContent)).toEqual(["Business Time Machine", "Today", "Try a change", "My journal"]);
+    expect(links.map((l) => l.getAttribute("aria-label") ?? l.textContent)).toEqual(["Business Time Machine", "Overview", "Try an idea", "Track results"]);
     expect(screen.getByText("Advanced")).toBeTruthy();
   });
 });
@@ -106,19 +106,19 @@ describe("the new pages sit inside the shared layout", () => {
 describe("how to get there", () => {
   it("Today has 'How did we get these numbers?' and 'Print or share this summary'", async () => {
     const { user } = open("/today");
-    await screen.findByRole("heading", { name: "Today at noah" });
+    await screen.findByRole("heading", { name: "Overview: noah" });
     const main = within(screen.getByRole("main"));
-    expect(main.getByRole("link", { name: "Print or share this summary" }).getAttribute("href")).toBe("/share");
-    await user.click(main.getByRole("link", { name: "How did we get these numbers?" }));
-    expect(await screen.findByRole("heading", { level: 1, name: "How we worked it out" })).toBeTruthy();
+    expect(main.getByRole("link", { name: "Print or save PDF" }).getAttribute("href")).toBe("/share");
+    await user.click(main.getByRole("link", { name: "Inputs and assumptions" }));
+    expect(await screen.findByRole("heading", { level: 1, name: "Inputs and assumptions" })).toBeTruthy();
   });
 
   it("a saved result links to both pages and shares that very run", async () => {
     const { user } = open("/history?business=1&run=2");
     expect(await screen.findByText("The coach card")).toBeTruthy();
     const main = within(screen.getByRole("main"));
-    expect(main.getByRole("link", { name: "How did we get these numbers?" }).getAttribute("href")).toBe("/how");
-    const share = main.getByRole("link", { name: "Print or share this result" });
+    expect(main.getByRole("link", { name: "Inputs and assumptions" }).getAttribute("href")).toBe("/how");
+    const share = main.getByRole("link", { name: "Print or save PDF" });
     expect(share.getAttribute("href")).toBe("/share?run=2");
     await user.click(share);
     expect(await screen.findByRole("region", { name: /and without it/ })).toBeTruthy();
@@ -129,16 +129,16 @@ describe("how to get there", () => {
     rememberBusiness(1);
     const { user } = open("/history?business=3&run=2");
     await screen.findByText("The coach card");
-    await user.click(within(screen.getByRole("main")).getByRole("link", { name: "Print or share this result" }));
+    await user.click(within(screen.getByRole("main")).getByRole("link", { name: "Print or save PDF" }));
     expect(getRememberedBusinessId()).toBe(3);
   });
 
   it("'Change this' on the how-page goes to the assumed list on Today and scrolls to it", async () => {
     const { user } = open("/how");
-    await screen.findByRole("heading", { level: 1, name: "How we worked it out" });
+    await screen.findByRole("heading", { level: 1, name: "Inputs and assumptions" });
     await user.click(screen.getByRole("link", { name: "Change Cash in the bank" }));
-    expect(await screen.findByRole("heading", { name: "Today at noah" })).toBeTruthy();
-    expect(document.getElementById("assumed")).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Overview: noah" })).toBeTruthy();
+    expect(document.getElementById("assumed")?.closest("details")?.open).toBe(true);
     await waitFor(() => expect(Element.prototype.scrollIntoView).toHaveBeenCalled());
   });
 });
@@ -148,7 +148,7 @@ describe("empty states: each shows its one next step", () => {
     vi.mocked(api.listScenarios).mockResolvedValue([]);
     open("/compare?business=1");
     const box = within(await screen.findByRole("region", { name: "No scenarios yet" }));
-    expect(box.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/explore");
+    expect(box.getByRole("link", { name: "Try an idea" }).getAttribute("href")).toBe("/explore");
     expect(box.getByRole("link", { name: "Describe one in your own words" }).getAttribute("href")).toBe("/scenarios");
     expect(box.getByText(/A scenario is one idea you want to test/)).toBeTruthy();
   });
@@ -156,15 +156,15 @@ describe("empty states: each shows its one next step", () => {
   it("the scenario builder with no scenarios", async () => {
     open("/scenarios?business=1");
     const box = within(await screen.findByRole("region", { name: "No scenarios yet" }));
-    expect(box.getByRole("link", { name: "Or use the sliders on Try a change" }).getAttribute("href")).toBe("/try");
+    expect(box.getByRole("link", { name: "Or try the price slider" }).getAttribute("href")).toBe("/try");
   });
 
   it("run history with no runs", async () => {
     vi.mocked(api.listSimulationRuns).mockResolvedValue([]);
     open("/history?business=1");
     const box = within(await screen.findByRole("region", { name: "No runs yet" }));
-    expect(box.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/explore");
-    expect(box.getByRole("link", { name: "Compare scenarios" }).getAttribute("href")).toBe("/compare");
+    expect(box.getByRole("link", { name: "Try an idea" }).getAttribute("href")).toBe("/explore");
+    expect(box.getByRole("link", { name: "Compare plans" }).getAttribute("href")).toBe("/compare");
   });
 
   for (const path of ["/compare", "/history", "/scenarios"]) {
@@ -180,23 +180,23 @@ describe("empty states: each shows its one next step", () => {
   it("Today for a new business with nothing saved", async () => {
     vi.mocked(api.getBusinessImpact).mockResolvedValue({ scenarios: 0, runs: 0 });
     open("/today");
-    const box = within(await screen.findByRole("region", { name: "You haven't tried a change yet" }));
-    expect(box.getByRole("link", { name: "Try a change" }).getAttribute("href")).toBe("/explore");
+    expect(await screen.findByText(/No saved plans yet/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Try an idea →" }).getAttribute("href")).toBe("/explore");
     expect(screen.queryByText("Thinking about a change?")).toBeNull();
   });
 
   it("Today does not say that once something is saved", async () => {
     open("/today");
-    await screen.findByRole("heading", { name: "Today at noah" });
+    await screen.findByRole("heading", { name: "Overview: noah" });
     await waitFor(() => expect(api.getBusinessImpact).toHaveBeenCalled());
     expect(screen.queryByRole("region", { name: "You haven't tried a change yet" })).toBeNull();
-    expect(screen.getByText("Thinking about a change?")).toBeTruthy();
+    expect(screen.queryByText(/No saved plans yet/)).toBeNull();
   });
 
   it("Today says nothing about it if the count cannot be loaded", async () => {
     vi.mocked(api.getBusinessImpact).mockRejectedValue(UNREACHABLE);
     open("/today");
-    await screen.findByRole("heading", { name: "Today at noah" });
+    await screen.findByRole("heading", { name: "Overview: noah" });
     expect(screen.queryByRole("region", { name: "You haven't tried a change yet" })).toBeNull();
   });
 
@@ -264,8 +264,8 @@ describe("failed loads: a calm message and Try again, never a raw error or a bla
     vi.mocked(api.getHow).mockResolvedValue({ ...makeHow(), assumed: null } as unknown as api.HowOut);
     const { user } = open("/how");
     await screen.findByText("Something went wrong on this page");
-    await user.click(within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Today" }));
-    expect(await screen.findByRole("heading", { name: "Today at noah" })).toBeTruthy();
+    await user.click(within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Overview" }));
+    expect(await screen.findByRole("heading", { name: "Overview: noah" })).toBeTruthy();
     await act(async () => undefined);
   });
 });
