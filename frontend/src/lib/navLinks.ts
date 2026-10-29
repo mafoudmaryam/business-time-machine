@@ -1,8 +1,9 @@
-/** Existing routes, grouped by the owner's task. Tools joins this list only when a real tool ships. */
+/** Existing routes, grouped by the owner's task. Tools contains the first working practical calculator. */
 export const MAIN_LINKS = [
   { to: "/today", label: "Overview", paths: ["/today", "/how", "/share"] },
   { to: "/explore", label: "Try an idea", paths: ["/explore", "/try", "/timeline", "/scenarios", "/compare", "/history"] },
   { to: "/journal", label: "Track results", paths: ["/journal"] },
+  { to: "/tools", label: "Tools", paths: ["/tools"] },
 ];
 
 export const ADVANCED_LINKS = [

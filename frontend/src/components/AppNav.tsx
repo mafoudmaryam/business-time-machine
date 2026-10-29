@@ -25,6 +25,7 @@ export function AppNav() {
           <li>
             <a href="#how-it-works" onClick={jumpLink("how-it-works")}>How it works</a>
           </li>
+          <li><Link to="/tools">Tools</Link></li>
           {/* The way back into an open business, so nobody is stranded on the front door. */}
           {getRememberedBusinessId() !== null && (
             <li>

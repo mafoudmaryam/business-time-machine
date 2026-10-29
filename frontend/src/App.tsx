@@ -1,3 +1,4 @@
+import { SalesNeededPage } from "./pages/Tools/SalesNeededPage";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
 import { GuidePage } from "./pages/Guide/GuidePage";
@@ -33,6 +34,7 @@ export function App() {
         <Route path="/try" element={<TryPage />} />
         <Route path="/timeline" element={<TimelinePage />} />
         <Route path="/how" element={<HowPage />} />
+        <Route path="/tools" element={<SalesNeededPage />} />
         <Route path="/journal" element={<JournalPage />} />
         <Route path="/share" element={<SharePage />} />
         <Route path="/guide" element={<GuidePage />} />

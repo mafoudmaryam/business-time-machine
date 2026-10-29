@@ -1193,3 +1193,8 @@ export function createGuideBusiness(name: string, industry: string, currency: st
     body: JSON.stringify({ name, industry, currency, baseline: quick.baseline, setup_source: "guide", assumed_fields: quick.assumed }),
   });
 }
+
+// Standalone practical tool: no scenario, business updates or AI service.
+export function calculateSalesNeeded(body: import("./lib/salesNeeded").SalesNeededInput, signal?: AbortSignal): Promise<import("./lib/salesNeeded").SalesNeededResult> {
+  return request("/tools/sales_needed", { method: "POST", body: JSON.stringify(body), signal });
+}

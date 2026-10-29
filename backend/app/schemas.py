@@ -808,3 +808,24 @@ class GuideSimulatorOut(BaseModel):
 
 class GuideLinkIn(BaseModel):
     business_id: int
+
+
+# Practical tools accept only owner-entered strings, never inferred business costs.
+class SalesNeededIn(BaseModel):
+    selling_price: str = Field(max_length=32)
+    cost_per_sale: str = Field(max_length=32)
+    monthly_costs: str = Field(max_length=32)
+    opening_days: str = Field(default="", max_length=32)
+
+
+class SalesNeededOut(BaseModel):
+    status: Literal["target", "no_margin"]
+    selling_price: str
+    cost_per_sale: str
+    monthly_costs: str
+    contribution_per_sale: str
+    opening_days: Optional[int]
+    monthly_sales: Optional[str]
+    daily_average: Optional[str]
+    monthly_revenue: Optional[str]
+    cost_share_percent: Optional[float]
