@@ -94,11 +94,11 @@ describe("the new pages sit inside the shared layout", () => {
     });
   }
 
-  it("the top bar is Today, Try a change, My journal, Advanced", async () => {
+  it("the top bar keeps the agreed sections and adds Tools", async () => {
     open("/how");
     await screen.findByRole("heading", { level: 1 });
     const links = within(screen.getByRole("navigation", { name: "Main" })).getAllByRole("link").filter((l) => !l.closest("details"));
-    expect(links.map((l) => l.getAttribute("aria-label") ?? l.textContent)).toEqual(["Business Time Machine", "Overview", "Try an idea", "Track results"]);
+    expect(links.map((l) => l.getAttribute("aria-label") ?? l.textContent)).toEqual(["Business Time Machine", "Overview", "Try an idea", "Track results", "Tools"]);
     expect(screen.getByText("Advanced")).toBeTruthy();
   });
 });

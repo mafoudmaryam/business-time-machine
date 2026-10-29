@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { ADVANCED_LINKS, MAIN_LINKS, businessPageLink, navigationBusinessId } from "./navLinks";
 
 describe("owner task navigation", () => {
-  it("uses existing routes and hides Tools until a working tool ships", () => {
+  it("uses existing routes and adds only the Tools category for the working calculator", () => {
     expect(MAIN_LINKS.map(link => [link.label, link.to])).toEqual([
-      ["Overview", "/today"], ["Try an idea", "/explore"], ["Track results", "/journal"],
+      ["Overview", "/today"], ["Try an idea", "/explore"], ["Track results", "/journal"], ["Tools", "/tools"],
     ]);
-    expect([...MAIN_LINKS, ...ADVANCED_LINKS].some(link => link.to.startsWith("/tools"))).toBe(false);
+    expect([...MAIN_LINKS, ...ADVANCED_LINKS].filter(link => link.to.startsWith("/tools"))).toHaveLength(1);
   });
   it.each(["/scenarios", "/compare", "/history"])("keeps the selected business for %s", path => {
     expect(businessPageLink(path, 7)).toBe(`${path}?business=7`);

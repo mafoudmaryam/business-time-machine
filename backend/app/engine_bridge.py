@@ -348,3 +348,9 @@ def guide_simulator(plan: dict) -> dict:
         out["quick"] = {"baseline": q.baseline.to_dict(), "assumed": q.assumed, "warnings": q.warnings,
                         "preview": month_one_summary(q.baseline, tpl)}
     return out
+
+
+# The practical tool is deliberately separate from simulations and stored businesses.
+def calculate_sales_needed(selling_price: str, cost_per_sale: str, monthly_costs: str, opening_days: str = "") -> dict:
+    from btm_engine.sales_needed import sales_needed
+    return sales_needed(selling_price, cost_per_sale, monthly_costs, opening_days)

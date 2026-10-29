@@ -126,7 +126,7 @@ describe("task navigation and keyboard access", () => {
     const main = screen.getByRole("navigation", { name: "Main" });
     expect(within(main).getByRole("link", { name: "Try an idea" }).getAttribute("aria-current")).toBe(path === "/explore" ? "page" : "location");
     expect(screen.getAllByRole("navigation")).toHaveLength(1);
-    expect(within(main).queryByText("Tools")).toBeNull();
+    expect(within(main).getByRole("link", { name: "Tools" }).getAttribute("href")).toBe("/tools");
   });
   it("keeps assumptions and reports within Overview", () => {
     nav("/share");
@@ -158,3 +158,9 @@ describe("task navigation and keyboard access", () => {
     expect(screen.getByText("Advanced").parentElement?.hasAttribute("open")).toBe(false);
   });
 });
+
+  it("adds the Tools category, not a separate calculator feature link", () => {
+    nav("/tools");
+    expect(screen.getByRole("link", { name: "Tools" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.queryByRole("link", { name: "How much do I need to sell?" })).toBeNull();
+  });

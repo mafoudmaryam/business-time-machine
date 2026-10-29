@@ -4,6 +4,10 @@ A standalone Python library that projects a small food-service business's custom
 
 The LLM layer never computes numbers. It only produces `Decision` objects, and every number comes from this engine.
 
+## Independent practical calculator
+
+`btm_engine.sales_needed.sales_needed` computes an entered-cost sales target without industry defaults, simulation, web or database imports. It accepts decimal strings, uses integer millionths and rounds monthly counts upward. Non-positive contribution returns no target. See [the tool contract](../docs/sales-needed-tool.md) for input limits and daily-average rounding. Scenario equations remain unchanged.
+
 ## Quick start (Windows, PowerShell)
 
 ```powershell

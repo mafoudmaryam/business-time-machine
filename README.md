@@ -31,9 +31,18 @@ Created and maintained by **[Maryam Mafoud (@mafoudmaryam)](https://github.com/m
 - **Overview** shows where your business stands. Open the monthly picture or check assumptions when you need more detail.
 - **Try an idea** lets you explore a change, reopen saved plans and compare them with changing nothing.
 - **Track results** is your existing journal: record what actually happened and compare it with the estimate.
+- **Tools** opens “How much do I need to sell?”: a short entered-cost calculator, separate from the simulator.
 - **Advanced** keeps detailed setup and specialist pages available, alongside shortcuts to assumptions, saved work and PDF export.
 
-All existing addresses still work. Tools will join this same navigation when the first working calculator is ready; there is no empty Tools page. See [the navigation structure and future tools plan](docs/navigation-structure.md).
+All existing addresses still work. Tools now opens a working calculator directly, with no extra top-level feature link. See [the navigation structure and future tools plan](docs/navigation-structure.md).
+
+## How much do I need to sell?
+
+Open **Tools** (`/tools`) to work out how many sales cover the costs you enter. Four short steps ask for a selling price, cost per sale, monthly costs and optional opening days. Costs start blank; the selected business supplies only its currency. Without a selected business, choose the currency explicitly.
+
+The result explains what remains from each sale, shows a simple cost breakdown and gives an editable monthly target rounded upward. An optional daily figure is an **average target**, rounded upward to two decimal places. Equal or lower prices than per-sale costs show an explanation instead of an impossible target. Zero costs must be entered explicitly.
+
+This covers one item, appointment, job or representative sale. It is not a forecast or a guarantee of overall profitability. Check product mix, omitted costs, tax treatment and whether the target is realistic. Formula and entered amounts are optional details. No AI service is needed; nothing is saved or copied into the business. An optional link opens Try an idea for a selected business, without transferring the calculator amounts. See [calculation rules and limits](docs/sales-needed-tool.md).
 
 ## What it does
 
@@ -152,9 +161,9 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 
 ```powershell
 # from the project root; all three use the backend's virtual environment
-cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 356 tests
-cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 683 tests (682 passed, 1 skipped)
-cd ..\frontend; npm test                                        # 853 tests
+cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 409 tests
+cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 692 tests (691 passed, 1 skipped)
+cd ..\frontend; npm test                                        # 891 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -211,17 +220,17 @@ Validation: 853 frontend tests, 682 backend tests plus one expected skip, and 35
 
 ## Quality
 
-Latest local verification: **2026-10-26**, using fresh Python 3.12 environments and a clean frontend install while checking the combined website improvements.
+Latest local verification: **2026-10-29**, using Python 3.12 and the lockfile frontend install while adding the first practical tool on top of the navigation and result-explanation work.
 
 | Check | Result |
 |---|---|
-| Engine tests (Python 3.12) | 356 passed |
-| Backend tests (Python 3.12) | 682 passed, 1 skipped (no development database) |
-| Frontend tests (Vitest, 61 files) | 853 passed |
+| Engine tests (Python 3.12) | 409 passed |
+| Backend tests (Python 3.12) | 691 passed, 1 skipped (no development database) |
+| Frontend tests (Vitest, 64 files) | 891 passed |
 | TypeScript check | clean |
 | Production build (Vite) | succeeds; existing bundle-size warning remains |
 | Lint (oxlint) | completes with existing warnings in unchanged files |
-| Earlier visual checks | original redesign only; combined browser and printed-layout verification pending |
+| Tool visual checks | desktop and 390px-wide layout reviewed with the running API; existing PDF rendering limitation above remains |
 | Logo consistency | navigation and favicon paths match the selected concept |
 
 ### Automatic checks

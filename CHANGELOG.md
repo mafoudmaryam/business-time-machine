@@ -3,6 +3,13 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## First practical tool: How much do I need to sell? (2026-10-29)
+
+- Add a working Tools entry within the existing navigation. A short guided form asks for price, per-sale costs, monthly costs and optional opening days, with examples and double-counting guidance. Use the selected business currency without assuming costs.
+- Explain the editable monthly target, daily average and one-sale breakdown. Keep representative-sale, omitted-cost and profitability limits visible; show formulas only on request. Handle explicit zero, invalid inputs and non-positive margins honestly.
+- Calculate exact decimal amounts and upward-rounded targets in the standalone engine through a read-only endpoint. Keep calculator entries separate from saved data and the simulator; offer only an explicit optional link to explore an idea.
+- Validation: 409 engine tests; 691 backend tests passed and one expected skip; 891 frontend tests across 64 files. Desktop and 390px layouts reviewed against the API. Production build/lint complete with existing warnings. No PDF export changes.
+
 ## Clearer navigation for business owners (2026-10-26)
 
 - Rename the existing main navigation to Overview, Try an idea and Track results while preserving every route. Keep detailed setup and specialist pages in Advanced, with saved-work, assumptions and PDF shortcuts.

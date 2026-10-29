@@ -7,6 +7,7 @@ export function isStartScreen(pathname: string): boolean {
  *  Today -> the start screen. Everything else (Try a change, Advanced pages, a scenario, a result, the timeline) -> Today. */
 export function parentPath(pathname: string): string {
   if (isStartScreen(pathname)) return "/";
+  if (pathname === "/tools") return "/"; // useful without a saved business
   if (pathname === "/today") return "/";
   if (pathname === "/guide") return "/";                       // the start-up guide needs no business, so Back never goes to Today
   if (pathname.startsWith("/guide/plan/")) return "/guide";
