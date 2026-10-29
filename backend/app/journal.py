@@ -5,9 +5,10 @@ range is read from a stored Today run, the comparison is arithmetic in `btm_engi
 templates. No AI writes anything on this page, so the grounding check has nothing to check; if AI wording is ever added,
 it must pass `coach.grounding` and `coach.consistency` and this template text must stay as the fallback.
 
-Which forecast counts as "what we expected" for a month? The latest stored Today run made BEFORE that month began and
-covering it (a run made in October covers November as its month 1). A run made during the month itself, or later, is never
-used: it would be hindsight. If there is none, the month is saved but not compared, and the page says so.
+At first save, freeze the latest stored Today run made BEFORE that month began and covering it (a run made in October
+covers November as month 1). Freeze absence too. Read comparisons from this snapshot, never from mutable runs. The
+migration freezes currently eligible legacy comparisons with explicit provenance; original historical assumptions were
+not stored. Missing actuals remain unknown, and entered costs imply profit only when confirmed complete.
 """
 from __future__ import annotations
 
@@ -19,7 +20,7 @@ from sqlalchemy.orm import Session
 from . import engine_bridge, models, schemas
 from .today import MONTH_LONG
 
-METRICS = ("profit", "cash", "visits")
+METRICS = ("profit", "cash", "visits", "revenue")
 DUE_LOOK_BACK = 3          # months that ended, offered as "How did X really go?"
 
 
@@ -64,7 +65,7 @@ def prediction_for(db: Session, business: models.Business, month: str) -> Option
 # ---------- sentences (templates) ----------
 
 _WHERE = {"inside": "so it landed inside the range we showed", "below": "so it came in below the range",
-          "above": "so it came in better than the range"}
+          "above": "so it came in above the range"}
 
 
 def _comparison_sentence(metric: str, c: dict, currency: str) -> str:
@@ -75,6 +76,9 @@ def _comparison_sentence(metric: str, c: dict, currency: str) -> str:
         verb = "You made about" if c["actual"] >= 0 else "You lost about"
         return (f"{verb} {money(abs(c['actual']))}. We expected {money(c['expected_low'])} to {money(c['expected_high'])}, "
                 f"most likely {money(c['expected'])}, {where}.")
+    if metric == "revenue":
+        return (f"Sales money earned was {money(c['actual'])}, compared with {money(c['expected'])} in the saved plan. "
+                "This shows a difference, not what caused it.")
     if metric == "cash":
         return (f"You ended the month with about {money(c['actual'])} in the bank. We expected {money(c['expected_low'])} to "
                 f"{money(c['expected_high'])}, most likely {money(c['expected'])}, {where}.")
@@ -82,30 +86,56 @@ def _comparison_sentence(metric: str, c: dict, currency: str) -> str:
             f"{whole(c['expected_high'])}, most likely {whole(c['expected'])}, {where}.")
 
 
+def capture_prediction(db: Session, business: models.Business, month: str, source="saved") -> dict:
+    """Freeze only the stored, pre-month Today baseline. Never invent historical assumptions."""
+    found = prediction_for(db, business, month)
+    snapshot = {"version": 1, "month": month, "currency": business.currency, "source": source,
+                "available": False, "bands": {}}
+    if found is None:
+        return snapshot
+    run, idx = found
+    baseline = next((r for r in run.results if r.scenario_name == "baseline"), None)
+    if baseline is None:
+        return snapshot
+    for metric in METRICS:
+        band = baseline.bands.get(metric, {})
+        if all(len(band.get(k, [])) > idx for k in ("p10", "p50", "p90")):
+            snapshot["bands"][metric] = {k: band[k][idx] for k in ("p10", "p50", "p90")}
+    snapshot.update(available=bool(snapshot["bands"]), run_id=run.id,
+                    made_at=run.created_at.isoformat(), name="Overview plan — changing nothing",
+                    engine_version=run.engine_version, seed=run.seed, iterations=run.iterations)
+    return snapshot
+
+
 def compare_entry(db: Session, business: models.Business, entry: models.JournalEntry) -> schemas.JournalMonthOut:
-    actuals = {"profit": entry.actual_profit, "cash": entry.actual_cash, "visits": entry.actual_visits}
+    actuals = {"profit": entry.actual_profit, "cash": entry.actual_cash, "visits": entry.actual_visits,
+               "revenue": entry.actual_sales}
+    remaining = engine_bridge.journal_recorded_result(entry.actual_sales, entry.actual_costs, False)["recorded_remaining"]
     out = schemas.JournalEntryOut(
         id=entry.id, business_id=entry.business_id, month=entry.month, month_label=month_label(entry.month),
         actual_profit=entry.actual_profit, actual_cash=entry.actual_cash, actual_visits=entry.actual_visits,
-        note=entry.note, created_at=entry.created_at)
-    found = prediction_for(db, business, entry.month)
-    if found is None:
+        actual_sales=entry.actual_sales, actual_costs=entry.actual_costs, costs_complete=bool(entry.costs_complete),
+        recorded_remaining=remaining, note=entry.note, created_at=entry.created_at, updated_at=entry.updated_at)
+    snapshot = entry.comparison_snapshot
+    currency = snapshot.get("currency", business.currency) if snapshot else business.currency
+    if not snapshot or not snapshot.get("available"):
         return schemas.JournalMonthOut(
-            entry=out, has_prediction=False, comparisons=[],
-            summary=f"We had no forecast for {month_label(entry.month)}, so there is nothing to compare it with. "
-                    f"Your figures are saved.")
-    run, idx = found
-    baseline = next(r for r in run.results if r.scenario_name == "baseline")
+            entry=out, has_prediction=False, comparisons=[], currency=currency, comparison_plan=snapshot,
+            summary=f"We had no forecast saved for {month_label(entry.month)}, so there is nothing to compare it with. "
+                    "Your figures are saved. Missing months are not treated as zero.")
     comparisons = []
     for metric in METRICS:
-        band = baseline.bands[metric]
-        c = engine_bridge.compare_month(actuals[metric], band["p10"][idx], band["p50"][idx], band["p90"][idx])
+        band = snapshot["bands"].get(metric)
+        if actuals[metric] is None or not band:
+            continue
+        c = engine_bridge.compare_month(actuals[metric], band["p10"], band["p50"], band["p90"])
         comparisons.append(schemas.JournalComparisonOut(
-            metric=metric, sentence=_comparison_sentence(metric, c, business.currency),
+            metric=metric, sentence=_comparison_sentence(metric, c, currency),
             **{k: c[k] for k in ("actual", "expected_low", "expected", "expected_high", "difference",
                                  "percent_difference", "position")}))
-    return schemas.JournalMonthOut(entry=out, has_prediction=True, prediction_run_id=run.id, comparisons=comparisons,
-                                   summary=comparisons[0].sentence)
+    summary = comparisons[0].sentence if comparisons else "Your figures are saved. Enter a supported actual figure to compare it with the saved plan."
+    return schemas.JournalMonthOut(entry=out, has_prediction=True, prediction_run_id=snapshot.get("run_id"),
+                                   comparisons=comparisons, summary=summary, comparison_plan=snapshot, currency=currency)
 
 
 def live_entries(db: Session, business_id: int) -> list[models.JournalEntry]:
@@ -158,18 +188,18 @@ def forecast_of(db: Session, business: models.Business) -> Optional[schemas.Jour
         first = (first[0] + 1, 1)
     last = latest.created_at.year * 12 + latest.created_at.month + latest.horizon
     for entry in live_entries(db, business.id):
-        if prediction_for(db, business, entry.month) is not None:
+        if entry.comparison_snapshot and entry.comparison_snapshot.get("available"):
             first = min(first, parse_month(entry.month))
+    saved = {e.month: e.comparison_snapshot for e in live_entries(db, business.id)}
     months = []
     index = first[0] * 12 + first[1] - 1
     while index <= last - 1 and len(months) < 36:
         key = month_key(index // 12, index % 12 + 1)
-        found = prediction_for(db, business, key)
-        if found is not None:
-            run, i = found
-            band = next(r for r in run.results if r.scenario_name == "baseline").bands["profit"]
+        snapshot = saved[key] if key in saved else capture_prediction(db, business, key)
+        band = (snapshot or {}).get("bands", {}).get("profit")
+        if band:
             months.append(schemas.JournalForecastMonth(
-                month=key, month_label=month_label(key), p10=band["p10"][i], p50=band["p50"][i], p90=band["p90"][i]))
+                month=key, month_label=month_label(key), p10=band["p10"], p50=band["p50"], p90=band["p90"]))
         index += 1
     return schemas.JournalForecast(run_id=latest.id, months=months)
 
@@ -194,14 +224,14 @@ def accuracy_report(db: Session, include_samples: bool = False) -> schemas.Journ
         compared = compare_entry(db, business, entry)
         if not compared.has_prediction:
             continue
-        run = db.get(models.SimulationRun, compared.prediction_run_id)
         for c in compared.comparisons:
             by_metric[c.metric].append(c.model_dump())
             rows.append(schemas.JournalAccuracyRow(
                 business_id=business.id, month=entry.month, metric=c.metric, actual=c.actual,
                 expected_low=c.expected_low, expected=c.expected, expected_high=c.expected_high,
                 difference=c.difference, percent_difference=c.percent_difference, position=c.position,
-                engine_version=run.engine_version, seed=run.seed, iterations=run.iterations))
+                engine_version=compared.comparison_plan.get("engine_version", "unknown"),
+                seed=compared.comparison_plan.get("seed", 0), iterations=compared.comparison_plan.get("iterations", 0)))
     totals = [schemas.JournalAccuracyOut(metric=m, **engine_bridge.accuracy_summary(by_metric[m]))
               for m in METRICS if by_metric[m]]
     return schemas.JournalAccuracyReport(rows=rows, totals=totals)

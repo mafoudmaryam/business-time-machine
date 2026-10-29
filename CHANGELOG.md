@@ -3,6 +3,13 @@
 What changed in Business Time Machine, newest first. Dates are from the Git history (`git log`). The engine, backend and
 frontend test counts at the end of each step are in `CLAUDE.md` and the README.
 
+## A simpler Track results journal (2026-10-29)
+
+- Start with “How did this month go?” Extend the same monthly records with sales earned and costs incurred. Allow incomplete figures without filling blanks with zero; calculate profit only for confirmed complete costs. Keep cash balances distinct from unsupported cash flows.
+- Show one sales-money breakdown and monthly expected/actual/difference summary, with current-assumption review. Put history, ranges, notes and CSV behind disclosures. Remove journal celebration and the pilot badge. Use stacked comparison rows on mobile so amounts remain readable.
+- Freeze the pre-month comparison figures, currency and run metadata at first save, including missing plans. Preserve old records through an Alembic migration with explicit legacy provenance. Retain comparison snapshots through corrections, delete/Undo and later plan changes. Prevent older clients from silently erasing new sales/cost details.
+- Verification: 423 engine tests; 714 backend passed and one expected skip; 890 frontend tests / 64 files; production build/lint and whitespace checks. Existing warnings remain. Desktop and 390px reviews used only a disposable migrated preview database. Simulator and PDF export unchanged.
+
 ## First practical tool: How much do I need to sell? (2026-10-29)
 
 - Add a working Tools entry within the existing navigation. A short guided form asks for price, per-sale costs, monthly costs and optional opening days, with examples and double-counting guidance. Use the selected business currency without assuming costs.

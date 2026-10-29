@@ -36,7 +36,14 @@ def _row(db: Session, business_id: int, month: str) -> models.JournalEntry | Non
 
 
 def _fill(row: models.JournalEntry, data) -> None:
-    row.actual_profit, row.actual_cash, row.actual_visits = data.actual_profit, data.actual_cash, data.actual_visits
+    if (row.actual_sales is not None or row.actual_costs is not None) and not {"actual_sales", "actual_costs"} <= data.model_fields_set:
+        raise HTTPException(status_code=422, detail="This month has sales and cost details. Include both fields when correcting it so they are not silently removed.")
+    row.actual_sales, row.actual_costs, row.costs_complete = data.actual_sales, data.actual_costs, data.costs_complete
+    result = journal.engine_bridge.journal_recorded_result(data.actual_sales, data.actual_costs, data.costs_complete)
+    has_breakdown = data.actual_sales is not None or data.actual_costs is not None
+    row.actual_profit = result["profit"] if has_breakdown else data.actual_profit
+    row.actual_cash, row.actual_visits = data.actual_cash, data.actual_visits
+    row.updated_at = dt.datetime.utcnow()
     row.note = (data.note or "").strip() or None
     row.deleted_at = None
 
@@ -55,6 +62,7 @@ def save_entry(business_id: int, data: schemas.JournalEntryIn, response: Respons
     response.status_code = 200 if row is not None and row.deleted_at is None else 201
     if row is None:
         row = models.JournalEntry(business_id=business_id, month=data.month)
+        row.comparison_snapshot = journal.capture_prediction(db, business, data.month)
         db.add(row)
     _fill(row, data)
     db.commit()

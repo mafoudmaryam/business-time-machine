@@ -52,11 +52,11 @@ describe("the download", () => {
 
   it("has the columns in order, one row per month per figure, oldest month first", () => {
     const rows = lines(journalCsv([makeJournalMonth({ month: "2026-12" }), makeJournalMonth({ month: "2026-11" })]));
-    expect(rows[0]).toBe("month,figure,predicted_p10,predicted_p50,predicted_p90,actual,difference,status,note");
+    expect(rows[0]).toBe("month,figure,predicted_p10,predicted_p50,predicted_p90,actual,difference,status,note,costs_incurred,all_costs_included,plan_run_id,plan_made_at,comparison_currency");
     expect(rows).toHaveLength(7);
-    expect(rows[1]).toBe("2026-11,profit,4800,6000,7300,5900,-100,inside the range we showed,");
-    expect(rows[2]).toBe("2026-11,cash in the bank,53000,57000,61000,52000,-5000,below the range,");
-    expect(rows[3]).toBe("2026-11,customer visits,3800,4000,4200,4300,300,better than the range,");
+    expect(rows[1]).toBe("2026-11,profit,4800,6000,7300,5900,-100,inside the range we showed,,,,,,");
+    expect(rows[2]).toBe("2026-11,cash in the bank,53000,57000,61000,52000,-5000,below the range,,,,,,");
+    expect(rows[3]).toBe("2026-11,customer visits,3800,4000,4200,4300,300,above the range,,,,,,");
     expect(rows[4].startsWith("2026-12,profit")).toBe(true);
   });
 
@@ -66,7 +66,7 @@ describe("the download", () => {
 
   it("leaves the predicted columns empty and says 'not compared' for a month with no forecast", () => {
     const m = makeJournalMonth({ has_prediction: false, comparisons: [] });
-    expect(lines(journalCsv([m]))[1]).toBe("2026-11,profit,,,,5900,,not compared,");
+    expect(lines(journalCsv([m]))[1]).toBe("2026-11,profit,,,,5900,,not compared,,,,,,");
   });
 
   it("quotes notes with commas, quotes and line breaks", () => {

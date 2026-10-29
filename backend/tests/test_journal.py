@@ -114,7 +114,7 @@ def test_a_loss_and_negative_cash_are_allowed(client):
 
 @pytest.mark.parametrize("bad", [
     {"month": "2026-13"}, {"month": "2026-00"}, {"month": "26-11"}, {"month": "November"}, {"month": "2026-1"},
-    {"actual_visits": -1}, {"actual_profit": 1e15}, {"actual_cash": "lots"}, {"actual_profit": None},
+    {"actual_visits": -1}, {"actual_profit": 1e15}, {"actual_cash": "lots"},
     {"note": "x" * 1001},
 ])
 def test_nonsense_is_refused_and_nothing_is_saved(client, bad):
@@ -130,11 +130,11 @@ def test_not_a_number_is_refused(client):
     assert resp.status_code == 422 and count_rows() == 0
 
 
-def test_a_missing_figure_is_refused(client):
+def test_a_missing_figure_remains_unknown(client):
     b = create_business(client)
     body = entry()
     del body["actual_cash"]
-    assert client.post(f"/businesses/{b['id']}/journal", json=body).status_code == 422
+    assert client.post(f"/businesses/{b['id']}/journal", json=body).json()["entry"]["actual_cash"] is None
 
 
 def test_a_month_that_has_not_started_is_refused(client):
@@ -300,7 +300,7 @@ def test_sentences_use_the_businesss_currency_and_plain_words(client):
     body = save(client, b["id"], profit=5900, cash=20000, visits=3000).json()
     profit = body["comparisons"][0]["sentence"]
     assert profit.startswith("You made about €5,900. We expected ") and "most likely" in profit
-    assert any(w in profit for w in ("inside the range we showed", "below the range", "better than the range"))
+    assert any(w in profit for w in ("inside the range we showed", "below the range", "above the range"))
     assert "$" not in profit
     visits = next(c for c in body["comparisons"] if c["metric"] == "visits")["sentence"]
     assert "customer visits" in visits

@@ -56,8 +56,10 @@ def test_downgrade_removes_only_the_new_table_and_upgrade_works_again(tmp_path, 
     assert "startup_plans" in _tables(path)
 
 
-def test_the_real_head_is_this_migration():
+def test_the_guide_migration_remains_in_the_single_upgrade_chain():
     from alembic.config import Config
     from alembic.script import ScriptDirectory
     cfg = Config("alembic.ini")
-    assert ScriptDirectory.from_config(cfg).get_current_head() == AFTER
+    script = ScriptDirectory.from_config(cfg)
+    assert len(script.get_heads()) == 1
+    assert AFTER in {r.revision for r in script.walk_revisions()}

@@ -247,12 +247,18 @@ class JournalEntry(Base):
     id = Column(Integer, primary_key=True)
     business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True)
     month = Column(String, nullable=False)                 # "YYYY-MM"
-    actual_profit = Column(Float, nullable=False)
-    actual_cash = Column(Float, nullable=False)
-    actual_visits = Column(Float, nullable=False)
+    actual_profit = Column(Float, nullable=True)
+    actual_cash = Column(Float, nullable=True)
+    actual_visits = Column(Float, nullable=True)
     note = Column(Text, nullable=True)
     created_at = Column(DateTime, default=dt.datetime.utcnow, nullable=False)
     deleted_at = Column(DateTime, nullable=True)           # soft delete: saving the month again brings the row back
+
+    actual_sales = Column(Float, nullable=True)
+    actual_costs = Column(Float, nullable=True)
+    costs_complete = Column(Boolean, nullable=False, default=False, server_default="0")
+    comparison_snapshot = Column(JSON, nullable=True)
+    updated_at = Column(DateTime, nullable=True)
 
     business = relationship("Business")
 

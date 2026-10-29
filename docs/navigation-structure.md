@@ -13,7 +13,7 @@ Overview leads with key figures and one main action, Try an idea. Optional expla
 
 Try an idea keeps the existing four working choices. Its saved-work links open the existing history and comparison pages with the selected business. Saved results list plan names and actions first, with dates and calculation settings in optional details. Detailed setup and the specialist builder remain in Advanced; assumptions and PDF export are also reachable there and from Overview. Advanced closes after navigation and supports Escape with focus returned to its summary.
 
-Track results keeps the journal's recording form first. Extra months and the comparison chart are optional disclosures. Saved entries, edits, recovery, CSV and the distinction between actual figures and simulated estimates remain intact.
+Track results starts with ‘How did this month go?’ and keeps the existing journal recording form first. Sales earned and costs incurred are distinct from profit and cash. One monthly summary compares recorded results with frozen estimates; history, chart and details are optional. Edits, recovery and CSV remain in the existing system. See [tracking data and limits](track-results.md).
 
 Page navigation moves keyboard focus to main content and starts at the introduction. Hash links retain their own target. Mobile uses the same navigation, wrapping rather than adding another bar. Storage keys, API paths, saved records, calculations, report contents and print styling are unchanged.
 
