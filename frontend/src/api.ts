@@ -883,27 +883,39 @@ export function getSummary(businessId: number): Promise<TodayOut> {
 
 // ---------- journal: what really happened, next to what we expected ----------
 
-export type JournalMetric = "profit" | "cash" | "visits";
+export type JournalMetric = "profit" | "cash" | "visits" | "revenue";
 export type JournalPosition = "below" | "inside" | "above";
 
 export interface JournalEntryIn {
-  month: string; // "YYYY-MM"
-  actual_profit: number;
-  actual_cash: number;
-  actual_visits: number;
+  month: string;
+  actual_profit: number | null;
+  actual_cash: number | null;
+  actual_visits: number | null;
+  actual_sales?: number | null;
+  actual_costs?: number | null;
+  costs_complete?: boolean;
   note: string | null;
 }
 
-export interface JournalEntryOut {
+export interface JournalEntryOut extends JournalEntryIn {
   id: number;
   business_id: number;
-  month: string;
   month_label: string;
-  actual_profit: number;
-  actual_cash: number;
-  actual_visits: number;
-  note: string | null;
   created_at: string;
+  updated_at?: string | null;
+  recorded_remaining?: number | null;
+}
+
+export interface JournalPlan {
+  month: string;
+  currency: string;
+  source: string;
+  available: boolean;
+  name?: string;
+  run_id?: number;
+  made_at?: string;
+  engine_version?: string;
+  bands: Partial<Record<JournalMetric, { p10: number; p50: number; p90: number }>>;
 }
 
 export interface JournalComparison {
@@ -924,6 +936,8 @@ export interface JournalMonthOut {
   prediction_run_id: number | null;
   comparisons: JournalComparison[];
   summary: string;
+  comparison_plan?: JournalPlan | null;
+  currency?: string | null;
 }
 
 export interface JournalDue {

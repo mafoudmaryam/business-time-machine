@@ -54,3 +54,20 @@ def accuracy_summary(comparisons: list[dict[str, Any]]) -> dict[str, Any]:
     pct = [abs(c["percent_difference"]) for c in comparisons if c["percent_difference"] is not None]
     out["mean_abs_percent_difference"] = sum(pct) / len(pct) if pct else None
     return out
+
+
+def recorded_result(sales: Optional[float], costs: Optional[float], complete: bool) -> dict:
+    """An entered-cost balance is profit only when the owner confirms all costs.
+
+    Decimal subtraction avoids binary artefacts in ordinary currency amounts.
+    Missing information remains None. No estimate or cash-flow inference.
+    """
+    from decimal import Decimal
+    for value in (sales, costs):
+        if value is not None and (isinstance(value, bool) or not isinstance(value, (int, float))
+                                  or not math.isfinite(value) or not 0 <= value <= 1e12):
+            raise ValueError("Sales and costs must be finite non-negative amounts.")
+    if complete and (sales is None or costs is None):
+        raise ValueError("Complete costs need sales and costs.")
+    remaining = None if sales is None or costs is None else float(Decimal(str(sales)) - Decimal(str(costs)))
+    return {"recorded_remaining": remaining, "profit": remaining if complete else None}

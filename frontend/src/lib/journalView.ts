@@ -50,10 +50,11 @@ export function startingMonth(due: JournalDue[], now: Date): string {
 
 export const METRIC_WORDS: Record<JournalMetric, { title: string; help: string; short: string }> = {
   profit: {
-    title: "What you kept",
+    title: "Profit or loss",
     short: "profit",
-    help: "Everything that came in during the month, minus everything you paid out (ingredients, pay, rent, bills, loan payments). If you spent more than you took in, enter it as a negative number, like -400.",
+    help: "Sales earned minus all costs incurred for the same month. This is different from cash received or paid. A loss is a negative number.",
   },
+  revenue: { title: "Sales money earned", short: "sales", help: "Sales earned in this month, even if a customer pays later. Not all cash received is sales." },
   cash: {
     title: "Money in the bank",
     short: "cash",
@@ -107,14 +108,14 @@ export function toEntryIn(d: EntryDraft): JournalEntryIn {
 
 export const POSITION_WORDS: Record<JournalPosition, string> = {
   inside: "Inside the range we showed",
-  above: "Better than we expected",
+  above: "Above the estimated range",
   below: "Lower than we expected",
 };
 
 /** The same three statuses as written in the CSV file. */
 const CSV_STATUS: Record<JournalPosition, string> = {
   inside: "inside the range we showed",
-  above: "better than the range",
+  above: "above the range",
   below: "below the range",
 };
 
@@ -195,8 +196,8 @@ const PAD = { left: 14, right: 14, top: 10, bottom: 10 };
 
 /** Lays the 12-month profit band and the owner's real months out on a width x height drawing. Only geometry, no forecasting. */
 export function chartGeometry(months: JournalForecastMonth[], entries: JournalMonthOut[], width = 600, height = 220): ChartGeometry {
-  const byMonth = new Map(entries.map((m) => [m.entry.month, m]));
-  const actuals = months.flatMap((f) => (byMonth.has(f.month) ? [byMonth.get(f.month)!.entry.actual_profit] : []));
+  const byMonth = new Map(entries.filter(m => m.entry.actual_profit !== null).map((m) => [m.entry.month, m]));
+  const actuals = months.flatMap((f) => (byMonth.has(f.month) ? [byMonth.get(f.month)!.entry.actual_profit!] : []));
   const lo = Math.min(...months.map((f) => f.p10), ...actuals);
   const hi = Math.max(...months.map((f) => f.p90), ...actuals);
   const span = hi - lo || Math.abs(hi) || 1;
@@ -213,7 +214,7 @@ export function chartGeometry(months: JournalForecastMonth[], entries: JournalMo
       const m = byMonth.get(f.month);
       if (!m) return [];
       const c = m.comparisons.find((k) => k.metric === "profit");
-      return [{ month: f.month, label: f.month_label, x: r(x(i)), y: r(y(m.entry.actual_profit)), position: c ? c.position : null }];
+      return [{ month: f.month, label: f.month_label, x: r(x(i)), y: r(y(m.entry.actual_profit!)), position: c ? c.position : null }];
     }),
     top: hi, bottom: lo,
     firstLabel: months[0]?.month_label ?? "", lastLabel: months[months.length - 1]?.month_label ?? "",
@@ -222,8 +223,8 @@ export function chartGeometry(months: JournalForecastMonth[], entries: JournalMo
 
 // ---------- download my journal (CSV) ----------
 
-const CSV_HEADER = ["month", "figure", "predicted_p10", "predicted_p50", "predicted_p90", "actual", "difference", "status", "note"];
-const FIGURE_NAME: Record<JournalMetric, string> = { profit: "profit", cash: "cash in the bank", visits: "customer visits" };
+const CSV_HEADER = ["month", "figure", "predicted_p10", "predicted_p50", "predicted_p90", "actual", "difference", "status", "note", "costs_incurred", "all_costs_included", "plan_run_id", "plan_made_at", "comparison_currency"];
+const FIGURE_NAME: Record<JournalMetric, string> = { profit: "profit", cash: "cash in the bank", visits: "customer visits", revenue: "sales earned" };
 
 function csvCell(value: string | number): string {
   let text = String(value);
@@ -238,13 +239,13 @@ export function journalCsv(entries: JournalMonthOut[]): string {
   const rows: (string | number)[][] = [CSV_HEADER];
   for (const m of [...entries].sort((a, b) => a.entry.month.localeCompare(b.entry.month))) {
     const e = m.entry;
-    const actual: Record<JournalMetric, number> = { profit: e.actual_profit, cash: e.actual_cash, visits: e.actual_visits };
-    for (const metric of ["profit", "cash", "visits"] as JournalMetric[]) {
+    const actual: Record<JournalMetric, number | null> = { profit: e.actual_profit, cash: e.actual_cash, visits: e.actual_visits, revenue: e.actual_sales ?? null };
+    for (const metric of ["profit", "cash", "visits", ...(e.actual_sales != null ? ["revenue"] : [])] as JournalMetric[]) {
       const c = m.comparisons.find((k) => k.metric === metric);
       rows.push([
         e.month, FIGURE_NAME[metric],
         c ? c.expected_low : "", c ? c.expected : "", c ? c.expected_high : "",
-        actual[metric], c ? c.difference : "", c ? CSV_STATUS[c.position] : "not compared", e.note ?? "",
+        actual[metric] ?? "", c ? c.difference : "", c ? CSV_STATUS[c.position] : "not compared", e.note ?? "", e.actual_costs ?? "", e.costs_complete === undefined ? "" : String(e.costs_complete), m.comparison_plan?.run_id ?? "", m.comparison_plan?.made_at ?? "", m.currency ?? "",
       ]);
     }
   }

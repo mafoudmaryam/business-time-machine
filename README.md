@@ -22,7 +22,7 @@ Created and maintained by **[Maryam Mafoud (@mafoudmaryam)](https://github.com/m
 - **How:** a deterministic simulation engine with Monte Carlo runs does all the maths; the AI only reads the owner's words and explains the engine's results.
 - **Safeguards:** every number the AI writes is checked against the engine’s facts. AI-parsed decisions must be confirmed before simulation. Direct slider experiments show quick estimates without saving a plan.
 - **Stack:** Python + NumPy engine, FastAPI + SQLAlchemy backend, React + TypeScript frontend.
-- **Quality:** 1,800+ automated tests across engine, backend and frontend, plus automatic accessibility checks on every page.
+- **Quality:** 2,000+ automated tests across engine, backend and frontend, plus automatic accessibility checks on every page.
 
 ---
 
@@ -30,11 +30,21 @@ Created and maintained by **[Maryam Mafoud (@mafoudmaryam)](https://github.com/m
 
 - **Overview** shows where your business stands. Open the monthly picture or check assumptions when you need more detail.
 - **Try an idea** lets you explore a change, reopen saved plans and compare them with changing nothing.
-- **Track results** is your existing journal: record what actually happened and compare it with the estimate.
+- **Track results** asks “How did this month go?” Record sales earned and costs incurred, then compare that month with its saved plan. Cash balance is optional and separate.
 - **Tools** opens “How much do I need to sell?”: a short entered-cost calculator, separate from the simulator.
 - **Advanced** keeps detailed setup and specialist pages available, alongside shortcuts to assumptions, saved work and PDF export.
 
 All existing addresses still work. Tools now opens a working calculator directly, with no extra top-level feature link. See [the navigation structure and future tools plan](docs/navigation-structure.md).
+
+## Track results: How did this month go?
+
+The existing `/journal` records now accept sales earned and costs incurred for the same calendar month. Blank means unknown, not zero. Profit or loss is calculated only when both figures are entered and the owner confirms all costs are included. Otherwise any remainder is labelled **Balance before unrecorded costs**, not profit. Older reported profit, cash, visits and notes are retained.
+
+One compact summary shows where the sales money went, the saved expectation, the actual figure and the difference. Costs are not compared with an invented estimate: stored plans do not contain a separate cost band. Month-end cash is a balance; this journal does not record cash received or paid, so it cannot calculate cash flow. History, ranges, notes and CSV export remain optional. There are no journal celebrations or streaks.
+
+A new month's comparison freezes the eligible pre-month Overview plan's monthly figures, currency and run metadata, including an explicit absence of a plan. Later model edits, run deletion and corrections cannot silently rewrite that comparison. The upgrade preserves older records and labels their captured comparison as the eligible plan available at upgrade; the originally viewed plan was not stored. Original historical assumptions cannot be reconstructed. The review link opens current assumptions and never changes them automatically. One month does not establish a cause.
+
+Apply the new Alembic migration to an appropriate database before running this version. Only temporary databases were migrated during verification; existing personal databases were not changed. Corrections replace actuals in the same monthly row; a full edit history is not provided. See [tracking data and migration details](docs/track-results.md).
 
 ## How much do I need to sell?
 
@@ -161,9 +171,9 @@ The coach never makes you wait: the rule-based text appears at once and the AI t
 
 ```powershell
 # from the project root; all three use the backend's virtual environment
-cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 409 tests
-cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 692 tests (691 passed, 1 skipped)
-cd ..\frontend; npm test                                        # 891 tests
+cd engine;      ..\backend\.venv\Scripts\python.exe -m pytest   # 423 tests
+cd ..\backend;  .\.venv\Scripts\python.exe -m pytest            # 715 tests (714 passed, 1 skipped)
+cd ..\frontend; npm test                                        # 890 tests
 ```
 
 There is also an evaluation set of 48 hand-written sentences for the plain-language parser: `cd backend; .\.venv\Scripts\python.exe scripts\eval_interpret.py --provider template` (from the project root). Results are saved as CSV in `backend\eval_results\`.
@@ -220,17 +230,17 @@ Validation: 853 frontend tests, 682 backend tests plus one expected skip, and 35
 
 ## Quality
 
-Latest local verification: **2026-10-29**, using Python 3.12 and the lockfile frontend install while adding the first practical tool on top of the navigation and result-explanation work.
+Latest local verification: **2026-10-29**, using Python 3.12 and the lockfile frontend install while improving the existing journal on top of the practical tool, navigation and result-explanation work.
 
 | Check | Result |
 |---|---|
-| Engine tests (Python 3.12) | 409 passed |
-| Backend tests (Python 3.12) | 691 passed, 1 skipped (no development database) |
-| Frontend tests (Vitest, 64 files) | 891 passed |
+| Engine tests (Python 3.12) | 423 passed |
+| Backend tests (Python 3.12) | 714 passed, 1 skipped (no development database) |
+| Frontend tests (Vitest, 64 files) | 890 passed |
 | TypeScript check | clean |
 | Production build (Vite) | succeeds; existing bundle-size warning remains |
 | Lint (oxlint) | completes with existing warnings in unchanged files |
-| Tool visual checks | desktop and 390px-wide layout reviewed with the running API; existing PDF rendering limitation above remains |
+| Current visual checks | tool and Track results reviewed on desktop and at 390px against the running API; PDF export unchanged and its rendering limitation above remains |
 | Logo consistency | navigation and favicon paths match the selected concept |
 
 ### Automatic checks
@@ -255,7 +265,7 @@ The demo, result screens and printable summary explain that outcome shares descr
 - **The coach can be wrong.** The checks catch numbers that are not in the facts and risk claims that contradict them, but they read phrases, not meaning. The instant rule-based text is the reliable one.
 - **The cloud AI provider is not covered by automated tests with a real key.** The tests replace every provider with a stand-in, so the Anthropic mode has not been verified against the live service by this test suite.
 - **The plain-language parser's score is optimistic.** The rule-based one gets 44 of 48 test sentences exactly right, but it was written alongside those sentences. A fresh, independent test set is still needed.
-- **The journal is a pilot.** A few months of figures cannot prove a forecast right or wrong.
+- **Track results has limits.** Incomplete costs do not establish profit; one month cannot prove why results changed. Historical comparisons retain saved estimates, not unrecorded historical assumptions.
 - **Pictures.** The current homepage café is a CSS/SVG illustration. Business-type photos are stock images, not real customers. Earlier AI-generated images remain in the repository and historical screenshots; see [Images](#images).
 
 ## Why I built this

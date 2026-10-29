@@ -3312,6 +3312,29 @@ button.danger:hover:not(:disabled) {
   .tool-actions > button { flex: 1; }
 }
 
+/* Track results uses the existing journal records and navigation. */
+.journal-complete { display: flex; align-items: flex-start; gap: .65rem; font-weight: 600; }
+.journal-complete input { width: auto; min-height: 1.35rem; margin-top: .15rem; accent-color: var(--green); }
+.journal-money-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; margin: 1rem 0; }
+.journal-money-flow > div { padding: .9rem; border-radius: 12px; background: var(--sage); }
+.journal-money-flow dt { font-size: .9rem; }
+.journal-money-flow dd { margin: .3rem 0 0; font-weight: 700; overflow-wrap: anywhere; }
+.journal-table-wrap { overflow-x: auto; }
+.journal-result-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.journal-result-table caption { text-align: left; font-weight: 700; padding: .6rem 0; }
+.journal-result-table th, .journal-result-table td { text-align: left; padding: .6rem; border-bottom: 1px solid var(--sage-edge); }
+.journal-result-table thead { background: var(--sage); }
+@media (max-width: 600px) {
+  .journal-money-flow { grid-template-columns: 1fr; gap: .5rem; }
+  .journal-result-table, .journal-result-table tbody { display: block; width: 100%; }
+  .journal-result-table caption { display: block; }
+  .journal-result-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .journal-result-table tr { display: block; padding: .65rem 0; border-bottom: 1px solid var(--sage-edge); }
+  .journal-result-table tbody th { display: block; padding: .4rem 0; border: 0; }
+  .journal-result-table td { display: grid; grid-template-columns: 5rem minmax(0, 1fr); gap: .5rem; text-align: right; padding: .3rem 0; border: 0; overflow-wrap: normal; }
+  .journal-result-table td::before { content: attr(data-label); text-align: left; color: var(--body); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .result-explanation { animation: none; }
   .guide-choice:hover {
@@ -3471,4 +3494,3 @@ button.danger:hover:not(:disabled) {
     display: none !important;
   }
 }
-

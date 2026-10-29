@@ -4,7 +4,7 @@ from __future__ import annotations
 import datetime as dt
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 # ---------- businesses ----------
 
@@ -507,36 +507,51 @@ _MONEY = dict(ge=-1e12, le=1e12, allow_inf_nan=False)
 MONTH_PATTERN = r"^\d{4}-(0[1-9]|1[0-2])$"
 
 
-class JournalEntryIn(BaseModel):
-    month: str = Field(pattern=MONTH_PATTERN)                  # "YYYY-MM"
-    actual_profit: float = Field(**_MONEY)
-    actual_cash: float = Field(**_MONEY)
-    actual_visits: float = Field(ge=0, le=1e9, allow_inf_nan=False)
-    note: Optional[str] = Field(None, max_length=1000)
-
-
 class JournalEntryUpdate(BaseModel):
-    """PUT /businesses/{id}/journal/{month}: the month is in the address."""
-    actual_profit: float = Field(**_MONEY)
-    actual_cash: float = Field(**_MONEY)
-    actual_visits: float = Field(ge=0, le=1e9, allow_inf_nan=False)
+    """Optional actuals: missing figures remain unknown, never zero."""
+    actual_profit: Optional[float] = Field(None, **_MONEY)
+    actual_cash: Optional[float] = Field(None, **_MONEY)
+    actual_visits: Optional[float] = Field(None, ge=0, le=1e9, allow_inf_nan=False)
+    actual_sales: Optional[float] = Field(None, ge=0, le=1e12, allow_inf_nan=False)
+    actual_costs: Optional[float] = Field(None, ge=0, le=1e12, allow_inf_nan=False)
+    costs_complete: bool = False
     note: Optional[str] = Field(None, max_length=1000)
+
+    @model_validator(mode="after")
+    def check_actuals(self):
+        figures = (self.actual_profit, self.actual_cash, self.actual_visits, self.actual_sales, self.actual_costs)
+        if all(v is None for v in figures):
+            raise ValueError("Enter at least one actual figure. Missing amounts are not zero.")
+        if self.costs_complete and (self.actual_sales is None or self.actual_costs is None):
+            raise ValueError("Enter both sales and costs before confirming all costs are included.")
+        if (self.actual_sales is not None or self.actual_costs is not None) and self.actual_profit is not None:
+            raise ValueError("With sales or costs, leave reported profit blank; the engine derives it only for complete costs.")
+        return self
+
+
+class JournalEntryIn(JournalEntryUpdate):
+    month: str = Field(pattern=MONTH_PATTERN)
 
 
 class JournalEntryOut(BaseModel):
     id: int
     business_id: int
     month: str
-    month_label: str                                           # "October 2026"
-    actual_profit: float
-    actual_cash: float
-    actual_visits: float
+    month_label: str
+    actual_profit: Optional[float]
+    actual_cash: Optional[float]
+    actual_visits: Optional[float]
+    actual_sales: Optional[float] = None
+    actual_costs: Optional[float] = None
+    costs_complete: bool = False
+    recorded_remaining: Optional[float] = None
     note: Optional[str] = None
     created_at: dt.datetime
+    updated_at: Optional[dt.datetime] = None
 
 
 class JournalComparisonOut(BaseModel):
-    metric: Literal["profit", "cash", "visits"]
+    metric: Literal["profit", "cash", "visits", "revenue"]
     actual: float
     expected_low: float
     expected: float
@@ -553,6 +568,8 @@ class JournalMonthOut(BaseModel):
     prediction_run_id: Optional[int] = None
     comparisons: list[JournalComparisonOut]                    # empty when there was no prediction for the month
     summary: str                                               # plain sentence, no AI
+    comparison_plan: Optional[dict[str, Any]] = None
+    currency: Optional[str] = None
 
 
 class JournalDueOut(BaseModel):
@@ -561,7 +578,7 @@ class JournalDueOut(BaseModel):
 
 
 class JournalAccuracyOut(BaseModel):
-    metric: Literal["profit", "cash", "visits"]
+    metric: Literal["profit", "cash", "visits", "revenue"]
     months: int
     inside: int
     below: int

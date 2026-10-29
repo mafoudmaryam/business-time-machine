@@ -354,3 +354,8 @@ def guide_simulator(plan: dict) -> dict:
 def calculate_sales_needed(selling_price: str, cost_per_sale: str, monthly_costs: str, opening_days: str = "") -> dict:
     from btm_engine.sales_needed import sales_needed
     return sales_needed(selling_price, cost_per_sale, monthly_costs, opening_days)
+
+
+def journal_recorded_result(sales, costs, complete):
+    from btm_engine.journal import recorded_result
+    return recorded_result(sales, costs, complete)
